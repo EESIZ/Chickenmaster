@@ -13,10 +13,14 @@
 # import math  # 향후 수학 함수 사용을 위해 준비 (현재 미사용)
 import json
 import os
-from typing import Dict, Any
+from typing import Dict, Any, cast
 
 # schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric, METRIC_RANGES, cap_metric_value  # noqa: F401 - 향후 확장을 위해 유지
+from schema import (
+    Metric,  # noqa: F401 - 향후 확장을 위해 유지
+    METRIC_RANGES,  # noqa: F401 - 향후 확장을 위해 유지
+    cap_metric_value,  # noqa: F401 - 향후 확장을 위해 유지
+)
 
 
 def load_economy_config() -> Dict[str, Any]:
@@ -34,7 +38,7 @@ def load_economy_config() -> Dict[str, Any]:
 
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            return cast(Dict[str, Any], json.load(f))
 
     # 기본 설정 (파일이 없을 경우)
     return {
@@ -97,4 +101,4 @@ def tradeoff_compute_demand(price: int, reputation: float, config: Dict[str, Any
     demand = round(base_demand * price_effect * reputation_effect)
 
     # 음수 수요 방지
-    return max(0, demand)
+    return int(max(0, demand))

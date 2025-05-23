@@ -14,7 +14,7 @@ import os
 import sys
 import json
 import pytest
-from typing import Dict, Any
+from typing import Dict, Any, cast
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -46,7 +46,7 @@ def test_config() -> Dict[str, Any]:
     """테스트용 경제 설정을 제공하는 fixture"""
     if os.path.exists(TEST_CONFIG_PATH):
         with open(TEST_CONFIG_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+            return cast(Dict[str, Any], json.load(f))
     return {
         "demand": {
             "base_demand": 50,
