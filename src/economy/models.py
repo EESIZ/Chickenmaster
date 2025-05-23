@@ -31,11 +31,11 @@ def load_economy_config() -> Dict[str, Any]:
         "data",
         "economy_config.json",
     )
-    
+
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    
+
     # 기본 설정 (파일이 없을 경우)
     return {
         "demand": {
@@ -80,21 +80,21 @@ def tradeoff_compute_demand(price: int, reputation: float, config: Dict[str, Any
     max_price = config["max_price"]
     optimal_price = config["optimal_price"]
     _uncertainty_factor = config["uncertainty_factor"]  # 향후 확장을 위해 유지
-    
+
     # 평판 정규화 (0-100 범위를 0-1로 변환)
     normalized_reputation = reputation / 100.0
-    
+
     # 가격 효과 계산 (최적 가격에서 멀어질수록 감소)
     price_effect = 1.0 - (
         price_sensitivity * abs(price - optimal_price) / (max_price - min_price)
     )
-    
+
     # 평판 효과 계산 (평판이 높을수록 증가)
     reputation_factor = config["reputation_factor"]
     reputation_effect = 1.0 + (normalized_reputation * reputation_factor)
-    
+
     # 최종 수요 계산
     demand = round(base_demand * price_effect * reputation_effect)
-    
+
     # 음수 수요 방지
     return max(0, demand)
