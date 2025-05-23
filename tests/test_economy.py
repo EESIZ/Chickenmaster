@@ -11,20 +11,24 @@
 """
 
 import os
+import sys
 import json
 import pytest
 from typing import Dict, Any
 
+# 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 # schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric, ActionType, METRIC_RANGES, cap_metric_value
+from schema import Metric, cap_metric_value
 
 # 테스트할 모듈 가져오기
-from src.economy.models import tradeoff_compute_demand, load_economy_config
+from src.economy.models import tradeoff_compute_demand  # load_economy_config는 향후 사용 예정
 from src.economy.engine import (
     noRightAnswer_compute_profit,
     uncertainty_adjust_inventory,
     tradeoff_apply_price_change,
-    apply_tradeoff,
+    # apply_tradeoff는 향후 확장을 위해 준비됨
 )
 from src.metrics.tracker import MetricsTracker
 

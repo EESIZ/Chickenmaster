@@ -10,14 +10,14 @@
 - 불확실성: 경제 상황은 예측 불가능하게 변화할 수 있습니다
 """
 
-import os
 from typing import Dict, Any, Optional
 
 # schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric, ActionType, METRIC_RANGES, cap_metric_value
+from schema import Metric, ActionType  # noqa: F401 - ActionType은 향후 확장을 위해 유지
+from schema import cap_metric_value
 
 # 경제 모델 함수 가져오기
-from src.economy.models import load_economy_config, tradeoff_compute_demand
+from src.economy.models import load_economy_config  # noqa: F401 - 향후 확장을 위해 유지
 
 
 def noRightAnswer_compute_profit(units_sold: int, unit_cost: float, price: float, fixed_cost: float) -> float:
