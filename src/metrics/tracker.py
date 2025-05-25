@@ -8,29 +8,32 @@
 - 정답 없음: 모든 지표 변화는 득과 실을 동시에 가져옵니다
 - 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
 - 불확실성: 지표 변화는 예측 불가능한 요소에 영향을 받습니다
+
+미래 확장 (M-3, M-4, M-6):
+- import random: M-3에서 불확실성 요소 확장 시 사용 예정
+- Tuple: M-3에서 복합 리턴값 처리 시 사용 예정
+- TRADEOFF_RELATIONSHIPS: M-4에서 연쇄 효과 확장 시 사용 예정
+- are_happiness_suffering_balanced: M-6에서 시소 검증 시 사용 예정
+- AdaptiveModifier: M-6에서 적응형 모델 구현 시 사용 예정
 """
 
 import os
 import json
-import random
 from datetime import datetime
 from collections import deque
-from typing import Dict, Any, Optional, List, Tuple, Deque
+from typing import Dict, Any, Optional, List, Deque
 
 # schema.py에서 필요한 상수와 Enum 가져오기
 from schema import (
     Metric,
     METRIC_RANGES,
-    TRADEOFF_RELATIONSHIPS,
     cap_metric_value,
-    are_happiness_suffering_balanced,
 )
 
 # 수정자 모듈 가져오기
 from src.metrics.modifiers import (
     MetricModifier,
     SimpleSeesawModifier,
-    AdaptiveModifier,
     uncertainty_apply_random_fluctuation,
 )
 

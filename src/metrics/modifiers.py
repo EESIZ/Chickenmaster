@@ -8,9 +8,12 @@
 - 정답 없음: 모든 지표 변화는 득과 실을 동시에 가져옵니다
 - 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
 - 불확실성: 지표 변화는 예측 불가능한 요소에 영향을 받습니다
+
+미래 확장 (M-6):
+- from abc import ABC, abstractmethod: AdaptiveModifier 구현 시 사용 예정
+- baseline, sensitivity 로직 추가 예정
 """
 
-from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Protocol, runtime_checkable
 import random
 
