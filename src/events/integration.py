@@ -1,7 +1,7 @@
 """
 이벤트 시스템과 MetricsTracker 통합 모듈
 
-이 모듈은 이벤트 엔진과 지표 추적기를 통합하여 
+이 모듈은 이벤트 엔진과 지표 추적기를 통합하여
 이벤트 효과가 게임 지표에 반영되도록 합니다.
 
 핵심 철학:
@@ -46,7 +46,7 @@ class GameEventSystem:
         """
         # 지표 추적기 초기화
         self.metrics_tracker = metrics_tracker or MetricsTracker()
-        
+
         # 이벤트 엔진 초기화
         self.event_engine = EventEngine(
             metrics_tracker=self.metrics_tracker,
@@ -54,7 +54,7 @@ class GameEventSystem:
             tradeoff_file=tradeoff_file if os.path.exists(tradeoff_file) else None,
             seed=seed,
         )
-        
+
         # 현재 게임 일수
         self.day = 0
 
@@ -67,21 +67,21 @@ class GameEventSystem:
         """
         # 일수 증가
         self.day += 1
-        
+
         # 불확실성 요소 적용
         self.metrics_tracker.uncertainty_apply_random_fluctuation(
             day=self.day, seed=self.event_engine.rng.randint(0, 10000)
         )
-        
+
         # 이벤트 엔진 업데이트
         metrics = self.event_engine.update()
-        
+
         # 임계값 이벤트 확인
         self.metrics_tracker.check_threshold_events()
-        
+
         # 스냅샷 생성
         self.metrics_tracker.create_snapshot()
-        
+
         return metrics
 
     def get_alerts(self, count: Optional[int] = None) -> List[Alert]:
@@ -108,7 +108,9 @@ class GameEventSystem:
         """
         return self.metrics_tracker.get_events(count)
 
-    def get_metrics_history(self, steps: Optional[int] = None) -> List[Dict[Metric, float]]:
+    def get_metrics_history(
+        self, steps: Optional[int] = None
+    ) -> List[Dict[Metric, float]]:
         """
         지표 변화 히스토리를 가져옵니다.
 
@@ -156,25 +158,25 @@ class GameEventSystem:
         # 시드 설정
         if "seed" in scenario:
             self.set_seed(scenario["seed"])
-        
+
         # 초기 지표 설정
         if "initial_metrics" in scenario:
             for metric, value in scenario["initial_metrics"].items():
                 self.metrics_tracker.update_metric(metric, value)
-        
+
         # 시뮬레이션 실행
         history = []
         events_history = []
-        
+
         for _ in range(days):
             # 하루 진행
             metrics = self.update_day()
             history.append(metrics.copy())
-            
+
             # 이벤트 히스토리 가져오기
             events = self.get_events_history()
             events_history.extend(events)
-        
+
         # 결과 반환
         return {
             "final_metrics": metrics,

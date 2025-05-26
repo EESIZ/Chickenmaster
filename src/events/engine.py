@@ -54,14 +54,14 @@ class EventEngine:
         self.cascade_matrix: Dict[Metric, List[Dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
         self.current_turn = 0
-        
+
         # 난수 생성기 초기화
         self.rng = random.Random(seed)
-        
+
         # 이벤트 파일 로드
         if events_file:
             self.load_events(events_file)
-        
+
         # 트레이드오프 매트릭스 로드
         if tradeoff_file:
             self.load_tradeoff_matrix(tradeoff_file)
@@ -88,11 +88,11 @@ class EventEngine:
             filepath: 트레이드오프 매트릭스 파일 경로
         """
         import tomllib
-        
+
         try:
             with open(filepath, "rb") as f:
                 data = tomllib.load(f)
-            
+
             # 연쇄 효과 매트릭스 로드
             if "cascade" in data:
                 for source_metric, targets in data["cascade"].items():
@@ -113,27 +113,27 @@ class EventEngine:
         """
         # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
-        
+
         # 발생 가능한 이벤트 목록
         triggered_events = []
-        
+
         # 모든 이벤트 평가
         for event in self.events:
             # 쿨다운 확인
             if not event.can_fire(self.current_turn):
                 continue
-            
+
             # 트리거 조건 평가
             if event.evaluate_trigger(current_metrics, self.rng):
                 triggered_events.append(event)
-        
+
         # 우선순위에 따라 정렬 (높은 우선순위가 먼저)
         triggered_events.sort(key=lambda e: -e.priority)
-        
+
         # 이벤트 큐에 추가
         for event in triggered_events:
             self.event_queue.append(event)
-        
+
         return triggered_events
 
     def evaluate_triggers(self) -> List[Event]:
@@ -145,23 +145,23 @@ class EventEngine:
         """
         # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
-        
+
         # 트리거된 이벤트 목록
         threshold_events = []
-        
+
         # THRESHOLD 타입 이벤트만 평가
         for event in self.events:
             if event.type != EventCategory.THRESHOLD:
                 continue
-            
+
             # 쿨다운 확인
             if not event.can_fire(self.current_turn):
                 continue
-            
+
             # 트리거 조건 평가
             if event.trigger and event.trigger.evaluate(current_metrics):
                 threshold_events.append(event)
-                
+
                 # 알림 생성
                 alert = Alert(
                     event_id=event.id,
@@ -171,10 +171,10 @@ class EventEngine:
                     severity="WARNING",
                 )
                 self.alert_queue.append(alert)
-                
+
                 # 이벤트 큐에 추가
                 self.event_queue.append(event)
-        
+
         return threshold_events
 
     def apply_effects(self) -> Dict[Metric, float]:
@@ -186,37 +186,37 @@ class EventEngine:
         """
         # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
-        
+
         # 이벤트 큐가 비어있으면 현재 상태 반환
         if not self.event_queue:
             return current_metrics
-        
+
         # 모든 이벤트 효과 적용
         while self.event_queue:
             event = self.event_queue.popleft()
-            
+
             # 이벤트 발생 기록
             event.last_fired = self.current_turn
-            
+
             # 효과 적용
             updates = {}
             for effect in event.effects:
                 new_value = effect.apply(current_metrics)
                 updates[effect.metric] = new_value
-                
+
                 # 이벤트 메시지 추가
                 if effect.message:
                     self.metrics_tracker.add_event(effect.message)
-            
+
             # 지표 업데이트
             self.metrics_tracker.tradeoff_update_metrics(updates)
-            
+
             # 연쇄 효과 처리
             self._process_cascade_effects(updates.keys(), 0)
-            
+
             # 업데이트된 지표 상태 가져오기
             current_metrics = self.metrics_tracker.get_metrics()
-        
+
         return current_metrics
 
     def _process_cascade_effects(
@@ -232,37 +232,37 @@ class EventEngine:
         # 최대 연쇄 깊이 확인
         if depth >= self.max_cascade_depth:
             return
-        
+
         # 연쇄 효과가 없으면 종료
         if not self.cascade_matrix:
             return
-        
+
         # 현재 지표 상태 가져오기 (항상 최신 상태 사용)
         current_metrics = self.metrics_tracker.get_metrics()
-        
+
         # 연쇄 효과 적용
         cascade_updates = {}
         next_changed_metrics = set()
-        
+
         for metric in changed_metrics:
             if metric not in self.cascade_matrix:
                 continue
-            
+
             # 현재 지표 값 가져오기
             current_value = current_metrics[metric]
-            
+
             # 연쇄 효과 적용
             for edge in self.cascade_matrix[metric]:
                 target_metric_name = edge["target"]
                 formula = edge["formula"]
-                
+
                 try:
                     # 대상 지표 확인
                     target_metric = Metric[target_metric_name]
-                    
+
                     # 현재 대상 지표 값 가져오기 (누적 적용을 위해)
                     target_current_value = current_metrics[target_metric]
-                    
+
                     # 수식 평가 방식 결정
                     if "%" in formula:
                         # 백분율 표기법 처리
@@ -279,32 +279,34 @@ class EventEngine:
                             # 복잡한 수식인 경우
                             # value는 변경된 소스 지표의 현재 값
                             value = current_value
-                            
+
                             # 수식에 'value'가 포함되어 있는지 확인
                             if "value" in formula:
                                 # value를 사용하는 수식 (예: "value * 0.9")
-                                result = eval(formula, {"__builtins__": {}}, {"value": value})
+                                result = eval(
+                                    formula, {"__builtins__": {}}, {"value": value}
+                                )
                             else:
                                 # value를 사용하지 않는 수식 (예: "10")
                                 # 이 경우 변화량으로 처리
                                 delta = eval(formula, {"__builtins__": {}}, {})
                                 result = target_current_value + float(delta)
-                    
+
                     # 결과 저장
                     cascade_updates[target_metric] = result
                     next_changed_metrics.add(target_metric)
-                    
+
                     # 이벤트 메시지 추가
                     if "message" in edge:
                         self.metrics_tracker.add_event(edge["message"])
                 except Exception as e:
                     print(f"연쇄 효과 적용 실패: {e}")
-        
+
         # 연쇄 효과가 있으면 적용
         if cascade_updates:
             # 지표 업데이트 (누적 적용)
             self.metrics_tracker.tradeoff_update_metrics(cascade_updates)
-            
+
             # 다음 단계 연쇄 효과 처리 (변경된 지표만)
             if next_changed_metrics:
                 self._process_cascade_effects(next_changed_metrics, depth + 1)
@@ -318,13 +320,13 @@ class EventEngine:
         """
         # 턴 증가
         self.current_turn += 1
-        
+
         # 이벤트 폴링
         self.poll()
-        
+
         # 임계값 트리거 평가
         self.evaluate_triggers()
-        
+
         # 효과 적용
         return self.apply_effects()
 
@@ -342,11 +344,11 @@ class EventEngine:
             alerts = list(self.alert_queue)
             self.alert_queue.clear()
             return alerts
-        
+
         alerts = []
         for _ in range(min(count, len(self.alert_queue))):
             alerts.append(self.alert_queue.popleft())
-        
+
         return alerts
 
     def is_dag_safe(self) -> bool:
@@ -359,7 +361,7 @@ class EventEngine:
         # 연쇄 효과가 없으면 DAG로 간주
         if not self.cascade_matrix:
             return True
-        
+
         # 간선 목록 생성
         edges = []
         for source, targets in self.cascade_matrix.items():
@@ -369,7 +371,7 @@ class EventEngine:
                     edges.append((source.name, target.name))
                 except KeyError:
                     continue
-        
+
         # Kahn의 위상 정렬 알고리즘으로 DAG 확인
         return self._is_dag_kahn(edges)
 
@@ -386,28 +388,28 @@ class EventEngine:
         # 진입 차수와 인접 리스트 초기화
         in_degree = defaultdict(int)
         adj_list = defaultdict(list)
-        
+
         # 그래프 구성
         for u, v in edges:
             adj_list[u].append(v)
             in_degree[v] += 1
-        
+
         # 진입 차수가 0인 노드 큐에 추가
         queue = [node for node in adj_list if in_degree[node] == 0]
-        
+
         # 방문한 노드 수
         visited = 0
-        
+
         # 위상 정렬
         while queue:
             u = queue.pop(0)
             visited += 1
-            
+
             for v in adj_list[u]:
                 in_degree[v] -= 1
                 if in_degree[v] == 0:
                     queue.append(v)
-        
+
         # 모든 노드를 방문했으면 DAG
         all_nodes = set(adj_list.keys()) | set(in_degree.keys())
         return visited == len(all_nodes)

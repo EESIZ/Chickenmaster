@@ -100,7 +100,7 @@ class Effect:
     def apply(self, current_metrics: Dict[Metric, float]) -> float:
         """
         효과를 적용하여 새 지표 값을 계산합니다.
-        
+
         중요: 수식은 변화량을 나타내며, 현재 값에 더해집니다.
         예: "-500"은 현재 값에서 500을 뺀 결과를 반환합니다.
 
@@ -133,7 +133,7 @@ class Effect:
                 # 수식이 복잡한 경우 (예: "value * 0.9")
                 value = current_value
                 result = eval(self.formula, {"__builtins__": {}}, {"value": value})
-                
+
                 # 수식이 절대값을 반환하는 경우 (value를 사용하지 않는 경우)
                 if "value" not in self.formula:
                     # 변화량으로 처리

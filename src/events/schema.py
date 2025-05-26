@@ -133,27 +133,38 @@ class EventSchemaValidator:
         try:
             event_category = EventCategory[event_type]
         except (KeyError, ValueError):
-            self.errors.append(f"이벤트 {event_id}의 타입이 유효하지 않습니다: {event_type}")
+            self.errors.append(
+                f"이벤트 {event_id}의 타입이 유효하지 않습니다: {event_type}"
+            )
             return
 
         # 타입별 필수 필드 검증
         if event_category == EventCategory.RANDOM:
             if "probability" not in event:
-                self.errors.append(f"RANDOM 이벤트 {event_id}에 probability가 없습니다.")
+                self.errors.append(
+                    f"RANDOM 이벤트 {event_id}에 probability가 없습니다."
+                )
             elif not (0 <= event["probability"] <= 1):
                 self.errors.append(
                     f"이벤트 {event_id}의 probability가 범위를 벗어났습니다: {event['probability']}"
                 )
 
-        elif event_category == EventCategory.THRESHOLD or event_category == EventCategory.CASCADE:
+        elif (
+            event_category == EventCategory.THRESHOLD
+            or event_category == EventCategory.CASCADE
+        ):
             if "trigger" not in event:
-                self.errors.append(f"{event_type} 이벤트 {event_id}에 trigger가 없습니다.")
+                self.errors.append(
+                    f"{event_type} 이벤트 {event_id}에 trigger가 없습니다."
+                )
             else:
                 self._validate_trigger(event["trigger"], event_id)
 
         elif event_category == EventCategory.SCHEDULED:
             if "schedule" not in event:
-                self.errors.append(f"SCHEDULED 이벤트 {event_id}에 schedule이 없습니다.")
+                self.errors.append(
+                    f"SCHEDULED 이벤트 {event_id}에 schedule이 없습니다."
+                )
             elif not isinstance(event["schedule"], int) or event["schedule"] <= 0:
                 self.errors.append(
                     f"이벤트 {event_id}의 schedule이 유효하지 않습니다: {event['schedule']}"
@@ -283,7 +294,9 @@ class EventSchemaValidator:
             value = 100.0  # 테스트용 값
             eval(formula, {"__builtins__": {}}, {"value": value})
         except Exception as e:
-            self.errors.append(f"효과 {effect_id}의 formula가 유효하지 않습니다: {formula}, 오류: {e}")
+            self.errors.append(
+                f"효과 {effect_id}의 formula가 유효하지 않습니다: {formula}, 오류: {e}"
+            )
 
 
 def load_events_from_toml(filepath: str) -> List[Event]:
@@ -393,19 +406,19 @@ def save_events_to_json(events: List[Event], filepath: str) -> None:
     events_data = {"events": []}
     for event in events:
         event_dict = asdict(event)
-        
+
         # Enum 값을 문자열로 변환
         event_dict["type"] = event.type.name
-        
+
         # 트리거가 있는 경우 Enum 값을 문자열로 변환
         if event.trigger:
             event_dict["trigger"]["metric"] = event.trigger.metric.name
             event_dict["trigger"]["condition"] = event.trigger.condition.value
-        
+
         # 효과의 지표를 문자열로 변환
         for i, effect in enumerate(event.effects):
             event_dict["effects"][i]["metric"] = effect.metric.name
-        
+
         events_data["events"].append(event_dict)
 
     # JSON 파일로 저장
