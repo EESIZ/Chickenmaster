@@ -69,7 +69,7 @@ def event_engine(metrics_tracker: MetricsTracker) -> EventEngine:
     # 파일 존재 여부 확인
     events_path_opt: Optional[str] = None
     tradeoff_path_opt: Optional[str] = None
-    
+
     if os.path.exists(events_path):
         events_path_opt = events_path
     if os.path.exists(tradeoff_path):
@@ -99,7 +99,7 @@ def game_event_system() -> GameEventSystem:
     # 파일 존재 여부 확인
     events_path_opt: Optional[str] = None
     tradeoff_path_opt: Optional[str] = None
-    
+
     if os.path.exists(events_path):
         events_path_opt = events_path
     if os.path.exists(tradeoff_path):
@@ -113,7 +113,9 @@ def game_event_system() -> GameEventSystem:
     )
 
 
-def test_event_application(event_engine: EventEngine, sample_metrics: Dict[Metric, float]) -> None:
+def test_event_application(
+    event_engine: EventEngine, sample_metrics: Dict[Metric, float]
+) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
     # 테스트용 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="-500")
@@ -134,7 +136,9 @@ def test_event_application(event_engine: EventEngine, sample_metrics: Dict[Metri
     assert updated_metrics[Metric.MONEY] == sample_metrics[Metric.MONEY] - 500
 
 
-def test_threshold_trigger(event_engine: EventEngine, sample_metrics: Dict[Metric, float]) -> None:
+def test_threshold_trigger(
+    event_engine: EventEngine, sample_metrics: Dict[Metric, float]
+) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
     # 테스트용 임계값 이벤트 생성
     trigger = Trigger(
@@ -164,7 +168,11 @@ def test_threshold_trigger(event_engine: EventEngine, sample_metrics: Dict[Metri
     assert len(event_engine.alert_queue) == 1
 
 
-def test_cascade_chain(event_engine: EventEngine, metrics_tracker: MetricsTracker, sample_metrics: Dict[Metric, float]) -> None:
+def test_cascade_chain(
+    event_engine: EventEngine,
+    metrics_tracker: MetricsTracker,
+    sample_metrics: Dict[Metric, float],
+) -> None:
     """3단계 연쇄 효과의 정확도를 테스트합니다."""
     # 연쇄 효과 매트릭스 설정
     event_engine.cascade_matrix = {
