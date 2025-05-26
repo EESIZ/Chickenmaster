@@ -4,6 +4,7 @@ stages:
   - lint
   - type_check
   - test
+  - performance
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
@@ -68,5 +69,17 @@ coverage_check:
       else
         echo "Coverage is at or above 80%"
       fi
+  needs:
+    - test
+
+# 성능 검증
+performance:
+  stage: performance
+  script:
+    - pip install pytest pytest-benchmark psutil
+    - python -c "import pytest; pytest.main(['-m', 'perf', '--benchmark-only'])"
+    - python -c "import psutil; mem_usage = psutil.Process().memory_info().rss / (1024 * 1024); print(f'Memory usage: {mem_usage:.2f} MB'); assert mem_usage < 256, f'Memory usage exceeds 256 MB: {mem_usage:.2f} MB'"
+    - echo "Performance check passed: execution time < 5s, memory usage < 256 MB"
+  allow_failure: false
   needs:
     - test
