@@ -37,6 +37,7 @@ type_check:
   stage: type_check
   script:
     - pip install mypy
+    - pip install types-psutil==7.0.0.20250516
     - mypy --strict .
 
 # 테스트 실행 (pytest)
