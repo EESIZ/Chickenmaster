@@ -16,8 +16,12 @@
 
 from typing import Dict, Any, Optional, Protocol, runtime_checkable
 import random
+import logging
 
 from schema import Metric, cap_metric_value
+
+# 로거 설정
+logger = logging.getLogger(__name__)
 
 
 @runtime_checkable
@@ -86,6 +90,11 @@ class SimpleSeesawModifier:
         """
         # 현재 지표의 복사본 생성
         result = metrics.copy()
+
+        # 미정의 지표 경고
+        for metric in updates:
+            if metric not in Metric:
+                logger.warning(f"Unknown metric update attempted: {metric}")
 
         # 업데이트 적용
         for metric, value in updates.items():
@@ -157,6 +166,11 @@ class AdaptiveModifier:
 
         # 현재 지표의 복사본 생성
         result = metrics.copy()
+
+        # 미정의 지표 경고
+        for metric in updates:
+            if metric not in Metric:
+                logger.warning(f"Unknown metric update attempted: {metric}")
 
         # 업데이트 적용
         for metric, value in updates.items():
