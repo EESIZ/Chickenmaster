@@ -14,7 +14,6 @@ import os
 import pytest
 import tempfile
 import time
-from typing import Dict, Optional
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
@@ -35,7 +34,7 @@ from src.events.integration import GameEventSystem
 
 
 @pytest.fixture
-def sample_metrics() -> Dict[Metric, float]:
+def sample_metrics() -> dict[Metric, float]:
     """샘플 지표 데이터를 제공합니다."""
     return {
         Metric.MONEY: 10000.0,
@@ -49,7 +48,7 @@ def sample_metrics() -> Dict[Metric, float]:
 
 
 @pytest.fixture
-def metrics_tracker(sample_metrics: Dict[Metric, float]) -> MetricsTracker:
+def metrics_tracker(sample_metrics: dict[Metric, float]) -> MetricsTracker:
     """테스트용 MetricsTracker 인스턴스를 제공합니다."""
     return MetricsTracker(initial_metrics=sample_metrics)
 
@@ -67,8 +66,8 @@ def event_engine(metrics_tracker: MetricsTracker) -> EventEngine:
     tradeoff_path = os.path.join(base_dir, tradeoff_file)
 
     # 파일 존재 여부 확인
-    events_path_opt: Optional[str] = None
-    tradeoff_path_opt: Optional[str] = None
+    events_path_opt = None
+    tradeoff_path_opt = None
 
     if os.path.exists(events_path):
         events_path_opt = events_path
@@ -97,8 +96,8 @@ def game_event_system() -> GameEventSystem:
     tradeoff_path = os.path.join(base_dir, tradeoff_file)
 
     # 파일 존재 여부 확인
-    events_path_opt: Optional[str] = None
-    tradeoff_path_opt: Optional[str] = None
+    events_path_opt = None
+    tradeoff_path_opt = None
 
     if os.path.exists(events_path):
         events_path_opt = events_path
@@ -114,7 +113,7 @@ def game_event_system() -> GameEventSystem:
 
 
 def test_event_application(
-    event_engine: EventEngine, sample_metrics: Dict[Metric, float]
+    event_engine: EventEngine, sample_metrics: dict[Metric, float]
 ) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
     # 테스트용 이벤트 생성
@@ -137,7 +136,7 @@ def test_event_application(
 
 
 def test_threshold_trigger(
-    event_engine: EventEngine, sample_metrics: Dict[Metric, float]
+    event_engine: EventEngine, sample_metrics: dict[Metric, float]
 ) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
     # 테스트용 임계값 이벤트 생성
@@ -171,7 +170,7 @@ def test_threshold_trigger(
 def test_cascade_chain(
     event_engine: EventEngine,
     metrics_tracker: MetricsTracker,
-    sample_metrics: Dict[Metric, float],
+    sample_metrics: dict[Metric, float],
 ) -> None:
     """3단계 연쇄 효과의 정확도를 테스트합니다."""
     # 연쇄 효과 매트릭스 설정
@@ -350,7 +349,7 @@ def test_event_schema_parsing() -> None:
         os.unlink(json_path)
 
 
-def test_random_seed_reproducibility(sample_metrics: Dict[Metric, float]) -> None:
+def test_random_seed_reproducibility(sample_metrics: dict[Metric, float]) -> None:
     """난수 시드 설정으로 이벤트 발생의 재현성을 테스트합니다."""
     # 동일한 시드로 두 개의 이벤트 엔진 생성
     metrics_tracker1 = MetricsTracker(initial_metrics=sample_metrics.copy())
@@ -403,7 +402,7 @@ def test_random_seed_reproducibility(sample_metrics: Dict[Metric, float]) -> Non
 def test_uncertainty_factor() -> None:
     """불확실성 요소(±10% 변동)를 테스트합니다."""
     # 테스트용 MetricsTracker 생성
-    initial_metrics: Dict[Metric, float] = {
+    initial_metrics = {
         Metric.MONEY: 10000.0,
         Metric.REPUTATION: 50.0,
     }
