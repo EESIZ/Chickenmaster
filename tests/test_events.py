@@ -14,7 +14,7 @@ import os
 import pytest
 import tempfile
 import time
-from typing import Dict, List, Set, Optional, Any, Tuple, cast
+from typing import Dict, Optional
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
@@ -492,7 +492,7 @@ def test_event_file_loading(game_event_system: GameEventSystem) -> None:
 def test_noRightAnswer_simulate_scenario(game_event_system: GameEventSystem) -> None:
     """시나리오 시뮬레이션을 테스트합니다."""
     # 테스트 시나리오 정의
-    scenario: Dict[str, Any] = {
+    scenario = {
         "seed": 42,
         "initial_metrics": {
             Metric.MONEY: 5000.0,
