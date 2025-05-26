@@ -47,10 +47,18 @@ class GameEventSystem:
         self.metrics_tracker = metrics_tracker or MetricsTracker()
 
         # 이벤트 엔진 초기화
+        events_path = None
+        if events_file and os.path.exists(events_file):
+            events_path = events_file
+            
+        tradeoff_path = None
+        if tradeoff_file and os.path.exists(tradeoff_file):
+            tradeoff_path = tradeoff_file
+            
         self.event_engine = EventEngine(
             metrics_tracker=self.metrics_tracker,
-            events_file=events_file if os.path.exists(events_file) else None,
-            tradeoff_file=tradeoff_file if os.path.exists(tradeoff_file) else None,
+            events_file=events_path,
+            tradeoff_file=tradeoff_path,
             seed=seed,
         )
 
@@ -166,6 +174,7 @@ class GameEventSystem:
         # 시뮬레이션 실행
         history = []
         events_history = []
+        metrics: Dict[Metric, float] = {}
 
         for _ in range(days):
             # 하루 진행

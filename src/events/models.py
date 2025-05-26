@@ -13,6 +13,7 @@ Event, Trigger, Effect 등의 데이터클래스를 통해 이벤트 구조를 �
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional, Any
+import random
 
 # schema.py에서 필요한 상수와 Enum 가져오기
 from schema import Metric
@@ -185,7 +186,7 @@ class Event:
         return True
 
     def evaluate_trigger(
-        self, current_metrics: Dict[Metric, float], rng: Any = None
+        self, current_metrics: Dict[Metric, float], rng: Optional[random.Random] = None
     ) -> bool:
         """
         이벤트 트리거 조건을 평가합니다.
@@ -203,10 +204,8 @@ class Event:
                 return False
 
             # 난수 생성기가 제공되지 않은 경우 기본 random 모듈 사용
-            import random
-
             random_instance = rng or random
-            return random_instance.random() < self.probability
+            return bool(random_instance.random() < self.probability)
 
         elif self.type == EventCategory.THRESHOLD:
             if self.trigger is None:
@@ -284,7 +283,7 @@ class Alert:
     severity: str = "INFO"
     timestamp: Optional[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         초기화 후 추가 작업을 수행합니다.
         """

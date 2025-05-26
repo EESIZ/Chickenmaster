@@ -211,7 +211,7 @@ class EventEngine:
             self.metrics_tracker.tradeoff_update_metrics(updates)
 
             # 연쇄 효과 처리
-            self._process_cascade_effects(updates.keys(), 0)
+            self._process_cascade_effects(set(updates.keys()), 0)
 
             # 업데이트된 지표 상태 가져오기
             current_metrics = self.metrics_tracker.get_metrics()
@@ -385,7 +385,7 @@ class EventEngine:
             bool: DAG이면 True, 그렇지 않으면 False
         """
         # 진입 차수와 인접 리스트 초기화
-        in_degree = defaultdict(int)
+        in_degree: Dict[str, int] = defaultdict(int)
         adj_list = defaultdict(list)
 
         # 그래프 구성

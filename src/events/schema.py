@@ -27,7 +27,7 @@ class EventSchemaValidator:
     스키마 규칙, ID 유일성, DAG 안전성 등을 확인합니다.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         EventSchemaValidator 초기화
         """
@@ -402,7 +402,7 @@ def save_events_to_json(events: List[Event], filepath: str) -> None:
         filepath: JSON 파일 경로
     """
     # 이벤트 객체를 딕셔너리로 변환
-    events_data = {"events": []}
+    events_data: Dict[str, List[Dict[str, Any]]] = {"events": []}
     for event in events:
         event_dict = asdict(event)
 
