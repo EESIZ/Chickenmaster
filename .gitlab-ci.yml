@@ -45,6 +45,7 @@ test:
   stage: test
   script:
     - pip install pytest pytest-cov
+    - pip install psutil
     - pytest --cov=. --cov-report=term --cov-report=xml
   coverage: '/TOTAL.*\s+(\d+%)/'
   artifacts:
@@ -60,6 +61,7 @@ coverage_check:
   stage: test
   script:
     - pip install pytest pytest-cov
+    - pip install psutil
     - pytest --cov=. --cov-report=term
     - coverage_result=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
     - echo "Coverage is $coverage_result%"
