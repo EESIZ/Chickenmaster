@@ -11,13 +11,12 @@
 """
 
 import os
-import tomllib
-from typing import Dict, List, Optional, Any, Set, Tuple
+from typing import Dict, List, Optional, Any
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
 from src.events.engine import EventEngine
-from src.events.models import Event, Alert
+from src.events.models import Alert
 
 
 class GameEventSystem:

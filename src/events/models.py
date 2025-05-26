@@ -12,10 +12,10 @@ Event, Trigger, Effect 등의 데이터클래스를 통해 이벤트 구조를 �
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, List, Optional, Union, Any, Set
+from typing import Dict, List, Optional, Any
 
 # schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric, EventType
+from schema import Metric
 
 
 class TriggerCondition(Enum):

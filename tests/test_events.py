@@ -13,8 +13,7 @@
 import os
 import pytest
 import tempfile
-import json
-from typing import Dict, Any, List
+from typing import Dict
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
@@ -24,7 +23,6 @@ from src.events.models import (
     Effect,
     EventCategory,
     TriggerCondition,
-    Alert,
 )
 from src.events.schema import (
     load_events_from_toml,
@@ -232,7 +230,7 @@ def test_dag_validation():
         Metric.FACILITY: [{"target": "STAFF_FATIGUE", "formula": "value + 10"}],
     }
 
-    assert event_engine.is_dag_safe() == True
+    assert event_engine.is_dag_safe()
 
     # 2. 순환 참조가 있는 경우
     event_engine.cascade_matrix = {
@@ -241,7 +239,7 @@ def test_dag_validation():
         Metric.FACILITY: [{"target": "REPUTATION", "formula": "-5"}],  # 순환 참조
     }
 
-    assert event_engine.is_dag_safe() == False
+    assert not event_engine.is_dag_safe()
 
 
 @pytest.mark.perf
@@ -420,9 +418,6 @@ def test_uncertainty_factor():
 
 def test_integration_with_metrics_tracker(game_event_system):
     """이벤트 엔진과 MetricsTracker의 통합을 테스트합니다."""
-    # 초기 지표 상태 저장
-    initial_metrics = game_event_system.metrics_tracker.get_metrics()
-
     # 여러 일 진행
     for _ in range(5):
         game_event_system.update_day()
@@ -464,7 +459,7 @@ def test_tradeoff_matrix_loading(game_event_system):
     assert len(event_engine.cascade_matrix) > 0
 
     # DAG 안전성 확인
-    assert event_engine.is_dag_safe() == True
+    assert event_engine.is_dag_safe()
 
 
 def test_event_file_loading(game_event_system):
