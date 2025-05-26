@@ -13,7 +13,8 @@
 import os
 import pytest
 import tempfile
-from typing import Dict
+import time
+from typing import Dict, List, Set, Optional, Any, Tuple, cast
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
@@ -48,13 +49,13 @@ def sample_metrics() -> Dict[Metric, float]:
 
 
 @pytest.fixture
-def metrics_tracker(sample_metrics) -> MetricsTracker:
+def metrics_tracker(sample_metrics: Dict[Metric, float]) -> MetricsTracker:
     """테스트용 MetricsTracker 인스턴스를 제공합니다."""
     return MetricsTracker(initial_metrics=sample_metrics)
 
 
 @pytest.fixture
-def event_engine(metrics_tracker) -> EventEngine:
+def event_engine(metrics_tracker: MetricsTracker) -> EventEngine:
     """테스트용 EventEngine 인스턴스를 제공합니다."""
     # 실제 파일 경로 확인
     events_file = "data/events.toml"
@@ -66,16 +67,19 @@ def event_engine(metrics_tracker) -> EventEngine:
     tradeoff_path = os.path.join(base_dir, tradeoff_file)
 
     # 파일 존재 여부 확인
-    if not os.path.exists(events_path):
-        events_path = None
-    if not os.path.exists(tradeoff_path):
-        tradeoff_path = None
+    events_path_opt: Optional[str] = None
+    tradeoff_path_opt: Optional[str] = None
+    
+    if os.path.exists(events_path):
+        events_path_opt = events_path
+    if os.path.exists(tradeoff_path):
+        tradeoff_path_opt = tradeoff_path
 
     # 이벤트 엔진 생성
     return EventEngine(
         metrics_tracker=metrics_tracker,
-        events_file=events_path,
-        tradeoff_file=tradeoff_path,
+        events_file=events_path_opt,
+        tradeoff_file=tradeoff_path_opt,
         seed=42,  # 테스트 재현성을 위한 고정 시드
     )
 
@@ -93,20 +97,23 @@ def game_event_system() -> GameEventSystem:
     tradeoff_path = os.path.join(base_dir, tradeoff_file)
 
     # 파일 존재 여부 확인
-    if not os.path.exists(events_path):
-        events_path = None
-    if not os.path.exists(tradeoff_path):
-        tradeoff_path = None
+    events_path_opt: Optional[str] = None
+    tradeoff_path_opt: Optional[str] = None
+    
+    if os.path.exists(events_path):
+        events_path_opt = events_path
+    if os.path.exists(tradeoff_path):
+        tradeoff_path_opt = tradeoff_path
 
     # 게임 이벤트 시스템 생성
     return GameEventSystem(
-        events_file=events_path,
-        tradeoff_file=tradeoff_path,
+        events_file=events_path_opt,
+        tradeoff_file=tradeoff_path_opt,
         seed=42,  # 테스트 재현성을 위한 고정 시드
     )
 
 
-def test_event_application(event_engine, sample_metrics) -> None:
+def test_event_application(event_engine: EventEngine, sample_metrics: Dict[Metric, float]) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
     # 테스트용 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="-500")
@@ -127,7 +134,7 @@ def test_event_application(event_engine, sample_metrics) -> None:
     assert updated_metrics[Metric.MONEY] == sample_metrics[Metric.MONEY] - 500
 
 
-def test_threshold_trigger(event_engine, sample_metrics) -> None:
+def test_threshold_trigger(event_engine: EventEngine, sample_metrics: Dict[Metric, float]) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
     # 테스트용 임계값 이벤트 생성
     trigger = Trigger(
@@ -157,7 +164,7 @@ def test_threshold_trigger(event_engine, sample_metrics) -> None:
     assert len(event_engine.alert_queue) == 1
 
 
-def test_cascade_chain(event_engine, metrics_tracker, sample_metrics) -> None:
+def test_cascade_chain(event_engine: EventEngine, metrics_tracker: MetricsTracker, sample_metrics: Dict[Metric, float]) -> None:
     """3단계 연쇄 효과의 정확도를 테스트합니다."""
     # 연쇄 효과 매트릭스 설정
     event_engine.cascade_matrix = {
@@ -243,9 +250,8 @@ def test_dag_validation() -> None:
 
 
 @pytest.mark.perf
-def test_perf_1000_events(game_event_system) -> None:
+def test_perf_1000_events(game_event_system: GameEventSystem) -> None:
     """1,000회 이벤트 시뮬레이션의 성능과 메모리 사용량을 테스트합니다."""
-    import time
     import psutil
 
     # 현재 프로세스
@@ -336,7 +342,7 @@ def test_event_schema_parsing() -> None:
         os.unlink(json_path)
 
 
-def test_random_seed_reproducibility(sample_metrics) -> None:
+def test_random_seed_reproducibility(sample_metrics: Dict[Metric, float]) -> None:
     """난수 시드 설정으로 이벤트 발생의 재현성을 테스트합니다."""
     # 동일한 시드로 두 개의 이벤트 엔진 생성
     metrics_tracker1 = MetricsTracker(initial_metrics=sample_metrics.copy())
@@ -389,7 +395,7 @@ def test_random_seed_reproducibility(sample_metrics) -> None:
 def test_uncertainty_factor() -> None:
     """불확실성 요소(±10% 변동)를 테스트합니다."""
     # 테스트용 MetricsTracker 생성
-    initial_metrics = {
+    initial_metrics: Dict[Metric, float] = {
         Metric.MONEY: 10000.0,
         Metric.REPUTATION: 50.0,
     }
@@ -416,7 +422,7 @@ def test_uncertainty_factor() -> None:
     )
 
 
-def test_integration_with_metrics_tracker(game_event_system) -> None:
+def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) -> None:
     """이벤트 엔진과 MetricsTracker의 통합을 테스트합니다."""
     # 여러 일 진행
     for _ in range(5):
@@ -438,7 +444,7 @@ def test_integration_with_metrics_tracker(game_event_system) -> None:
     )
 
 
-def test_tradeoff_matrix_loading(game_event_system) -> None:
+def test_tradeoff_matrix_loading(game_event_system: GameEventSystem) -> None:
     """tradeoff_matrix.toml 파일 로드를 테스트합니다."""
     # tradeoff_matrix.toml 파일 경로
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -462,7 +468,7 @@ def test_tradeoff_matrix_loading(game_event_system) -> None:
     assert event_engine.is_dag_safe()
 
 
-def test_event_file_loading(game_event_system) -> None:
+def test_event_file_loading(game_event_system: GameEventSystem) -> None:
     """events.toml 파일 로드를 테스트합니다."""
     # events.toml 파일 경로
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -483,10 +489,10 @@ def test_event_file_loading(game_event_system) -> None:
     assert len(event_engine.events) > 0
 
 
-def test_noRightAnswer_simulate_scenario(game_event_system) -> None:
+def test_noRightAnswer_simulate_scenario(game_event_system: GameEventSystem) -> None:
     """시나리오 시뮬레이션을 테스트합니다."""
     # 테스트 시나리오 정의
-    scenario = {
+    scenario: Dict[str, Any] = {
         "seed": 42,
         "initial_metrics": {
             Metric.MONEY: 5000.0,
