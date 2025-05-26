@@ -13,7 +13,7 @@
 import os
 import pytest
 import tempfile
-from typing import Dict, Any
+from typing import Dict
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
