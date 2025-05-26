@@ -13,7 +13,7 @@
 import os
 import pytest
 import tempfile
-from typing import Dict
+from typing import Dict, Any
 
 from schema import Metric
 from src.metrics.tracker import MetricsTracker
@@ -106,7 +106,7 @@ def game_event_system() -> GameEventSystem:
     )
 
 
-def test_event_application(event_engine, sample_metrics):
+def test_event_application(event_engine, sample_metrics) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
     # 테스트용 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="-500")
@@ -127,7 +127,7 @@ def test_event_application(event_engine, sample_metrics):
     assert updated_metrics[Metric.MONEY] == sample_metrics[Metric.MONEY] - 500
 
 
-def test_threshold_trigger(event_engine, sample_metrics):
+def test_threshold_trigger(event_engine, sample_metrics) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
     # 테스트용 임계값 이벤트 생성
     trigger = Trigger(
@@ -157,7 +157,7 @@ def test_threshold_trigger(event_engine, sample_metrics):
     assert len(event_engine.alert_queue) == 1
 
 
-def test_cascade_chain(event_engine, metrics_tracker, sample_metrics):
+def test_cascade_chain(event_engine, metrics_tracker, sample_metrics) -> None:
     """3단계 연쇄 효과의 정확도를 테스트합니다."""
     # 연쇄 효과 매트릭스 설정
     event_engine.cascade_matrix = {
@@ -215,7 +215,7 @@ def test_cascade_chain(event_engine, metrics_tracker, sample_metrics):
     assert len(events) >= 3  # 최소 3개의 연쇄 효과 메시지
 
 
-def test_dag_validation():
+def test_dag_validation() -> None:
     """순환 참조 감지 알고리즘을 테스트합니다."""
     # 테스트용 MetricsTracker 생성
     metrics_tracker = MetricsTracker()
@@ -243,7 +243,7 @@ def test_dag_validation():
 
 
 @pytest.mark.perf
-def test_perf_1000_events(game_event_system):
+def test_perf_1000_events(game_event_system) -> None:
     """1,000회 이벤트 시뮬레이션의 성능과 메모리 사용량을 테스트합니다."""
     import time
     import psutil
@@ -274,7 +274,7 @@ def test_perf_1000_events(game_event_system):
     assert memory_usage <= 256.0  # 256 MB 이내
 
 
-def test_event_schema_parsing():
+def test_event_schema_parsing() -> None:
     """이벤트 스키마 파싱 및 변환을 테스트합니다."""
     # 테스트용 TOML 문자열
     toml_content = """
@@ -336,7 +336,7 @@ def test_event_schema_parsing():
         os.unlink(json_path)
 
 
-def test_random_seed_reproducibility(sample_metrics):
+def test_random_seed_reproducibility(sample_metrics) -> None:
     """난수 시드 설정으로 이벤트 발생의 재현성을 테스트합니다."""
     # 동일한 시드로 두 개의 이벤트 엔진 생성
     metrics_tracker1 = MetricsTracker(initial_metrics=sample_metrics.copy())
@@ -386,7 +386,7 @@ def test_random_seed_reproducibility(sample_metrics):
         engine2.current_turn += 1
 
 
-def test_uncertainty_factor():
+def test_uncertainty_factor() -> None:
     """불확실성 요소(±10% 변동)를 테스트합니다."""
     # 테스트용 MetricsTracker 생성
     initial_metrics = {
@@ -416,7 +416,7 @@ def test_uncertainty_factor():
     )
 
 
-def test_integration_with_metrics_tracker(game_event_system):
+def test_integration_with_metrics_tracker(game_event_system) -> None:
     """이벤트 엔진과 MetricsTracker의 통합을 테스트합니다."""
     # 여러 일 진행
     for _ in range(5):
@@ -438,7 +438,7 @@ def test_integration_with_metrics_tracker(game_event_system):
     )
 
 
-def test_tradeoff_matrix_loading(game_event_system):
+def test_tradeoff_matrix_loading(game_event_system) -> None:
     """tradeoff_matrix.toml 파일 로드를 테스트합니다."""
     # tradeoff_matrix.toml 파일 경로
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -462,7 +462,7 @@ def test_tradeoff_matrix_loading(game_event_system):
     assert event_engine.is_dag_safe()
 
 
-def test_event_file_loading(game_event_system):
+def test_event_file_loading(game_event_system) -> None:
     """events.toml 파일 로드를 테스트합니다."""
     # events.toml 파일 경로
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -483,7 +483,7 @@ def test_event_file_loading(game_event_system):
     assert len(event_engine.events) > 0
 
 
-def test_noRightAnswer_simulate_scenario(game_event_system):
+def test_noRightAnswer_simulate_scenario(game_event_system) -> None:
     """시나리오 시뮬레이션을 테스트합니다."""
     # 테스트 시나리오 정의
     scenario = {
