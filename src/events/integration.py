@@ -50,11 +50,11 @@ class GameEventSystem:
         events_path = None
         if events_file and os.path.exists(events_file):
             events_path = events_file
-            
+
         tradeoff_path = None
         if tradeoff_file and os.path.exists(tradeoff_file):
             tradeoff_path = tradeoff_file
-            
+
         self.event_engine = EventEngine(
             metrics_tracker=self.metrics_tracker,
             events_file=events_path,

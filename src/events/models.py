@@ -12,7 +12,7 @@ Event, Trigger, Effect 등의 데이터클래스를 통해 이벤트 구조를 �
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 import random
 
 # schema.py에서 필요한 상수와 Enum 가져오기
