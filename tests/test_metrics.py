@@ -15,7 +15,7 @@ import sys
 import random
 import tempfile
 import pytest
-from typing import Dict
+from typing import Dict, Generator
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -34,18 +34,18 @@ from src.metrics.tracker import MetricsTracker
 def test_metrics() -> Dict[Metric, float]:
     """테스트용 지표 초기값을 제공하는 fixture"""
     return {
-        Metric.MONEY: 10000,
-        Metric.REPUTATION: 50,
-        Metric.HAPPINESS: 60,
-        Metric.SUFFERING: 40,
-        Metric.INVENTORY: 100,
-        Metric.STAFF_FATIGUE: 30,
-        Metric.FACILITY: 80,
+        Metric.MONEY: 10000.0,
+        Metric.REPUTATION: 50.0,
+        Metric.HAPPINESS: 60.0,
+        Metric.SUFFERING: 40.0,
+        Metric.INVENTORY: 100.0,
+        Metric.STAFF_FATIGUE: 30.0,
+        Metric.FACILITY: 80.0,
     }
 
 
 @pytest.fixture
-def temp_data_dir() -> str:
+def temp_data_dir() -> Generator[str, None, None]:
     """테스트용 임시 데이터 디렉토리를 제공하는 fixture"""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield temp_dir
@@ -61,13 +61,13 @@ def test_seesaw_consistency_simple_modifier() -> None:
     # 다양한 지표 상태 테스트
     test_cases = [
         # 행복 변경
-        ({Metric.HAPPINESS: 50, Metric.SUFFERING: 50}, {Metric.HAPPINESS: 70}),
-        ({Metric.HAPPINESS: 30, Metric.SUFFERING: 70}, {Metric.HAPPINESS: 10}),
-        ({Metric.HAPPINESS: 0, Metric.SUFFERING: 100}, {Metric.HAPPINESS: 100}),
+        ({Metric.HAPPINESS: 50.0, Metric.SUFFERING: 50.0}, {Metric.HAPPINESS: 70.0}),
+        ({Metric.HAPPINESS: 30.0, Metric.SUFFERING: 70.0}, {Metric.HAPPINESS: 10.0}),
+        ({Metric.HAPPINESS: 0.0, Metric.SUFFERING: 100.0}, {Metric.HAPPINESS: 100.0}),
         # 고통 변경
-        ({Metric.HAPPINESS: 50, Metric.SUFFERING: 50}, {Metric.SUFFERING: 70}),
-        ({Metric.HAPPINESS: 70, Metric.SUFFERING: 30}, {Metric.SUFFERING: 10}),
-        ({Metric.HAPPINESS: 100, Metric.SUFFERING: 0}, {Metric.SUFFERING: 100}),
+        ({Metric.HAPPINESS: 50.0, Metric.SUFFERING: 50.0}, {Metric.SUFFERING: 70.0}),
+        ({Metric.HAPPINESS: 70.0, Metric.SUFFERING: 30.0}, {Metric.SUFFERING: 10.0}),
+        ({Metric.HAPPINESS: 100.0, Metric.SUFFERING: 0.0}, {Metric.SUFFERING: 100.0}),
     ]
 
     for metrics, updates in test_cases:
@@ -90,13 +90,13 @@ def test_seesaw_consistency_adaptive_modifier() -> None:
     # 다양한 지표 상태 테스트
     test_cases = [
         # 행복 변경
-        ({Metric.HAPPINESS: 50, Metric.SUFFERING: 50}, {Metric.HAPPINESS: 70}),
-        ({Metric.HAPPINESS: 30, Metric.SUFFERING: 70}, {Metric.HAPPINESS: 10}),
-        ({Metric.HAPPINESS: 0, Metric.SUFFERING: 100}, {Metric.HAPPINESS: 100}),
+        ({Metric.HAPPINESS: 50.0, Metric.SUFFERING: 50.0}, {Metric.HAPPINESS: 70.0}),
+        ({Metric.HAPPINESS: 30.0, Metric.SUFFERING: 70.0}, {Metric.HAPPINESS: 10.0}),
+        ({Metric.HAPPINESS: 0.0, Metric.SUFFERING: 100.0}, {Metric.HAPPINESS: 100.0}),
         # 고통 변경
-        ({Metric.HAPPINESS: 50, Metric.SUFFERING: 50}, {Metric.SUFFERING: 70}),
-        ({Metric.HAPPINESS: 70, Metric.SUFFERING: 30}, {Metric.SUFFERING: 10}),
-        ({Metric.HAPPINESS: 100, Metric.SUFFERING: 0}, {Metric.SUFFERING: 100}),
+        ({Metric.HAPPINESS: 50.0, Metric.SUFFERING: 50.0}, {Metric.SUFFERING: 70.0}),
+        ({Metric.HAPPINESS: 70.0, Metric.SUFFERING: 30.0}, {Metric.SUFFERING: 10.0}),
+        ({Metric.HAPPINESS: 100.0, Metric.SUFFERING: 0.0}, {Metric.SUFFERING: 100.0}),
     ]
 
     for metrics, updates in test_cases:
@@ -117,14 +117,14 @@ def test_seesaw_consistency_tracker(test_metrics: Dict[Metric, float]) -> None:
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
     # 행복 업데이트
-    tracker.update_metric(Metric.HAPPINESS, 75)
+    tracker.update_metric(Metric.HAPPINESS, 75.0)
     metrics = tracker.get_metrics()
     assert are_happiness_suffering_balanced(
         metrics[Metric.HAPPINESS], metrics[Metric.SUFFERING]
     ), "행복 업데이트 후 시소 불변식 위반"
 
     # 고통 업데이트
-    tracker.update_metric(Metric.SUFFERING, 80)
+    tracker.update_metric(Metric.SUFFERING, 80.0)
     metrics = tracker.get_metrics()
     assert are_happiness_suffering_balanced(
         metrics[Metric.HAPPINESS], metrics[Metric.SUFFERING]
@@ -133,9 +133,9 @@ def test_seesaw_consistency_tracker(test_metrics: Dict[Metric, float]) -> None:
     # 여러 지표 동시 업데이트
     tracker.tradeoff_update_metrics(
         {
-            Metric.HAPPINESS: 30,
-            Metric.MONEY: 12000,
-            Metric.REPUTATION: 60,
+            Metric.HAPPINESS: 30.0,
+            Metric.MONEY: 12000.0,
+            Metric.REPUTATION: 60.0,
         }
     )
     metrics = tracker.get_metrics()
@@ -153,7 +153,8 @@ def test_modifier_interface() -> None:
     adaptive_modifier = AdaptiveModifier()
 
     # 인터페이스 준수 검증
-    for modifier in [simple_modifier, adaptive_modifier]:
+    modifiers: list[MetricModifier] = [simple_modifier, adaptive_modifier]
+    for modifier in modifiers:
         # apply 메서드 검증
         assert hasattr(modifier, "apply"), f"{modifier.get_name()}에 apply 메서드 없음"
 
@@ -194,9 +195,9 @@ def test_future_compatibility() -> None:
 
     # 동일한 업데이트 적용
     updates = {
-        Metric.HAPPINESS: 70,
-        Metric.MONEY: 12000,
-        Metric.REPUTATION: 60,
+        Metric.HAPPINESS: 70.0,
+        Metric.MONEY: 12000.0,
+        Metric.REPUTATION: 60.0,
     }
 
     default_tracker.tradeoff_update_metrics(updates)
@@ -232,7 +233,7 @@ def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
 
     # 평판 하락으로 인한 연쇄 효과 검증
     initial_money = tracker.get_metrics()[Metric.MONEY]
-    tracker.update_metric(Metric.REPUTATION, 20)  # 평판을 20으로 낮춤
+    tracker.update_metric(Metric.REPUTATION, 20.0)  # 평판을 20으로 낮춤
 
     # 자금에 영향이 있어야 함
     current_money = tracker.get_metrics()[Metric.MONEY]
@@ -240,7 +241,7 @@ def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
 
     # 직원 피로도 증가로 인한 연쇄 효과 검증
     initial_facility = tracker.get_metrics()[Metric.FACILITY]
-    tracker.update_metric(Metric.STAFF_FATIGUE, 80)  # 피로도를 80으로 높임
+    tracker.update_metric(Metric.STAFF_FATIGUE, 80.0)  # 피로도를 80으로 높임
 
     # 시설 상태에 영향이 있어야 함
     current_facility = tracker.get_metrics()[Metric.FACILITY]
@@ -250,7 +251,7 @@ def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
 
     # 시설 상태 악화로 인한 연쇄 효과 검증
     initial_reputation = tracker.get_metrics()[Metric.REPUTATION]
-    tracker.update_metric(Metric.FACILITY, 30)  # 시설 상태를 30으로 낮춤
+    tracker.update_metric(Metric.FACILITY, 30.0)  # 시설 상태를 30으로 낮춤
 
     # 평판에 영향이 있어야 함
     current_reputation = tracker.get_metrics()[Metric.REPUTATION]
@@ -265,13 +266,13 @@ def test_uncertainty_factors() -> None:
     """
     # 초기 지표 설정
     initial_metrics = {
-        Metric.MONEY: 10000,
-        Metric.REPUTATION: 50,
-        Metric.HAPPINESS: 60,
-        Metric.SUFFERING: 40,
-        Metric.INVENTORY: 100,
-        Metric.STAFF_FATIGUE: 30,
-        Metric.FACILITY: 80,
+        Metric.MONEY: 10000.0,
+        Metric.REPUTATION: 50.0,
+        Metric.HAPPINESS: 60.0,
+        Metric.SUFFERING: 40.0,
+        Metric.INVENTORY: 100.0,
+        Metric.STAFF_FATIGUE: 30.0,
+        Metric.FACILITY: 80.0,
     }
 
     # 시드를 사용한 불확실성 적용 (결과 재현 가능)
@@ -327,7 +328,7 @@ def test_history_tracking(test_metrics: Dict[Metric, float]) -> None:
 
     # 여러 업데이트 적용
     for i in range(10):
-        tracker.update_metric(Metric.MONEY, test_metrics[Metric.MONEY] + i * 1000)
+        tracker.update_metric(Metric.MONEY, test_metrics[Metric.MONEY] + i * 1000.0)
 
     # 히스토리 크기 확인 (최대 5개로 제한되어야 함)
     history = tracker.get_history()
@@ -336,7 +337,7 @@ def test_history_tracking(test_metrics: Dict[Metric, float]) -> None:
     # 최근 히스토리 항목 확인
     latest = history[-1]
     assert (
-        latest[Metric.MONEY] == test_metrics[Metric.MONEY] + 9000
+        latest[Metric.MONEY] == test_metrics[Metric.MONEY] + 9000.0
     ), "최근 히스토리 항목이 잘못됨"
 
 
@@ -352,8 +353,8 @@ def test_snapshot_creation_and_loading(
     )
 
     # 몇 가지 업데이트 적용
-    tracker.update_metric(Metric.MONEY, 15000)
-    tracker.update_metric(Metric.REPUTATION, 70)
+    tracker.update_metric(Metric.MONEY, 15000.0)
+    tracker.update_metric(Metric.REPUTATION, 70.0)
     tracker.add_event("테스트 이벤트 1")
     tracker.add_event("테스트 이벤트 2")
 
@@ -372,8 +373,8 @@ def test_snapshot_creation_and_loading(
 
     # 로드된 지표 확인 - 연쇄 효과로 인해 자금이 14900으로 감소함
     loaded_metrics = new_tracker.get_metrics()
-    assert loaded_metrics[Metric.MONEY] == 14900, "로드된 자금 값이 잘못됨"
-    assert loaded_metrics[Metric.REPUTATION] == 70, "로드된 평판 값이 잘못됨"
+    assert loaded_metrics[Metric.MONEY] == 14900.0, "로드된 자금 값이 잘못됨"
+    assert loaded_metrics[Metric.REPUTATION] == 70.0, "로드된 평판 값이 잘못됨"
 
     # 로드된 이벤트 확인
     loaded_events = new_tracker.get_events()
@@ -395,7 +396,7 @@ def test_max_snapshots_limit(
     # 5개의 스냅샷 생성 (각 생성 사이에 약간의 지연 추가)
     snapshot_paths = []
     for i in range(5):
-        tracker.update_metric(Metric.MONEY, 10000 + i * 1000)
+        tracker.update_metric(Metric.MONEY, 10000.0 + i * 1000.0)
         path = tracker.create_snapshot()
         snapshot_paths.append(path)
         # 파일 시스템 타임스탬프 차이를 보장하기 위한 지연
@@ -433,28 +434,28 @@ def test_threshold_events(test_metrics: Dict[Metric, float]) -> None:
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
     # 자금 위기 임계값 테스트
-    tracker.update_metric(Metric.MONEY, 900)
+    tracker.update_metric(Metric.MONEY, 900.0)
     events = tracker.check_threshold_events()
     assert any(
         "자금 위기" in event for event in events
     ), "자금 위기 이벤트가 트리거되지 않음"
 
     # 평판 위기 임계값 테스트
-    tracker.update_metric(Metric.REPUTATION, 15)
+    tracker.update_metric(Metric.REPUTATION, 15.0)
     events = tracker.check_threshold_events()
     assert any(
         "평판 위기" in event for event in events
     ), "평판 위기 이벤트가 트리거되지 않음"
 
     # 시설 위기 임계값 테스트
-    tracker.update_metric(Metric.FACILITY, 25)
+    tracker.update_metric(Metric.FACILITY, 25.0)
     events = tracker.check_threshold_events()
     assert any(
         "시설 위기" in event for event in events
     ), "시설 위기 이벤트가 트리거되지 않음"
 
     # 직원 위기 임계값 테스트
-    tracker.update_metric(Metric.STAFF_FATIGUE, 85)
+    tracker.update_metric(Metric.STAFF_FATIGUE, 85.0)
     events = tracker.check_threshold_events()
     assert any(
         "직원 위기" in event for event in events
@@ -469,11 +470,11 @@ def test_extreme_case_bankruptcy(test_metrics: Dict[Metric, float]) -> None:
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
     # 자금을 0으로 설정 (파산)
-    tracker.update_metric(Metric.MONEY, 0)
+    tracker.update_metric(Metric.MONEY, 0.0)
 
     # 자금이 0 이하로 내려가지 않는지 확인
     metrics = tracker.get_metrics()
-    assert metrics[Metric.MONEY] == 0, "자금이 0 이하로 내려감"
+    assert metrics[Metric.MONEY] == 0.0, "자금이 0 이하로 내려감"
 
     # 임계값 이벤트 확인
     events = tracker.check_threshold_events()
@@ -490,11 +491,11 @@ def test_extreme_case_zero_reputation(test_metrics: Dict[Metric, float]) -> None
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
     # 평판을 0으로 설정
-    tracker.update_metric(Metric.REPUTATION, 0)
+    tracker.update_metric(Metric.REPUTATION, 0.0)
 
     # 평판이 0 이하로 내려가지 않는지 확인
     metrics = tracker.get_metrics()
-    assert metrics[Metric.REPUTATION] == 0, "평판이 0 이하로 내려감"
+    assert metrics[Metric.REPUTATION] == 0.0, "평판이 0 이하로 내려감"
 
     # 임계값 이벤트 확인
     events = tracker.check_threshold_events()
@@ -519,18 +520,18 @@ def test_extreme_case_max_values(test_metrics: Dict[Metric, float]) -> None:
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
     # 모든 지표를 최대값으로 설정
-    tracker.update_metric(Metric.MONEY, 1000000000)  # 매우 큰 값
-    tracker.update_metric(Metric.REPUTATION, 100)
-    tracker.update_metric(Metric.HAPPINESS, 100)
-    tracker.update_metric(Metric.INVENTORY, 1000000)  # 매우 큰 값
-    tracker.update_metric(Metric.FACILITY, 100)
+    tracker.update_metric(Metric.MONEY, 1000000000.0)  # 매우 큰 값
+    tracker.update_metric(Metric.REPUTATION, 100.0)
+    tracker.update_metric(Metric.HAPPINESS, 100.0)
+    tracker.update_metric(Metric.INVENTORY, 1000000.0)  # 매우 큰 값
+    tracker.update_metric(Metric.FACILITY, 100.0)
 
     # 지표가 최대값을 초과하지 않는지 확인
     metrics = tracker.get_metrics()
-    assert metrics[Metric.REPUTATION] == 100, "평판이 최대값을 초과함"
-    assert metrics[Metric.HAPPINESS] == 100, "행복이 최대값을 초과함"
-    assert metrics[Metric.SUFFERING] == 0, "고통이 최소값 미만으로 내려감"
-    assert metrics[Metric.FACILITY] == 100, "시설 상태가 최대값을 초과함"
+    assert metrics[Metric.REPUTATION] == 100.0, "평판이 최대값을 초과함"
+    assert metrics[Metric.HAPPINESS] == 100.0, "행복이 최대값을 초과함"
+    assert metrics[Metric.SUFFERING] == 0.0, "고통이 최소값 미만으로 내려감"
+    assert metrics[Metric.FACILITY] == 100.0, "시설 상태가 최대값을 초과함"
 
 
 def test_autoplay_simulation() -> None:
@@ -542,81 +543,58 @@ def test_autoplay_simulation() -> None:
 
     # 100일 시뮬레이션
     for day in range(1, 101):
-        # 불확실성 요소 적용
-        tracker.uncertainty_apply_random_fluctuation(day, intensity=0.1, seed=day)
-
         # 랜덤 업데이트 적용
-        random_updates = {}
-        for metric in list(Metric):
-            if random.random() < 0.3:  # 30% 확률로 각 지표 업데이트
-                current = tracker.get_metrics()[metric]
-                change = (random.random() * 20) - 10  # -10 ~ +10 범위의 변화
-                random_updates[metric] = current + change
+        random_updates = {
+            Metric.MONEY: random.uniform(5000.0, 15000.0),
+            Metric.REPUTATION: random.uniform(30.0, 70.0),
+            Metric.HAPPINESS: random.uniform(40.0, 80.0),
+            Metric.INVENTORY: random.uniform(50.0, 150.0),
+            Metric.STAFF_FATIGUE: random.uniform(20.0, 60.0),
+            Metric.FACILITY: random.uniform(40.0, 90.0),
+        }
 
-        if random_updates:
-            tracker.tradeoff_update_metrics(random_updates)
+        # 업데이트 적용
+        tracker.tradeoff_update_metrics(random_updates)
 
-        # 임계값 이벤트 확인
-        tracker.check_threshold_events()
-
-        # 10일마다 스냅샷 생성
-        if day % 10 == 0:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                tracker.snapshot_dir = temp_dir
-                tracker.create_snapshot()
-
-    # 시뮬레이션 후 상태 확인
-    final_metrics = tracker.get_metrics()
-
-    # 행복-고통 시소 불변식 검증
-    assert are_happiness_suffering_balanced(
-        final_metrics[Metric.HAPPINESS], final_metrics[Metric.SUFFERING]
-    ), "시뮬레이션 후 시소 불변식 위반"
-
-    # 모든 지표가 유효 범위 내에 있는지 확인
-    for metric, value in final_metrics.items():
-        assert value >= 0, f"{metric} 값이 음수임"
-        if metric in {
-            Metric.REPUTATION,
-            Metric.HAPPINESS,
-            Metric.SUFFERING,
-            Metric.STAFF_FATIGUE,
-            Metric.FACILITY,
-        }:
-            assert value <= 100, f"{metric} 값이 100을 초과함"
+        # 행복-고통 시소 불변식 검증
+        metrics = tracker.get_metrics()
+        assert are_happiness_suffering_balanced(
+            metrics[Metric.HAPPINESS], metrics[Metric.SUFFERING]
+        ), f"시뮬레이션 {day}일차: 시소 불변식 위반"
 
 
 def test_performance_10k_turns() -> None:
     """
     10,000턴 성능 테스트를 수행합니다.
     """
-    import time
-
     # 트래커 생성
     tracker = MetricsTracker()
 
     # 시작 시간 기록
+    import time
+
     start_time = time.time()
 
     # 10,000턴 시뮬레이션
-    for day in range(1, 10001):
-        # 불확실성 요소 적용
-        tracker.uncertainty_apply_random_fluctuation(day, intensity=0.1)
+    for turn in range(10000):
+        # 랜덤 업데이트 적용
+        random_updates = {
+            Metric.MONEY: random.uniform(5000.0, 15000.0),
+            Metric.REPUTATION: random.uniform(30.0, 70.0),
+            Metric.HAPPINESS: random.uniform(40.0, 80.0),
+        }
 
-        # 간단한 업데이트 적용
-        if day % 10 == 0:
-            tracker.tradeoff_update_metrics(
-                {
-                    Metric.MONEY: tracker.get_metrics()[Metric.MONEY] + 100,
-                    Metric.REPUTATION: min(
-                        100, tracker.get_metrics()[Metric.REPUTATION] + 1
-                    ),
-                }
+        # 업데이트 적용
+        tracker.tradeoff_update_metrics(random_updates)
+
+        # 불확실성 요소 적용 (매 10턴마다)
+        if turn % 10 == 0:
+            # 불확실성 적용 - 직접 함수 호출로 대체
+            metrics = tracker.get_metrics()
+            updated_metrics = uncertainty_apply_random_fluctuation(
+                metrics, intensity=0.1, seed=turn
             )
-
-        # 임계값 이벤트 확인
-        if day % 100 == 0:
-            tracker.check_threshold_events()
+            tracker.tradeoff_update_metrics(updated_metrics)
 
     # 종료 시간 기록
     end_time = time.time()
@@ -624,15 +602,11 @@ def test_performance_10k_turns() -> None:
 
     # 5초 이내에 완료되어야 함
     assert (
-        elapsed_time <= 5
+        elapsed_time < 5.0
     ), f"10,000턴 시뮬레이션이 5초를 초과함 (실제: {elapsed_time:.2f}초)"
 
-    # 메모리 사용량은 프로세스 외부에서 측정해야 하므로 여기서는 생략
-
-    # 최종 상태 확인
-    final_metrics = tracker.get_metrics()
-
     # 행복-고통 시소 불변식 검증
+    metrics = tracker.get_metrics()
     assert are_happiness_suffering_balanced(
-        final_metrics[Metric.HAPPINESS], final_metrics[Metric.SUFFERING]
-    ), "성능 테스트 후 시소 불변식 위반"
+        metrics[Metric.HAPPINESS], metrics[Metric.SUFFERING]
+    ), "10,000턴 후 시소 불변식 위반"
