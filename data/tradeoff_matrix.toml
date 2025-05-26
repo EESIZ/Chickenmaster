@@ -1,82 +1,61 @@
-# 연쇄 효과 매트릭스
-# 이 파일은 지표 간 연쇄 효과 관계를 정의합니다.
-# M-3 이벤트 엔진에서 로드하여 사용할 예정입니다.
-
-[cascade_effects]
+[cascade]
 # 평판 → 자금
-[[cascade_effects.reputation_to_money]]
-trigger_metric = "REPUTATION"
-trigger_threshold = 30.0
-trigger_condition = "less_than"
-target_metric = "MONEY"
-impact_formula = "-1000 * (1 - value / 30)"
-event_message = "평판 하락으로 인한 매출 감소"
+REPUTATION = [
+  { target = "MONEY", formula = "-1000 * (1 - value / 30)", message = "평판 하락으로 인한 매출 감소" }
+]
 
-# 피로도 → 시설
-[[cascade_effects.fatigue_to_facility]]
-trigger_metric = "STAFF_FATIGUE"
-trigger_threshold = 70.0
-trigger_condition = "greater_than"
-target_metric = "FACILITY"
-impact_formula = "-5 * (value - 70) / 30"
-event_message = "직원 피로도 증가로 인한 시설 관리 소홀"
+# 수요 → 자금
+DEMAND = [
+  { target = "MONEY", formula = "-2000 * (1 - value/100)", message = "수요 감소로 인한 매출 하락" }
+]
 
-# 행복 → 평판
-[[cascade_effects.happiness_to_reputation]]
-trigger_metric = "HAPPINESS"
-trigger_threshold = 25.0
-trigger_condition = "less_than"
-target_metric = "REPUTATION"
-impact_formula = "-2 * (25 - value)"
-event_message = "행복도 저하로 인한 평판 하락"
-
-# 자금 → 시설
-[[cascade_effects.money_to_facility]]
-trigger_metric = "MONEY"
-trigger_threshold = 5000.0
-trigger_condition = "less_than"
-target_metric = "FACILITY"
-impact_formula = "-10 * (1 - value / 5000)"
-event_message = "자금 부족으로 인한 시설 관리 부실"
+# 직원 피로도 → 시설
+STAFF_FATIGUE = [
+  { target = "FACILITY", formula = "-5 * (value - 70) / 30", message = "직원 피로도 증가로 인한 시설 관리 소홀" }
+]
 
 # 시설 → 평판
-[[cascade_effects.facility_to_reputation]]
-trigger_metric = "FACILITY"
-trigger_threshold = 40.0
-trigger_condition = "less_than"
-target_metric = "REPUTATION"
-impact_formula = "-1 * (40 - value) / 2"
-event_message = "시설 상태 악화로 인한 평판 하락"
+FACILITY = [
+  { target = "REPUTATION", formula = "-10 * (1 - value / 40)", message = "시설 상태 악화로 인한 고객 불만" }
+]
 
 [threshold_events]
-# 파산 임계값
-[[threshold_events.bankruptcy]]
+# 자금 위기 이벤트
+[[threshold_events.money_crisis]]
 metric = "MONEY"
-threshold = 0.0
-condition = "less_than_equal"
-event_type = "GAME_OVER"
-event_message = "자금이 바닥나 파산했습니다!"
+condition = "less_than"
+value = 1000
+event_id = "money_crisis"
+message = "자금 위기: 1,000 미만"
 
-# 평판 붕괴 임계값
-[[threshold_events.reputation_collapse]]
+# 평판 위기 이벤트
+[[threshold_events.reputation_crisis]]
 metric = "REPUTATION"
-threshold = 0.0
-condition = "less_than_equal"
-event_type = "GAME_OVER"
-event_message = "평판이 바닥나 사업을 지속할 수 없게 되었습니다!"
+condition = "less_than"
+value = 20
+event_id = "reputation_crisis"
+message = "평판 위기: 20 미만"
 
-# 행복 위기 임계값
-[[threshold_events.happiness_crisis]]
-metric = "HAPPINESS"
-threshold = 10.0
-condition = "less_than_equal"
-event_type = "CRISIS"
-event_message = "행복도가 위험 수준까지 떨어졌습니다! 긴급 조치가 필요합니다."
+# 평판 호황 이벤트
+[[threshold_events.reputation_boom]]
+metric = "REPUTATION"
+condition = "greater_than"
+value = 80
+event_id = "reputation_boom"
+message = "평판 호황: 80 초과"
 
-# 고통 위기 임계값
-[[threshold_events.suffering_crisis]]
-metric = "SUFFERING"
-threshold = 90.0
-condition = "greater_than_equal"
-event_type = "CRISIS"
-event_message = "고통 지수가 위험 수준까지 상승했습니다! 긴급 조치가 필요합니다."
+# 시설 위기 이벤트
+[[threshold_events.facility_crisis]]
+metric = "FACILITY"
+condition = "less_than"
+value = 30
+event_id = "facility_crisis"
+message = "시설 위기: 30 미만, 위생 단속 위험"
+
+# 직원 위기 이벤트
+[[threshold_events.staff_crisis]]
+metric = "STAFF_FATIGUE"
+condition = "greater_than"
+value = 80
+event_id = "staff_crisis"
+message = "직원 위기: 피로도 80 초과, 이직 위험"

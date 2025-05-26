@@ -33,6 +33,7 @@ class Metric(Enum):
     INVENTORY = auto()  # 보유 식자재 수량
     STAFF_FATIGUE = auto()  # 직원의 피로도
     FACILITY = auto()  # 시설 상태
+    DEMAND = auto()  # 고객 수요
 
 
 class ActionType(Enum):
@@ -79,6 +80,7 @@ METRIC_RANGES: Final[Dict[Metric, Tuple[int, Union[int, float], int]]] = {
     Metric.INVENTORY: (0, INF, 100),  # 음수 불가, 무한대 가능
     Metric.STAFF_FATIGUE: (0, 100, 30),  # 0-100 범위
     Metric.FACILITY: (0, 100, 80),  # 0-100 범위
+    Metric.DEMAND: (0, 100, 70),  # 0-100 범위
 }
 
 
@@ -91,6 +93,7 @@ TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, list[Metric]]] = {
     Metric.INVENTORY: [Metric.MONEY],
     Metric.STAFF_FATIGUE: [Metric.REPUTATION, Metric.FACILITY],
     Metric.FACILITY: [Metric.MONEY],
+    Metric.DEMAND: [Metric.INVENTORY, Metric.STAFF_FATIGUE],
 }
 
 
@@ -103,6 +106,7 @@ UNCERTAINTY_WEIGHTS: Final[Dict[Metric, float]] = {
     Metric.INVENTORY: 0.05,  # 재고가 많을수록 약간 위험
     Metric.STAFF_FATIGUE: 0.15,  # 직원 피로도가 높을수록 위험
     Metric.FACILITY: -0.2,  # 시설 상태가 좋을수록 위험 감소
+    Metric.DEMAND: 0.1,  # 수요가 높을수록 약간 위험
 }
 
 
