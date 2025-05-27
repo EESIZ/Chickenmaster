@@ -3,6 +3,8 @@
 목적: LLM을 사용한 이벤트 대량 생성 도구
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 from datetime import datetime
@@ -12,7 +14,7 @@ from dev_tools.config import Config
 
 
 class EventGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         API 키는 Config 클래스에서 자동 로드
         """
@@ -24,7 +26,7 @@ class EventGenerator:
         # Anthropic 클라이언트 초기화
 
         try:
-            from anthropic import Anthropic
+            from anthropic import Anthropic  # type: ignore
 
             self.client = Anthropic(api_key=self.api_key)
         except ImportError:
@@ -89,7 +91,7 @@ class EventGenerator:
             dummy_events.append(event)
         return dummy_events
 
-    def save_to_json(self, events: List[Dict], output_dir: str = "out"):
+    def save_to_json(self, events: List[Dict[str, Any]], output_dir: str = "out") -> str:
         """
         생성된 이벤트를 JSON으로 저장
 
@@ -122,11 +124,12 @@ class EventGenerator:
         return f"한국 치킨집 경영 게임을 위한 {category} 카테고리의 이벤트 {count}개를 생성해주세요."
 
 
-def main():
+def main() -> int:
     # Config 검증
 
     if not Config.validate():
-        return
+        return 1
+    
     parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 생성기")
     parser.add_argument(
         "--category",
@@ -154,7 +157,7 @@ def main():
     # 이벤트 생성기 초기화
 
     try:
-        generator = EventGenerator()
+        generator: EventGenerator = EventGenerator()
 
         # 이벤트 생성
 
