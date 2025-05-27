@@ -91,7 +91,9 @@ class EventGenerator:
             dummy_events.append(event)
         return dummy_events
 
-    def save_to_json(self, events: List[Dict[str, Any]], output_dir: str = "out") -> str:
+    def save_to_json(
+        self, events: List[Dict[str, Any]], output_dir: str = "out"
+    ) -> str:
         """
         생성된 이벤트를 JSON으로 저장
 
@@ -129,7 +131,6 @@ def main() -> int:
 
     if not Config.validate():
         return 1
-    
     parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 생성기")
     parser.add_argument(
         "--category",
