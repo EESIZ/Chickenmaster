@@ -5,9 +5,11 @@ stages:
   - type_check
   - test
   - performance
+  - interact  # 추가
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  FF_ENABLE_TERMINAL: "true"  # Web Terminal 활성화
 
 cache:
   paths:
@@ -86,3 +88,22 @@ performance:
   allow_failure: false
   needs:
     - test
+
+# Claude Code 대화형 작업용 Job
+claude_interactive:
+  stage: interact
+  image: python:3.12
+  before_script:
+    - apt-get update -qq && apt-get install -y nodejs npm git
+    - npm install -g @anthropic-ai/claude-code || echo "Claude Code 설치 실패"
+    - pip install -r requirements-dev.txt || echo "requirements 파일 없음"
+  script:
+    - "export ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
+    - "echo Claude Code 환경 준비 완료"
+    - "echo 사용 예시: claude-code 프롬프트"
+    - "sleep 3600"
+  when: manual
+  tags:
+    - docker
+  only:
+    - web
