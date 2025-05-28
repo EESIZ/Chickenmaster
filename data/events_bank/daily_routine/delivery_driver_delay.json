@@ -1,0 +1,59 @@
+{
+  "id": "delivery_driver_delay",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "배달기사 지연 문제",
+  "name_en": "Delivery Driver Delay Issue",
+  "text_ko": "배달기사가 늦어져서 치킨이 식어가고 있습니다. 고객이 전화해서 언제 오냐고 묻고 있습니다.",
+  "text_en": "The delivery driver is delayed and the chicken is getting cold. The customer called asking when it will arrive.",
+  "effects": [
+    {
+      "metric": "DELIVERY_SERVICE_CRISIS",
+      "formula": "value + 15",
+      "message": "delivery_service_crisis이(가) 증가했습니다."
+    },
+    {
+      "metric": "DELIVERY_RELIABILITY_REPUTATION",
+      "formula": "value - 8",
+      "message": "delivery_reliability_reputation이(가) 감소했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "직접 배달을 간다",
+      "text_en": "Deliver it yourself",
+      "effects": {
+        "customer_satisfaction": 20,
+        "preparation_time": 40,
+        "personal_service": 15
+      }
+    },
+    {
+      "text_ko": "다른 배달기사를 긴급 호출한다",
+      "text_en": "Emergency call another delivery driver",
+      "effects": {
+        "money": -8000,
+        "customer_satisfaction": 10,
+        "problem_solving": 10
+      }
+    },
+    {
+      "text_ko": "고객에게 상황을 설명하고 새로 만들어 보낸다",
+      "text_en": "Explain to customer and make fresh food",
+      "effects": {
+        "customer_satisfaction": 5,
+        "money": -12000,
+        "honesty_reputation": 15
+      }
+    }
+  ],
+  "conditions": [
+    "delivery_orders > 3"
+  ],
+  "tags": [
+    "배달문제",
+    "고객소통",
+    "위기대응"
+  ],
+  "probability": 0.14
+}

@@ -1,0 +1,59 @@
+{
+  "id": "card_payment_system_error",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "카드 결제 시스템 오류",
+  "name_en": "Card Payment System Error",
+  "text_ko": "카드 결제기가 갑자기 작동하지 않습니다. 손님들이 현금이 없다고 당황하고 있습니다.",
+  "text_en": "The card payment machine suddenly stopped working. Customers are panicking saying they don't have cash.",
+  "effects": [
+    {
+      "metric": "PAYMENT_CRISIS",
+      "formula": "value + 20",
+      "message": "payment_crisis이(가) 증가했습니다."
+    },
+    {
+      "metric": "CUSTOMER_CONVENIENCE_REPUTATION",
+      "formula": "value - 10",
+      "message": "customer_convenience_reputation이(가) 감소했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "현금 결제만 받는다고 안내한다",
+      "text_en": "Inform that only cash payments are accepted",
+      "effects": {
+        "customer_satisfaction": -15,
+        "sales_loss": 20000,
+        "simplicity": 5
+      }
+    },
+    {
+      "text_ko": "외상으로 처리하고 나중에 받기로 한다",
+      "text_en": "Process as credit and collect payment later",
+      "effects": {
+        "customer_satisfaction": 20,
+        "financial_risk": 15,
+        "trust_building": 15
+      }
+    },
+    {
+      "text_ko": "스마트폰 결제 앱을 활용한다",
+      "text_en": "Use smartphone payment apps",
+      "effects": {
+        "customer_satisfaction": 10,
+        "tech_adaptation": 15,
+        "convenience": 10
+      }
+    }
+  ],
+  "conditions": [
+    "payment_system_age > 1"
+  ],
+  "tags": [
+    "결제시스템",
+    "기술문제",
+    "고객편의"
+  ],
+  "probability": 0.06
+}

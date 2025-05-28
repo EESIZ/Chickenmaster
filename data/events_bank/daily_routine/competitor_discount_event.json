@@ -1,0 +1,59 @@
+{
+  "id": "competitor_discount_event",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "경쟁업체 할인 이벤트",
+  "name_en": "Competitor Discount Event",
+  "text_ko": "옆 치킨집에서 대대적인 할인 이벤트를 시작했습니다. 우리 매장도 대응이 필요해 보입니다.",
+  "text_en": "The chicken shop next door started a major discount event. It seems your store needs to respond too.",
+  "effects": [
+    {
+      "metric": "COMPETITIVE_PRESSURE",
+      "formula": "value + 20",
+      "message": "competitive_pressure이(가) 증가했습니다."
+    },
+    {
+      "metric": "MARKET_POSITION_CHANGE",
+      "formula": "value + 10",
+      "message": "market_position_change이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "즉시 맞대응 할인을 시작한다",
+      "text_en": "Start counter-discount immediately",
+      "effects": {
+        "competitiveness": 15,
+        "profit_margin": -20,
+        "market_share": 10
+      }
+    },
+    {
+      "text_ko": "품질로 승부한다고 마음먹는다",
+      "text_en": "Decide to compete with quality",
+      "effects": {
+        "quality_focus": 20,
+        "customer_education": 10,
+        "differentiation": 15
+      }
+    },
+    {
+      "text_ko": "특별 서비스로 차별화한다",
+      "text_en": "Differentiate with special service",
+      "effects": {
+        "service_quality": 15,
+        "operational_cost": 5,
+        "uniqueness": 20
+      }
+    }
+  ],
+  "conditions": [
+    "competition_level > 60"
+  ],
+  "tags": [
+    "경쟁대응",
+    "가격전략",
+    "차별화"
+  ],
+  "probability": 0.09
+}
