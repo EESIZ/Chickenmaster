@@ -1,0 +1,59 @@
+{
+  "id": "staff_condition_morning",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "직원 컨디션 체크",
+  "name_en": "Staff Condition Check",
+  "text_ko": "알바생이 감기에 걸린 것 같습니다. 기침을 하고 있는데 계속 일을 시켜야 할지 고민됩니다.",
+  "text_en": "Your part-time worker seems to have caught a cold. They're coughing, and you wonder if you should keep them working.",
+  "effects": [
+    {
+      "metric": "HEALTH_CONCERN",
+      "formula": "value + 10",
+      "message": "health_concern이(가) 증가했습니다."
+    },
+    {
+      "metric": "HYGIENE_RISK",
+      "formula": "value + 8",
+      "message": "hygiene_risk이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "마스크 착용하고 계속 일시킨다",
+      "text_en": "Have them wear a mask and continue working",
+      "effects": {
+        "staff_loyalty": -10,
+        "hygiene": -5,
+        "productivity": -10
+      }
+    },
+    {
+      "text_ko": "집에 보내고 혼자 운영한다",
+      "text_en": "Send them home and work alone",
+      "effects": {
+        "staff_loyalty": 15,
+        "stress": 25,
+        "productivity": -20
+      }
+    },
+    {
+      "text_ko": "약국에서 감기약을 사다준다",
+      "text_en": "Buy cold medicine for them",
+      "effects": {
+        "money": -8000,
+        "staff_loyalty": 20,
+        "hygiene": 5
+      }
+    }
+  ],
+  "conditions": [
+    "staff_count >= 1"
+  ],
+  "tags": [
+    "직원관리",
+    "위생",
+    "인간관계"
+  ],
+  "probability": 0.1
+}

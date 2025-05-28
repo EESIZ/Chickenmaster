@@ -1,0 +1,26 @@
+{
+  "last_updated": "2025-05-27T01:41:36.978102",
+  "total_events": 5,
+  "categories": {
+    "daily_routine": {
+      "count": 5
+    }
+  },
+  "tags": {
+    "평판": 1,
+    "메뉴 개발": 1,
+    "고객 관리": 1,
+    "알바생 관리": 1,
+    "배달앱": 1,
+    "실수": 1,
+    "재료비": 1,
+    "가격 정책": 1,
+    "수수료": 1
+  },
+  "metrics": {
+    "diversity_score": 0.0,
+    "tradeoff_clarity": 0.13999999999999999,
+    "cultural_authenticity": 0.27999999999999997,
+    "replayability": 0.469
+  }
+}
