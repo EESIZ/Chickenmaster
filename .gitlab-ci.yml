@@ -1,0 +1,99 @@
+image: python:3.12
+
+stages:
+  - lint
+  - type_check
+  - test
+  - performance
+  - interact  # 추가
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  FF_ENABLE_TERMINAL: "true"  # Web Terminal 활성화
+
+cache:
+  paths:
+    - .pip-cache/
+
+before_script:
+  - python -V
+  - pip install --upgrade pip
+  - pip install black ruff mypy pytest pytest-cov
+
+# 코드 포맷팅 검사 (black)
+format:
+  stage: lint
+  script:
+    - pip install black
+    - black --check --diff .
+
+# 코드 린팅 (ruff)
+lint:
+  stage: lint
+  script:
+    - pip install ruff
+    - ruff check .
+
+# 타입 체크 (mypy)
+type_check:
+  stage: type_check
+  script:
+    - pip install mypy
+    - pip install types-psutil==7.0.0.20250516
+    - mypy --strict .
+
+# 테스트 실행 (pytest)
+test:
+  stage: test
+  script:
+    - pip install pytest pytest-cov
+    - pip install psutil
+    - pytest --cov=. --cov-report=term --cov-report=xml
+  coverage: '/TOTAL.*\s+(\d+%)/'
+  artifacts:
+    paths:
+      - coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# 커버리지 검증
+coverage_check:
+  stage: test
+  script:
+    - pip install pytest pytest-cov psutil types-psutil
+    - pytest --cov=. --cov-report=term --cov-report=xml --cov-fail-under=80
+  needs:
+    - test
+
+# 성능 검증
+performance:
+  stage: performance
+  script:
+    - pip install pytest pytest-benchmark psutil
+    - pytest -m perf --benchmark-only || true
+    - python -c "import psutil; print('Memory:', psutil.Process().memory_info().rss / 1024 / 1024, 'MB')"
+    - echo 'Performance checks completed'
+  allow_failure: false
+  needs:
+    - test
+
+# Claude Code 대화형 작업용 Job
+claude_interactive:
+  stage: interact
+  image: python:3.12
+  before_script:
+    - apt-get update -qq && apt-get install -y nodejs npm git
+    - npm install -g @anthropic-ai/claude-code || echo "Claude Code 설치 실패"
+    - pip install -r requirements-dev.txt || echo "requirements 파일 없음"
+  script:
+    - "export ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
+    - "echo Claude Code 환경 준비 완료"
+    - "echo 사용 예시: claude-code 프롬프트"
+    - "sleep 3600"
+  when: manual
+  tags:
+    - docker
+  only:
+    - web

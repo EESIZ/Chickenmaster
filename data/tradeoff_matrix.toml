@@ -1,0 +1,61 @@
+[cascade]
+# 평판 → 자금
+REPUTATION = [
+  { target = "MONEY", formula = "-1000 * (1 - value / 30)", message = "평판 하락으로 인한 매출 감소" }
+]
+
+# 수요 → 자금
+DEMAND = [
+  { target = "MONEY", formula = "-2000 * (1 - value/100)", message = "수요 감소로 인한 매출 하락" }
+]
+
+# 직원 피로도 → 시설
+STAFF_FATIGUE = [
+  { target = "FACILITY", formula = "-5 * (value - 70) / 30", message = "직원 피로도 증가로 인한 시설 관리 소홀" }
+]
+
+# 시설 → 평판
+FACILITY = [
+  { target = "REPUTATION", formula = "-10 * (1 - value / 40)", message = "시설 상태 악화로 인한 고객 불만" }
+]
+
+[threshold_events]
+# 자금 위기 이벤트
+[[threshold_events.money_crisis]]
+metric = "MONEY"
+condition = "less_than"
+value = 1000
+event_id = "money_crisis"
+message = "자금 위기: 1,000 미만"
+
+# 평판 위기 이벤트
+[[threshold_events.reputation_crisis]]
+metric = "REPUTATION"
+condition = "less_than"
+value = 20
+event_id = "reputation_crisis"
+message = "평판 위기: 20 미만"
+
+# 평판 호황 이벤트
+[[threshold_events.reputation_boom]]
+metric = "REPUTATION"
+condition = "greater_than"
+value = 80
+event_id = "reputation_boom"
+message = "평판 호황: 80 초과"
+
+# 시설 위기 이벤트
+[[threshold_events.facility_crisis]]
+metric = "FACILITY"
+condition = "less_than"
+value = 30
+event_id = "facility_crisis"
+message = "시설 위기: 30 미만, 위생 단속 위험"
+
+# 직원 위기 이벤트
+[[threshold_events.staff_crisis]]
+metric = "STAFF_FATIGUE"
+condition = "greater_than"
+value = 80
+event_id = "staff_crisis"
+message = "직원 위기: 피로도 80 초과, 이직 위험"

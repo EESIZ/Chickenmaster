@@ -1,0 +1,28 @@
+{
+  "demand": {
+    "base_demand": 50,
+    "price_sensitivity": 0.5,
+    "reputation_factor": 0.8,
+    "min_price": 5000,
+    "max_price": 20000,
+    "optimal_price": 10000,
+    "uncertainty_factor": 0.2
+  },
+  "profit": {
+    "base_unit_cost": 3000,
+    "fixed_cost_daily": 15000,
+    "cost_fluctuation_range": 0.2
+  },
+  "tradeoffs": {
+    "price_to_reputation_factor": 0.3,
+    "price_to_fatigue_factor": 0.2,
+    "inventory_to_money_factor": 0.1,
+    "reputation_to_fatigue_factor": 0.25,
+    "facility_to_reputation_factor": 0.15
+  },
+  "uncertainty": {
+    "daily_random_factor": 0.1,
+    "event_trigger_threshold": 0.7,
+    "max_event_severity": 3
+  }
+}
