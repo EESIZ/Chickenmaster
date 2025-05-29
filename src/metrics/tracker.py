@@ -21,7 +21,7 @@ import os
 import json
 from datetime import datetime
 from collections import deque
-from typing import Dict, Any, Optional, List, Deque
+from typing import Dict, Optional, List, Deque, Set, Union
 
 # schema.py에서 필요한 상수와 Enum 가져오기
 from schema import (
@@ -143,7 +143,7 @@ class MetricsTracker:
         self.metrics = self.modifier.apply(self.metrics, updates)
 
         # 연쇄 효과 적용
-        self.apply_cascade_effects([metric])
+        self.apply_cascade_effects({metric})
 
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
@@ -159,19 +159,19 @@ class MetricsTracker:
         self.metrics = self.modifier.apply(self.metrics, updates)
 
         # 연쇄 효과 적용
-        self.apply_cascade_effects(updates.keys())
+        self.apply_cascade_effects(set(updates.keys()))
 
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
 
-    def apply_cascade_effects(self, changed_metrics: Any) -> None:
+    def apply_cascade_effects(self, changed_metrics: Set[Metric]) -> None:
         """
         지표 변화의 연쇄 효과를 적용합니다.
 
         예: 평판↓ → 수요↓ → 자금↓
 
         Args:
-            changed_metrics: 변경된 지표 목록
+            changed_metrics: 변경된 지표 집합
         """
         cascade_updates = {}
 
@@ -395,8 +395,8 @@ class MetricsTracker:
         except (IOError, json.JSONDecodeError, KeyError):
             return False
 
-    def noRightAnswer_simulate_decision(
-        self, decision: Dict[str, Any]
+    def simulate_no_right_answer_decision(
+        self, decision: Dict[str, Union[float, str, bool]]
     ) -> Dict[Metric, float]:
         """
         플레이어 결정의 결과를 시뮬레이션하여 예상 지표 변화를 반환합니다.
