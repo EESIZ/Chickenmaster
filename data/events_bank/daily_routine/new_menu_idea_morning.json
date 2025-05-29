@@ -1,0 +1,54 @@
+{
+  "id": "new_menu_idea_morning",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "새 메뉴 아이디어",
+  "name_en": "New Menu Idea",
+  "text_ko": "어젯밤 TV에서 본 치킨 요리가 인상적이었습니다. 우리 매장에서도 시도해볼까 생각됩니다.",
+  "text_en": "The chicken dish you saw on TV last night was impressive. You're thinking of trying it at your store.",
+  "effects": [
+    {
+      "metric": "CREATIVITY_INSPIRATION",
+      "formula": "value + 10",
+      "message": "creativity_inspiration이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "바로 테스트해본다",
+      "text_en": "Test it right away",
+      "effects": {
+        "innovation": 15,
+        "money": -8000,
+        "experimentation_risk": 10
+      }
+    },
+    {
+      "text_ko": "주말에 시간 날 때 연구해본다",
+      "text_en": "Research it when you have time on weekends",
+      "effects": {
+        "innovation": 5,
+        "stress": 5,
+        "planning": 10
+      }
+    },
+    {
+      "text_ko": "기존 메뉴에 집중한다",
+      "text_en": "Focus on existing menu",
+      "effects": {
+        "innovation": -2,
+        "food_quality": 5,
+        "operational_stability": 10
+      }
+    }
+  ],
+  "conditions": [
+    "creativity > 60"
+  ],
+  "tags": [
+    "혁신",
+    "메뉴개발",
+    "리스크"
+  ],
+  "probability": 0.08
+}

@@ -1,0 +1,59 @@
+{
+  "id": "store_temperature_morning",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "매장 온도 조절",
+  "name_en": "Store Temperature Control",
+  "text_ko": "아침인데 매장이 너무 춥습니다. 난방을 켜면 전기요금이 올라가고, 안 켜면 손님이 불편해할 것 같습니다.",
+  "text_en": "The store is too cold this morning. Turning on heating increases electricity bills, but customers will be uncomfortable without it.",
+  "effects": [
+    {
+      "metric": "COMFORT_CONCERN",
+      "formula": "value + 10",
+      "message": "comfort_concern이(가) 증가했습니다."
+    },
+    {
+      "metric": "UTILITY_COST",
+      "formula": "value + 5",
+      "message": "utility_cost이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "난방을 적당히 켠다",
+      "text_en": "Turn on heating moderately",
+      "effects": {
+        "money": -15000,
+        "customer_comfort": 15,
+        "staff_comfort": 10
+      }
+    },
+    {
+      "text_ko": "그냥 참는다",
+      "text_en": "Just endure it",
+      "effects": {
+        "money": 0,
+        "customer_comfort": -10,
+        "staff_comfort": -10
+      }
+    },
+    {
+      "text_ko": "두꺼운 옷을 입고 버틴다",
+      "text_en": "Wear thicker clothes and endure",
+      "effects": {
+        "money": 0,
+        "personal_comfort": -5,
+        "resilience": 10
+      }
+    }
+  ],
+  "conditions": [
+    "season == 'winter'"
+  ],
+  "tags": [
+    "전기요금",
+    "고객편의",
+    "비용절약"
+  ],
+  "probability": 0.15
+}

@@ -1,0 +1,45 @@
+{
+  "id": "daily_routine_001",
+  "category": "daily_routine",
+  "type": "RANDOM",
+  "name_ko": "단골 손님의 특별 주문",
+  "name_en": "Regular Customer's Special Order",
+  "text_ko": "오랫동안 가게를 찾아주시는 단골 손님이 메뉴에 없는 특별한 치킨 요리를 주문했습니다. 재료는 있지만 준비 시간이 오래 걸릴 것 같습니다.",
+  "text_en": "A regular customer has ordered a special chicken dish that's not on the menu. You have the ingredients, but it will take extra time to prepare.",
+  "conditions": [],
+  "effects": [
+    {
+      "metric": "REPUTATION",
+      "formula": "value + 5",
+      "message": "단골 손님의 만족도가 상승했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "특별 요리를 만들어 드린다 (시간 +30분)",
+      "text_en": "Make the special dish (Time +30min)",
+      "effects": {
+        "money": 150,
+        "reputation": 10,
+        "stress": 15
+      }
+    },
+    {
+      "text_ko": "정중히 거절하고 메뉴 내에서 추천해 드린다",
+      "text_en": "Politely decline and recommend from the menu",
+      "effects": {
+        "money": 100,
+        "reputation": -5,
+        "stress": -5
+      }
+    }
+  ],
+  "tags": [
+    "단골",
+    "주문",
+    "서비스",
+    "트레이드오프"
+  ],
+  "probability": 0.4,
+  "cooldown": 14
+}

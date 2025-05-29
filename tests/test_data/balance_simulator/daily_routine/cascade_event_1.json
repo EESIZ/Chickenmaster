@@ -1,0 +1,44 @@
+{
+  "id": "cascade_event_1",
+  "type": "THRESHOLD",
+  "name": "연쇄 이벤트",
+  "name_en": "Cascade Event",
+  "text": "이것은 연쇄 이벤트입니다.",
+  "text_en": "This is a cascade event.",
+  "trigger": {
+    "metric": "happiness",
+    "operator": "greater_than",
+    "value": 60
+  },
+  "effects": [
+    {
+      "metric": "money",
+      "formula": "50",
+      "message": "돈이 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "id": "cascade_choice_1",
+      "text": "연쇄 선택지",
+      "text_en": "Cascade Choice",
+      "effects": [
+        {
+          "metric": "happiness",
+          "formula": "5",
+          "message": "행복이 증가했습니다."
+        }
+      ],
+      "cascade_events": [
+        {
+          "id": "test_event_1",
+          "condition": {
+            "metric": "money",
+            "operator": "greater_than",
+            "value": 1000
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "chicken_radish_prep",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "치킨무 준비량 결정",
+  "name_en": "Chicken Radish Preparation Decision",
+  "text_ko": "오늘 치킨무를 얼마나 준비할지 결정해야 합니다. 어제는 부족해서 곤란했습니다.",
+  "text_en": "Need to decide how much pickled radish to prepare today. Yesterday we ran short and had trouble.",
+  "effects": [
+    {
+      "metric": "PREPARATION_PLANNING",
+      "formula": "value + 5",
+      "message": "preparation_planning이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "넉넉하게 많이 준비한다",
+      "text_en": "Prepare plenty generously",
+      "effects": {
+        "money": -3000,
+        "customer_satisfaction": 10,
+        "food_waste_risk": 15
+      }
+    },
+    {
+      "text_ko": "평소만큼만 준비한다",
+      "text_en": "Prepare the usual amount",
+      "effects": {
+        "money": 0,
+        "customer_satisfaction": 0,
+        "operational_efficiency": 5
+      }
+    },
+    {
+      "text_ko": "적게 준비하고 떨어지면 추가로 만든다",
+      "text_en": "Prepare less and make more if needed",
+      "effects": {
+        "money": 1000,
+        "customer_satisfaction": -5,
+        "workload": 10
+      }
+    }
+  ],
+  "conditions": [
+    "time_of_day == 'morning'"
+  ],
+  "tags": [
+    "재료관리",
+    "고객만족",
+    "비용"
+  ],
+  "probability": 0.2
+}
