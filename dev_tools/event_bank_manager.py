@@ -7,19 +7,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import csv
-import random
 import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Set, Union, Tuple, Iterator, Generator
+from typing import Any, Optional, Tuple, Generator
 from tqdm import tqdm
 
 import tomllib  # Python 3.11+
 
-from dev_tools.config import Config, EVENT_CATEGORIES
+from dev_tools.config import EVENT_CATEGORIES
 
 # 조건부 import 및 스텁 클래스 구현
 try:

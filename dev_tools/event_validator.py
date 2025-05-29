@@ -9,11 +9,10 @@ import argparse
 import ast
 import json
 import math
-import re
 import tomllib  # Python 3.11+
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Set
 
 
 class EventType(Enum):

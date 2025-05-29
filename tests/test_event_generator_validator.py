@@ -13,13 +13,12 @@ import tempfile
 import shutil
 from unittest.mock import patch
 import sys
-import tomllib
 
 # 프로젝트 루트 디렉토리를 Python 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from dev_tools.event_generator import generate_event_with_claude
-from dev_tools.event_validator import validate_event, EventValidationError
+from dev_tools.event_validator import EventValidator
+from dev_tools.event_generator import EventGenerator
 
 
 class TestEventValidator(unittest.TestCase):

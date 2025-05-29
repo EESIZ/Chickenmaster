@@ -9,8 +9,7 @@
 import json
 import argparse
 import re
-import os
-from typing import Dict, List, Any, Union
+from typing import Dict, List
 
 
 def convert_effects_structure(effects_dict: Dict) -> List[Dict]:
