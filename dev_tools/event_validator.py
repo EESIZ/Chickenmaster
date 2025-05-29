@@ -111,6 +111,30 @@ class EventValidator:
 
         return all_valid
 
+    def validate_event(self, event: Dict[str, Any]) -> bool:
+        """
+        단일 이벤트 검증 (공개 메서드)
+
+        Args:
+            event: 이벤트 데이터 딕셔너리
+
+        Returns:
+            검증 성공 여부
+        """
+        # 기존 오류 상태 저장
+        old_errors = self.errors.copy()
+        self.errors = []
+        
+        # 내부 검증 메서드 호출
+        result = self._validate_event(event)
+        
+        # 오류가 발생했으면 기존 오류 목록에 추가
+        if not result:
+            old_errors.extend(self.errors)
+        
+        self.errors = old_errors
+        return result
+
     def _validate_event(self, event: Dict[str, Any]) -> bool:
         """
         단일 이벤트 검증

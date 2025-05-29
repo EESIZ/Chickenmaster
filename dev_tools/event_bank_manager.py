@@ -11,7 +11,7 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Tuple, Generator, Dict, List, Set
+from typing import Any, Optional, Tuple, Generator, Dict, List, Set, Union, Type
 from tqdm import tqdm
 
 import tomllib  # Python 3.11+
@@ -21,9 +21,9 @@ from dev_tools.config import EVENT_CATEGORIES
 # 조건부 import 및 스텁 클래스 구현
 try:
     from dev_tools.event_validator import EventValidator
+    _EventValidator = EventValidator
 except ImportError:
-
-    class EventValidator:
+    class _EventValidatorStub:
         """이벤트 검증기 스텁"""
 
         def __init__(self) -> None:
@@ -43,24 +43,35 @@ except ImportError:
                 "cultural_authenticity": 0.0,
                 "replayability": 0.0,
             }
+    _EventValidator: Type[Any] = _EventValidatorStub  # type: ignore
 
 
 try:
-    from dev_tools.balance_simulator import BalanceSimulator
+    from dev_tools.balance_simulator import EventSimulator, SimulationConfig
+    _EventSimulator = EventSimulator
+    _SimulationConfig = SimulationConfig
 except ImportError:
+    class _SimulationConfigStub:
+        """시뮬레이션 설정 스텁"""
+        
+        def __init__(self, **kwargs: Any) -> None:
+            self.iterations = kwargs.get("iterations", 100)
+            self.turns_per_sim = kwargs.get("turns_per_sim", 30)
+            self.seed = kwargs.get("seed", 42)
+            
+    class _EventSimulatorStub:
+        """이벤트 시뮬레이터 스텁"""
 
-    class BalanceSimulator:
-        """밸런스 시뮬레이터 스텁"""
+        def __init__(self, events_dir: str, config: Any) -> None:
+            self.events_dir = events_dir
+            self.config = config
 
-        def __init__(self) -> None:
-            self.events: List[Dict[str, Any]] = []
-
-        def run_simulation(self, turns: int = 100, seed: int = 42) -> None:
+        def run_simulations(self) -> Any:
             """시뮬레이션 실행"""
-            pass
+            return None
 
-        def generate_balance_report(self) -> Dict[str, Any]:
-            """밸런스 보고서 생성"""
+        def generate_report(self, results: Any, output_path: str) -> Dict[str, Any]:
+            """보고서 생성"""
             return {
                 "bankruptcy_rate": 0.0,
                 "avg_days_survived": 0.0,
@@ -74,6 +85,8 @@ except ImportError:
         def save_report_to_csv(self, report_dir: str) -> str:
             """CSV 보고서 저장"""
             return ""
+    _EventSimulator: Type[Any] = _EventSimulatorStub  # type: ignore
+    _SimulationConfig: Type[Any] = _SimulationConfigStub  # type: ignore
 
 
 class EventBankManager:
@@ -91,8 +104,8 @@ class EventBankManager:
         self.events: dict[str, list[dict[str, Any]]] = {
             category: [] for category in self.CATEGORIES
         }
-        self.validator = EventValidator()
-        self.simulator = BalanceSimulator()
+        self.validator = _EventValidator()
+        self.simulator = _EventSimulator("", _SimulationConfig())
         self.data_dir = Path("data/events")
         self.out_dir = Path("out")
         self.reports_dir = Path("reports")
@@ -351,24 +364,30 @@ class EventBankManager:
         sys.stdout.flush()
 
         # 시뮬레이터 초기화 및 이벤트 설정
-        self.simulator = BalanceSimulator()
-        self.simulator.events = all_events
+        self.simulator = _EventSimulator(str(self.data_dir), _SimulationConfig())
 
         # 시뮬레이션 실행 (진행률 표시 추가)
         with tqdm(total=turns, desc="Simulating turns", unit="turn") as pbar:
-            # 실제 시뮬레이션은 BalanceSimulator 내부에서 실행되므로 여기서는 진행률만 표시
-            self.simulator.run_simulation(turns=turns, seed=seed)
+            # 실제 시뮬레이션은 EventSimulator 내부에서 실행되므로 여기서는 진행률만 표시
+            results = self.simulator.run_simulations()
             pbar.update(turns)
 
         # 밸런스 리포트 생성
-        report = self.simulator.generate_balance_report()
+        report = self.simulator.generate_report(results, "")
 
         # 결과 저장
         timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
 
         if not self.dry_run:
-            json_path = self.simulator.save_report_to_json(str(self.reports_dir))
-            csv_path = self.simulator.save_report_to_csv(str(self.reports_dir))
+            if hasattr(self.simulator, 'save_report_to_json'):
+                json_path = self.simulator.save_report_to_json(str(self.reports_dir))
+            else:
+                json_path = f"{self.reports_dir}/balance_report_{timestamp}.json"
+                
+            if hasattr(self.simulator, 'save_report_to_csv'):
+                csv_path = self.simulator.save_report_to_csv(str(self.reports_dir))
+            else:
+                csv_path = f"{self.reports_dir}/metrics_history_{timestamp}.csv"
         else:
             json_path = f"{self.reports_dir}/balance_report_{timestamp}.json"
             csv_path = f"{self.reports_dir}/metrics_history_{timestamp}.csv"
@@ -378,18 +397,22 @@ class EventBankManager:
         # 요약 출력
         print("\n📊 밸런스 요약:")
         sys.stdout.flush()
-        if "balance_scores" in report:
-            for name, score in report["balance_scores"].items():
-                status = "✅" if score >= 0.7 else "⚠️" if score >= 0.5 else "❌"
-                print(f"  {status} {name}: {score:.2f}")
-                sys.stdout.flush()
+        if isinstance(report, dict) and "balance_scores" in report:
+            balance_scores = report["balance_scores"]
+            if isinstance(balance_scores, dict):
+                for name, score in balance_scores.items():
+                    status = "✅" if score >= 0.7 else "⚠️" if score >= 0.5 else "❌"
+                    print(f"  {status} {name}: {score:.2f}")
+                    sys.stdout.flush()
 
         print("\n💡 추천사항:")
         sys.stdout.flush()
-        if "recommendations" in report:
-            for recommendation in report["recommendations"]:
-                print(f"  • {recommendation}")
-                sys.stdout.flush()
+        if isinstance(report, dict) and "recommendations" in report:
+            recommendations = report["recommendations"]
+            if isinstance(recommendations, list):
+                for recommendation in recommendations:
+                    print(f"  • {recommendation}")
+                    sys.stdout.flush()
 
         return report
 
@@ -403,7 +426,7 @@ class EventBankManager:
         print("📊 이벤트 뱅크 통계 생성 시작...")
         sys.stdout.flush()
 
-        stats = {
+        stats: dict[str, Any] = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "total_events": 0,
             "categories": {},
@@ -421,18 +444,24 @@ class EventBankManager:
             for event in tqdm(events, desc=f"Analyzing {category}", unit="event"):
                 # 타입별 통계
                 event_type = event.get("type", "UNKNOWN")
-                stats["types"][event_type] = stats["types"].get(event_type, 0) + 1
+                types_dict = stats["types"]
+                assert isinstance(types_dict, dict)
+                types_dict[event_type] = types_dict.get(event_type, 0) + 1
 
                 # 태그 통계
                 tags = event.get("tags", [])
+                tags_dict = stats["tags"]
+                assert isinstance(tags_dict, dict)
                 for tag in tags:
-                    stats["tags"][tag] = stats["tags"].get(tag, 0) + 1
+                    tags_dict[tag] = tags_dict.get(tag, 0) + 1
 
                 # 메트릭 영향 통계
                 effects = event.get("effects", [])
+                metrics_dict = stats["metrics"]
+                assert isinstance(metrics_dict, dict)
                 for effect in effects:
                     metric = effect.get("metric", "UNKNOWN")
-                    stats["metrics"][metric] = stats["metrics"].get(metric, 0) + 1
+                    metrics_dict[metric] = metrics_dict.get(metric, 0) + 1
 
         print("✅ 통계 생성 완료")
         sys.stdout.flush()

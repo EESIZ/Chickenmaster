@@ -31,14 +31,35 @@ from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict, cast
 
 try:
     import matplotlib.pyplot as plt
+    import matplotlib
     import numpy as np
     import pandas as pd
     import seaborn as sns
     from pydantic import BaseModel, Field, field_validator
     PLOTTING_AVAILABLE = True
+    PYDANTIC_AVAILABLE = True
 except ImportError:
     PLOTTING_AVAILABLE = False
+    PYDANTIC_AVAILABLE = False
     print("⚠️ 시각화 라이브러리를 찾을 수 없습니다. 시각화 기능이 비활성화됩니다.")
+    
+    # mypy를 위한 더미 클래스 정의
+    class BaseModel:
+        def __init__(self, **kwargs: Any) -> None:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+        
+        def model_dump(self) -> Dict[str, Any]:
+            return {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+    
+    def Field(default: Any = None, **kwargs: Any) -> Any:
+        return default
+    
+    def field_validator(field_name: str) -> Any:
+        def decorator(func: Any) -> Any:
+            func._field_name = field_name
+            return func
+        return decorator
 
 # 로깅 설정
 logging.basicConfig(
@@ -61,6 +82,7 @@ class SimulationConfig(BaseModel):
     destruction_threshold: float = Field(default=0.05, description="허용 가능한 파괴율")
 
     @field_validator("iterations")
+    @classmethod
     def validate_iterations(cls, v: int) -> int:
         """반복 횟수 검증"""
         if not 1 <= v <= 1000:
@@ -68,6 +90,7 @@ class SimulationConfig(BaseModel):
         return v
 
     @field_validator("turns_per_sim")
+    @classmethod
     def validate_turns(cls, v: int) -> int:
         """턴 수 검증"""
         if not 1 <= v <= 1000:
@@ -75,6 +98,7 @@ class SimulationConfig(BaseModel):
         return v
 
     @field_validator("cascade_depth_limit")
+    @classmethod
     def validate_cascade_depth(cls, v: int) -> int:
         """연쇄 깊이 제한 검증"""
         if not 1 <= v <= 10:
@@ -254,11 +278,11 @@ class EventSimulator:
         """
         self.events_dir = Path(events_dir)
         self.config = config
-        self.events = {}
-        self.event_stats = defaultdict(lambda: defaultdict(int))
-        self.cascade_stats = defaultdict(int)
-        self.tradeoff_metrics = defaultdict(list)
-        self.uncertainty_factors = defaultdict(list)
+        self.events: Dict[str, Dict[str, Any]] = {}
+        self.event_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        self.cascade_stats: Dict[int, int] = defaultdict(int)
+        self.tradeoff_metrics: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self.uncertainty_factors: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         # 랜덤 시드 설정
         if config.seed is not None:
