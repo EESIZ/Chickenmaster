@@ -14,9 +14,10 @@
 - baseline, sensitivity 로직 추가 예정
 """
 
+from typing import Dict, Any, Optional, Protocol, runtime_checkable
+import random
 import logging
 import os
-from typing import Dict, Optional, Protocol, Union, runtime_checkable
 
 from schema import Metric, cap_metric_value
 
@@ -144,16 +145,14 @@ class AdaptiveModifier:
     현재는 SimpleSeesawModifier와 동일하게 동작하는 스켈레톤만 제공
     """
 
-    def __init__(
-        self, 
-        player_profile: Optional[Dict[str, Union[str, int, float, bool]]] = None
-    ):
+    def __init__(self, player_profile: Optional[Dict[str, Any]] = None):
         """
         AdaptiveModifier 초기화
 
         Args:
             player_profile: 플레이어 성향 프로필 (기본값: None)
         """
+        # TODO: M-6에서 플레이어 성향 분석 및 적응형 로직 구현
         self.player_profile = player_profile or {}
 
     def apply(
@@ -215,30 +214,43 @@ class AdaptiveModifier:
 
 
 def uncertainty_apply_random_fluctuation(
-    metrics: Dict[Metric, float], 
-    intensity: float = 0.1, 
-    seed: Optional[int] = None
+    metrics: Dict[Metric, float], intensity: float = 0.1, seed: Optional[int] = None
 ) -> Dict[Metric, float]:
     """
-    지표에 무작위 변동을 적용합니다.
+    불확실성 요소를 반영하여 지표에 무작위 변동을 적용합니다.
 
     Args:
         metrics: 현재 지표 상태
-        intensity: 변동의 강도 (0.0 ~ 1.0)
+        intensity: 변동 강도 (기본값: 0.1, 즉 ±10%)
         seed: 난수 생성 시드 (기본값: None)
 
     Returns:
         Dict[Metric, float]: 변동이 적용된 지표 상태
     """
-    import random  # 필요한 시점에 임포트
-
+    # 시드가 제공된 경우 설정
     if seed is not None:
         random.seed(seed)
 
+    # 결과 지표 초기화
     result = metrics.copy()
-    for metric in result:
-        # 현재 값의 ±intensity% 범위 내에서 무작위 변동
-        fluctuation = random.uniform(-intensity, intensity) * result[metric]
-        result[metric] = cap_metric_value(metric, result[metric] + fluctuation)
+
+    # 행복과 고통은 시소 관계를 유지해야 하므로 별도 처리
+    happiness_suffering_pair = {Metric.HAPPINESS, Metric.SUFFERING}
+
+    # 행복-고통 외 다른 지표에 무작위 변동 적용
+    for metric, value in metrics.items():
+        if metric not in happiness_suffering_pair:
+            # ±intensity 범위 내에서 무작위 변동 적용
+            fluctuation = 1.0 + (random.random() * 2 - 1) * intensity
+            result[metric] = cap_metric_value(metric, value * fluctuation)
+
+    # 행복-고통 시소 관계 유지하면서 변동 적용
+    if Metric.HAPPINESS in metrics:
+        happiness = metrics[Metric.HAPPINESS]
+        # 행복에만 변동 적용하고 고통은 시소 관계로 조정
+        fluctuation = 1.0 + (random.random() * 2 - 1) * intensity
+        new_happiness = cap_metric_value(Metric.HAPPINESS, happiness * fluctuation)
+        result[Metric.HAPPINESS] = new_happiness
+        result[Metric.SUFFERING] = 100 - new_happiness
 
     return result

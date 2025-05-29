@@ -11,7 +11,7 @@ Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈
 """
 
 from enum import Enum, auto
-from typing import Dict, Final, List, Tuple, Union
+from typing import Dict, Final, Tuple, Union
 
 
 # 무한대 값을 위한 타입 힌트 호환 상수
@@ -40,7 +40,7 @@ class ActionType(Enum):
     """
     플레이어가 선택할 수 있는 행동 유형
 
-    각 행동은 '정답 없음' 원칙에 따라 항상 득과 실을 동시에 가져옵니다.
+    각 행동은 noRightAnswer 원칙에 따라 항상 득과 실을 동시에 가져옵니다.
     """
 
     PRICE_CHANGE = auto()  # 가격 조정
@@ -85,7 +85,7 @@ METRIC_RANGES: Final[Dict[Metric, Tuple[int, Union[int, float], int]]] = {
 
 
 # 트레이드오프 관계 정의 (상승 시 하락하는 지표들)
-TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, List[Metric]]] = {
+TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, list[Metric]]] = {
     Metric.MONEY: [Metric.REPUTATION, Metric.HAPPINESS],
     Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],
     Metric.HAPPINESS: [Metric.SUFFERING],

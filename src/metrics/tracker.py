@@ -17,17 +17,20 @@
 - AdaptiveModifier: M-6에서 적응형 모델 구현 시 사용 예정
 """
 
-from collections import deque
-from datetime import datetime
-import json
 import os
-from typing import Dict, Any, Optional, List, Deque, Set, Union
+import json
+from datetime import datetime
+from collections import deque
+from typing import Dict, Any, Optional, List, Deque
 
+# schema.py에서 필요한 상수와 Enum 가져오기
 from schema import (
     Metric,
     METRIC_RANGES,
     cap_metric_value,
 )
+
+# 수정자 모듈 가져오기
 from src.metrics.modifiers import (
     MetricModifier,
     SimpleSeesawModifier,
@@ -161,14 +164,14 @@ class MetricsTracker:
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
 
-    def apply_cascade_effects(self, changed_metrics: Set[Metric]) -> None:
+    def apply_cascade_effects(self, changed_metrics: Any) -> None:
         """
         지표 변화의 연쇄 효과를 적용합니다.
 
         예: 평판↓ → 수요↓ → 자금↓
 
         Args:
-            changed_metrics: 변경된 지표 집합
+            changed_metrics: 변경된 지표 목록
         """
         cascade_updates = {}
 
@@ -392,17 +395,19 @@ class MetricsTracker:
         except (IOError, json.JSONDecodeError, KeyError):
             return False
 
-    def simulate_no_right_answer_decision(
-        self, decision: Dict[str, Union[float, str, bool]]
+    def noRightAnswer_simulate_decision(
+        self, decision: Dict[str, Any]
     ) -> Dict[Metric, float]:
         """
-        정답이 없는 의사결정을 시뮬레이션합니다.
+        플레이어 결정의 결과를 시뮬레이션하여 예상 지표 변화를 반환합니다.
+
+        이 함수는 '정답 없음' 원칙을 반영하여, 모든 결정에 장단점이 있음을 보여줍니다.
 
         Args:
-            decision: 의사결정 정보
+            decision: 플레이어의 결정 (행동 유형과 파라미터)
 
         Returns:
-            Dict[Metric, float]: 의사결정으로 인한 지표 변화
+            Dict[Metric, float]: 예상되는 지표 변화
         """
         # 이 함수는 향후 구현 예정
         # 현재는 빈 딕셔너리 반환
