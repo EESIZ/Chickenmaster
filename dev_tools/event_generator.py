@@ -55,7 +55,7 @@ class EventGenerator:
             "crisis_events": "치킨집 경영에 위기를 가져올 수 있는 부정적 이벤트를 생성해주세요. 식자재 가격 상승, 경쟁업체 등장, 위생 문제 등이 포함되어야 합니다.",
             "opportunity": "치킨집에 기회가 될 수 있는 긍정적 이벤트를 생성해주세요. 지역 축제, 유명인 방문, 신메뉴 개발 기회 등이 포함되어야 합니다.",
             "human_drama": "치킨집 주변 인물들과의 드라마틱한 상황을 담은 이벤트를 생성해주세요. 손님과의 갈등, 직원 간 관계, 가족 문제 등이 포함되어야 합니다.",
-            "chain_scenario": "여러 선택지가 연쇄적으로 이어지는 복합 시나리오를 생성해주세요. 초기 선택에 따라 다른 결과로 분기되는 구조여야 합니다."
+            "chain_scenario": "여러 선택지가 연쇄적으로 이어지는 복합 시나리오를 생성해주세요. 초기 선택에 따라 다른 결과로 분기되는 구조여야 합니다.",
         }
 
         # 기본 프롬프트
@@ -127,7 +127,12 @@ class EventGenerator:
         return prompt
 
     def generate_events(
-        self, category: str, n: int = 10, seed: Optional[int] = None, variants: bool = False, output_dir: str = "."
+        self,
+        category: str,
+        n: int = 10,
+        seed: Optional[int] = None,
+        variants: bool = False,
+        output_dir: str = ".",
     ) -> List[Dict[str, Any]]:
         """
         이벤트 생성
@@ -154,8 +159,10 @@ class EventGenerator:
             if self.client:
                 api_response = self._call_claude_api(prompt)
                 # 반환 구조 불일치 수정: 딕셔너리 응답에서 이벤트 리스트 추출
-                if isinstance(api_response, dict) and 'content' in api_response:
-                    parsed_events = self._parse_json_response(api_response['content'][0]['text'])
+                if isinstance(api_response, dict) and "content" in api_response:
+                    parsed_events = self._parse_json_response(
+                        api_response["content"][0]["text"]
+                    )
                     events_list = parsed_events if parsed_events else []
                 else:
                     events_list = api_response if isinstance(api_response, list) else []
@@ -189,9 +196,7 @@ class EventGenerator:
                 max_tokens=4000,
                 temperature=0.7,
                 system="당신은 게임 이벤트 생성 전문가입니다. 응답은 반드시 유효한 JSON 형식이어야 합니다. 설명이나 추가 텍스트 없이 JSON 배열만 반환하세요.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             # 응답 텍스트 추출
@@ -200,7 +205,7 @@ class EventGenerator:
 
             # JSON 파싱 (3단계 전략)
             events = self._parse_json_response(response_text)
-            
+
             if not events:
                 print("⚠️ 유효한 이벤트를 추출할 수 없습니다. 더미 데이터를 생성합니다.")
                 return []
@@ -224,7 +229,7 @@ class EventGenerator:
         # 1. JSON 코드 블록 추출 시도
         json_block_pattern = r"```(?:json)?\s*([\s\S]*?)\s*```"
         json_blocks = re.findall(json_block_pattern, response_text)
-        
+
         for block in json_blocks:
             try:
                 # 배열인 경우
@@ -239,26 +244,30 @@ class EventGenerator:
                         return data["events"]
             except json.JSONDecodeError:
                 continue
-        
+
         # 2. 전체 텍스트에서 JSON 배열 추출 시도
         try:
             # 전체 텍스트가 JSON 배열인 경우
-            if response_text.strip().startswith("[") and response_text.strip().endswith("]"):
+            if response_text.strip().startswith("[") and response_text.strip().endswith(
+                "]"
+            ):
                 data = json.loads(response_text)
                 if isinstance(data, list):
                     return data
             # 전체 텍스트가 JSON 객체인 경우
-            elif response_text.strip().startswith("{") and response_text.strip().endswith("}"):
+            elif response_text.strip().startswith(
+                "{"
+            ) and response_text.strip().endswith("}"):
                 data = json.loads(response_text)
                 if "events" in data and isinstance(data["events"], list):
                     return data["events"]
         except json.JSONDecodeError:
             pass
-        
+
         # 3. 개별 JSON 객체 추출 시도
         json_object_pattern = r"(\{[\s\S]*?\})"
         json_objects = re.findall(json_object_pattern, response_text)
-        
+
         events = []
         for obj in json_objects:
             try:
@@ -267,15 +276,17 @@ class EventGenerator:
                     events.append(data)
             except json.JSONDecodeError:
                 continue
-        
+
         if events:
             return events
-        
+
         # 모든 시도 실패
         print(f"⚠️ JSON 파싱 실패. 응답: {response_text[:100]}...")
         return []
 
-    def _generate_dummy_events(self, category: str, n: int, variants: bool) -> List[Dict[str, Any]]:
+    def _generate_dummy_events(
+        self, category: str, n: int, variants: bool
+    ) -> List[Dict[str, Any]]:
         """
         더미 이벤트 생성
 
@@ -289,22 +300,28 @@ class EventGenerator:
         """
         dummy_events = []
         event_types = ["RANDOM", "THRESHOLD", "SCHEDULED", "CASCADE"]
-        metrics = ["money", "reputation", "stress", "customer_satisfaction", "employee_morale"]
+        metrics = [
+            "money",
+            "reputation",
+            "stress",
+            "customer_satisfaction",
+            "employee_morale",
+        ]
         conditions = ["greater_than", "less_than", "equal"]
-        
+
         # 카테고리별 태그
         category_tags = {
             "daily_routine": ["일상", "배달", "단골", "알바생", "주방", "홀서빙"],
             "crisis_events": ["위기", "경쟁", "가격상승", "위생", "민원", "사고"],
             "opportunity": ["기회", "축제", "유명인", "신메뉴", "프로모션", "투자"],
             "human_drama": ["갈등", "관계", "가족", "직원", "손님", "감동"],
-            "chain_scenario": ["선택", "분기", "시나리오", "결과", "연쇄", "전략"]
+            "chain_scenario": ["선택", "분기", "시나리오", "결과", "연쇄", "전략"],
         }
-        
+
         for i in range(n):
             event_type = random.choice(event_types)
             event_id = f"{category}_{i+1:03d}"
-            
+
             # 기본 이벤트 구조
             event = {
                 "id": event_id,
@@ -315,11 +332,14 @@ class EventGenerator:
                 "text_ko": f"이것은 {category} 카테고리의 테스트 이벤트입니다. 한국 치킨집 문화를 반영한 다양한 상황과 선택지를 제공합니다.",
                 "text_en": f"This is a test event in the {category} category. It provides various situations and choices reflecting Korean chicken restaurant culture.",
                 "cooldown": random.randint(0, 30),
-                "tags": random.sample(category_tags.get(category, ["테스트"]), min(3, len(category_tags.get(category, ["테스트"])))),
+                "tags": random.sample(
+                    category_tags.get(category, ["테스트"]),
+                    min(3, len(category_tags.get(category, ["테스트"]))),
+                ),
                 "effects": [
                     {
                         "metric": random.choice(metrics),
-                        "formula": f"{'+' if random.random() > 0.5 else '-'}{random.randint(10, 500)}"
+                        "formula": f"{'+' if random.random() > 0.5 else '-'}{random.randint(10, 500)}",
                     }
                 ],
                 "choices": [
@@ -330,13 +350,14 @@ class EventGenerator:
                         "effects": [
                             {
                                 "metric": random.choice(metrics),
-                                "formula": f"{'+' if random.random() > 0.5 else '-'}{random.randint(10, 500)}"
+                                "formula": f"{'+' if random.random() > 0.5 else '-'}{random.randint(10, 500)}",
                             }
-                        ]
-                    } for j in range(random.randint(2, 4))
-                ]
+                        ],
+                    }
+                    for j in range(random.randint(2, 4))
+                ],
             }
-            
+
             # 이벤트 타입별 추가 필드
             if event_type == "RANDOM":
                 event["probability"] = round(random.uniform(0.1, 1.0), 2)
@@ -344,22 +365,22 @@ class EventGenerator:
                 event["trigger"] = {
                     "metric": random.choice(metrics),
                     "condition": random.choice(conditions),
-                    "value": random.randint(0, 1000)
+                    "value": random.randint(0, 1000),
                 }
                 if event_type == "CASCADE":
                     for choice in event["choices"]:
                         choice["next_event"] = f"{category}_{random.randint(1, n):03d}"
             elif event_type == "SCHEDULED":
                 event["schedule"] = random.randint(1, 30)
-            
+
             # A/B 변형 추가
             if variants and i % 2 == 0:
                 event["variant"] = "a"
             elif variants:
                 event["variant"] = "b"
-                
+
             dummy_events.append(event)
-        
+
         return dummy_events
 
     def save_events(self, events: List[Dict[str, Any]], output_dir: str) -> str:
@@ -375,19 +396,19 @@ class EventGenerator:
         """
         # 출력 디렉토리 생성
         os.makedirs(output_dir, exist_ok=True)
-        
+
         # 타임스탬프 생성
         timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-        
+
         # 파일 경로 생성
         file_path = os.path.join(output_dir, f"raw_events_{timestamp}.json")
-        
+
         # 이벤트 저장
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump({"events": events}, f, ensure_ascii=False, indent=2)
-            
+
         print(f"✅ 이벤트 {len(events)}개가 {file_path}에 저장되었습니다.")
-        
+
         return file_path
 
 
@@ -396,22 +417,20 @@ def main() -> int:
     parser.add_argument(
         "--category",
         type=str,
-        choices=["daily_routine", "crisis_events", "opportunity", "human_drama", "chain_scenario"],
+        choices=[
+            "daily_routine",
+            "crisis_events",
+            "opportunity",
+            "human_drama",
+            "chain_scenario",
+        ],
         default="daily_routine",
         help="이벤트 카테고리",
     )
-    parser.add_argument(
-        "--n", type=int, default=10, help="생성할 이벤트 수"
-    )
-    parser.add_argument(
-        "--seed", type=int, help="랜덤 시드"
-    )
-    parser.add_argument(
-        "--variants", action="store_true", help="A/B 변형 생성 여부"
-    )
-    parser.add_argument(
-        "--output", type=str, default=".", help="출력 디렉토리"
-    )
+    parser.add_argument("--n", type=int, default=10, help="생성할 이벤트 수")
+    parser.add_argument("--seed", type=int, help="랜덤 시드")
+    parser.add_argument("--variants", action="store_true", help="A/B 변형 생성 여부")
+    parser.add_argument("--output", type=str, default=".", help="출력 디렉토리")
 
     args = parser.parse_args()
 
@@ -421,7 +440,7 @@ def main() -> int:
         n=args.n,
         seed=args.seed,
         variants=args.variants,
-        output_dir=args.output
+        output_dir=args.output,
     )
 
     return 0
