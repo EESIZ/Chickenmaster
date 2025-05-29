@@ -92,7 +92,7 @@ class FormulaValidator(BaseValidator):
             try:
                 tree = ast.parse(effect.formula, mode="eval")
                 for node in ast.walk(tree):
-                    if isinstance(node, (ast.Call, ast.Attribute)):
+                    if isinstance(node, ast.Call | ast.Attribute):
                         result.is_valid = False
                         result.errors.append(
                             f"안전하지 않은 수식: {effect.formula} (함수 호출 또는 속성 접근 불가)"

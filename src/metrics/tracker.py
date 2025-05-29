@@ -405,7 +405,7 @@ class MetricsTracker:
         # 결정에 따른 지표 변화 계산
         for key, value in decision.items():
             if key == "price_change":
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     if value > 0:
                         simulated_metrics[Metric.REPUTATION] *= 0.9
                         simulated_metrics[Metric.MONEY] *= 1.1
