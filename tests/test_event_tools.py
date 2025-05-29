@@ -76,9 +76,7 @@ class TestEventConditionFixer(unittest.TestCase):
         fixer = EventConditionFixer(self.input_file, self.output_file)
 
         # 지원되지 않는 조건이 지원되는 조건으로 매핑되는지 확인
-        self.assertEqual(
-            fixer.CONDITION_MAPPING["greater_than_or_equal"], "greater_than"
-        )
+        self.assertEqual(fixer.CONDITION_MAPPING["greater_than_or_equal"], "greater_than")
         self.assertEqual(fixer.CONDITION_MAPPING["less_than_or_equal"], "less_than")
 
         # 지원되는 조건은 그대로 유지되는지 확인
@@ -115,9 +113,7 @@ class TestEventConditionFixer(unittest.TestCase):
             fixed_data = json.load(f)
 
         # 수정된 조건 확인
-        self.assertEqual(
-            fixed_data["events"][0]["trigger"]["condition"], "greater_than"
-        )
+        self.assertEqual(fixed_data["events"][0]["trigger"]["condition"], "greater_than")
         self.assertEqual(fixed_data["events"][1]["trigger"]["condition"], "less_than")
 
 
@@ -173,9 +169,7 @@ class TestEventBankIndexer(unittest.TestCase):
         metadata = indexer.load_metadata()
 
         # 이벤트 통합
-        updated_metadata = indexer.integrate_events(
-            self.test_events["events"], metadata
-        )
+        updated_metadata = indexer.integrate_events(self.test_events["events"], metadata)
 
         # 통합 결과 확인
         self.assertEqual(updated_metadata["total_events"], 2)
@@ -206,18 +200,12 @@ class TestEventBankIndexer(unittest.TestCase):
         updated_metadata = indexer.update_metrics(metadata, test_metrics)
 
         # 업데이트 결과 확인 (가중 평균 검증)
-        self.assertAlmostEqual(
-            updated_metadata["metrics"]["diversity_score"], 0.8 * 0.7, places=2
-        )
-        self.assertAlmostEqual(
-            updated_metadata["metrics"]["tradeoff_clarity"], 0.7 * 0.7, places=2
-        )
+        self.assertAlmostEqual(updated_metadata["metrics"]["diversity_score"], 0.8 * 0.7, places=2)
+        self.assertAlmostEqual(updated_metadata["metrics"]["tradeoff_clarity"], 0.7 * 0.7, places=2)
         self.assertAlmostEqual(
             updated_metadata["metrics"]["cultural_authenticity"], 0.9 * 0.7, places=2
         )
-        self.assertAlmostEqual(
-            updated_metadata["metrics"]["replayability"], 0.6 * 0.7, places=2
-        )
+        self.assertAlmostEqual(updated_metadata["metrics"]["replayability"], 0.6 * 0.7, places=2)
 
     def test_process_noRightAnswer(self) -> None:
         """전체 프로세스 테스트 - 정답이 없는 상황"""
@@ -243,14 +231,10 @@ class TestEventBankIndexer(unittest.TestCase):
 
         # 이벤트 파일 확인
         self.assertTrue(
-            os.path.exists(
-                os.path.join(self.output_dir, "daily_routine", "test_event_001.json")
-            )
+            os.path.exists(os.path.join(self.output_dir, "daily_routine", "test_event_001.json"))
         )
         self.assertTrue(
-            os.path.exists(
-                os.path.join(self.output_dir, "crisis_events", "test_event_002.json")
-            )
+            os.path.exists(os.path.join(self.output_dir, "crisis_events", "test_event_002.json"))
         )
 
         # 메타데이터 로드

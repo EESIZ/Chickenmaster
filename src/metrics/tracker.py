@@ -180,36 +180,22 @@ class MetricsTracker:
             reputation = self.metrics[Metric.REPUTATION]
             # 평판이 30 이하로 떨어지면 자금에 영향
             if reputation <= 30:
-                money_impact = -1000 * (
-                    1 - reputation / 30
-                )  # 평판이 낮을수록 더 큰 영향
-                cascade_updates[Metric.MONEY] = (
-                    self.metrics[Metric.MONEY] + money_impact
-                )
-                self.add_event(
-                    f"평판 하락으로 인한 매출 감소, 자금 {money_impact:.0f} 변동"
-                )
+                money_impact = -1000 * (1 - reputation / 30)  # 평판이 낮을수록 더 큰 영향
+                cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
+                self.add_event(f"평판 하락으로 인한 매출 감소, 자금 {money_impact:.0f} 변동")
             # 테스트를 위해 평판이 30보다 높아도 약간의 영향 추가
             else:
                 money_impact = -100  # 약간의 영향
-                cascade_updates[Metric.MONEY] = (
-                    self.metrics[Metric.MONEY] + money_impact
-                )
-                self.add_event(
-                    f"평판 변동으로 인한 경미한 매출 변화, 자금 {money_impact:.0f} 변동"
-                )
+                cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
+                self.add_event(f"평판 변동으로 인한 경미한 매출 변화, 자금 {money_impact:.0f} 변동")
 
         # 직원 피로도 변화에 따른 연쇄 효과
         if Metric.STAFF_FATIGUE in changed_metrics:
             fatigue = self.metrics[Metric.STAFF_FATIGUE]
             # 피로도가 70 이상이면 시설 상태에 영향
             if fatigue >= 70:
-                facility_impact = (
-                    -5 * (fatigue - 70) / 30
-                )  # 피로도가 높을수록 더 큰 영향
-                cascade_updates[Metric.FACILITY] = (
-                    self.metrics[Metric.FACILITY] + facility_impact
-                )
+                facility_impact = -5 * (fatigue - 70) / 30  # 피로도가 높을수록 더 큰 영향
+                cascade_updates[Metric.FACILITY] = self.metrics[Metric.FACILITY] + facility_impact
                 self.add_event(
                     f"직원 피로도 증가로 인한 시설 관리 소홀, 시설 상태 {facility_impact:.1f} 변동"
                 )
@@ -219,9 +205,7 @@ class MetricsTracker:
             facility = self.metrics[Metric.FACILITY]
             # 시설 상태가 40 이하면 평판에 영향
             if facility <= 40:
-                reputation_impact = -10 * (
-                    1 - facility / 40
-                )  # 시설 상태가 낮을수록 더 큰 영향
+                reputation_impact = -10 * (1 - facility / 40)  # 시설 상태가 낮을수록 더 큰 영향
                 cascade_updates[Metric.REPUTATION] = (
                     self.metrics[Metric.REPUTATION] + reputation_impact
                 )
@@ -284,9 +268,7 @@ class MetricsTracker:
         self.day = day
 
         # 불확실성 함수를 사용하여 변동 적용
-        self.metrics = uncertainty_apply_random_fluctuation(
-            self.metrics, intensity, seed
-        )
+        self.metrics = uncertainty_apply_random_fluctuation(self.metrics, intensity, seed)
 
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
@@ -306,9 +288,7 @@ class MetricsTracker:
             os.makedirs(self.snapshot_dir)
 
         # 스냅샷 파일명 생성 (YYMMDD_HHMMSS_ms 형식)
-        timestamp = datetime.now().strftime("%y%m%d_%H%M%S_%f")[
-            :19
-        ]  # 밀리초 포함하여 고유성 보장
+        timestamp = datetime.now().strftime("%y%m%d_%H%M%S_%f")[:19]  # 밀리초 포함하여 고유성 보장
         filename = f"metrics_snap_{timestamp}.json"
         filepath = os.path.join(self.snapshot_dir, filename)
 
@@ -356,9 +336,7 @@ class MetricsTracker:
                     os.remove(snapshot_files[i])
                     print(f"스냅샷 파일 삭제: {snapshot_files[i]}")  # 디버깅용 출력
                 except OSError as e:
-                    print(
-                        f"스냅샷 파일 삭제 실패: {snapshot_files[i]}, 오류: {e}"
-                    )  # 디버깅용 출력
+                    print(f"스냅샷 파일 삭제 실패: {snapshot_files[i]}, 오류: {e}")  # 디버깅용 출력
 
     def load_snapshot(self, filepath: str) -> bool:
         """

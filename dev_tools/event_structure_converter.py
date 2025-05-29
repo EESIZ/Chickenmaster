@@ -35,18 +35,14 @@ def convert_effects_structure(effects_dict: Dict[str, Any]) -> List[Dict[str, An
         for metric, value in effects_dict["immediate"].items():
             formula = f"value + {value}" if value >= 0 else f"value - {abs(value)}"
             message = f"{metric}이(가) {'증가' if value >= 0 else '감소'}했습니다."
-            result.append(
-                {"metric": metric.upper(), "formula": formula, "message": message}
-            )
+            result.append({"metric": metric.upper(), "formula": formula, "message": message})
 
     # delayed 효과 처리
     if "delayed" in effects_dict:
         for metric, value in effects_dict["delayed"].items():
             formula = f"value + {value}" if value >= 0 else f"value - {abs(value)}"
             message = f"{metric}이(가) {'증가' if value >= 0 else '감소'}했습니다."
-            result.append(
-                {"metric": metric.upper(), "formula": formula, "message": message}
-            )
+            result.append({"metric": metric.upper(), "formula": formula, "message": message})
 
     return result
 
@@ -56,11 +52,7 @@ def add_trigger_field(event: Dict[str, Any]) -> Dict[str, Any]:
     THRESHOLD 타입 이벤트에 trigger 필드 추가
     conditions 배열의 첫 번째 조건을 파싱하여 trigger 필드 생성
     """
-    if (
-        event.get("type") != "THRESHOLD"
-        or "conditions" not in event
-        or not event["conditions"]
-    ):
+    if event.get("type") != "THRESHOLD" or "conditions" not in event or not event["conditions"]:
         return event
 
     # 첫 번째 조건 파싱
@@ -74,9 +66,7 @@ def add_trigger_field(event: Dict[str, Any]) -> Dict[str, Any]:
         value = int(value)
     else:
         # 패턴 2: 불리언 비교 (예: "rush_hour == true")
-        match_boolean = re.match(
-            r"(\w+)\s*([=!]+)\s*(true|false)", condition, re.IGNORECASE
-        )
+        match_boolean = re.match(r"(\w+)\s*([=!]+)\s*(true|false)", condition, re.IGNORECASE)
         if match_boolean:
             metric, operator, value_str = match_boolean.groups()
             value = value_str.lower() == "true"

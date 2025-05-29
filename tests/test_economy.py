@@ -36,9 +36,7 @@ from src.metrics.tracker import MetricsTracker
 
 
 # 테스트 설정 파일 경로
-TEST_CONFIG_PATH = os.path.join(
-    os.path.dirname(__file__), "../data/economy_config.json"
-)
+TEST_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../data/economy_config.json")
 
 
 @pytest.fixture
@@ -99,29 +97,17 @@ def test_tradeoff_compute_demand_optimal_price(test_config: Dict[str, Any]) -> N
 
     # 검증
     expected_base_demand = config["base_demand"]
-    expected_reputation_effect = 1.0 + (
-        reputation / 100.0 * config["reputation_factor"]
-    )
+    expected_reputation_effect = 1.0 + (reputation / 100.0 * config["reputation_factor"])
     expected_demand = round(expected_base_demand * 1.0 * expected_reputation_effect)
 
-    assert (
-        demand == expected_demand
-    ), f"최적 가격({optimal_price})에서 수요가 예상값과 다릅니다"
+    assert demand == expected_demand, f"최적 가격({optimal_price})에서 수요가 예상값과 다릅니다"
 
     # 추가 검증: 최적 가격보다 높거나 낮은 가격에서는 수요가 감소해야 함
-    higher_price_demand = tradeoff_compute_demand(
-        optimal_price + 2000, reputation, config
-    )
-    lower_price_demand = tradeoff_compute_demand(
-        optimal_price - 2000, reputation, config
-    )
+    higher_price_demand = tradeoff_compute_demand(optimal_price + 2000, reputation, config)
+    lower_price_demand = tradeoff_compute_demand(optimal_price - 2000, reputation, config)
 
-    assert (
-        demand > higher_price_demand
-    ), "최적 가격보다 높은 가격에서 수요가 감소해야 합니다"
-    assert (
-        demand > lower_price_demand
-    ), "최적 가격보다 낮은 가격에서 수요가 감소해야 합니다"
+    assert demand > higher_price_demand, "최적 가격보다 높은 가격에서 수요가 감소해야 합니다"
+    assert demand > lower_price_demand, "최적 가격보다 낮은 가격에서 수요가 감소해야 합니다"
 
 
 def test_tradeoff_compute_demand_reputation_effect(test_config: Dict[str, Any]) -> None:
@@ -148,13 +134,9 @@ def test_tradeoff_compute_demand_reputation_effect(test_config: Dict[str, Any]) 
     expected_ratio = (1.0 + (high_reputation / 100.0 * reputation_factor)) / (
         1.0 + (low_reputation / 100.0 * reputation_factor)
     )
-    actual_ratio = (
-        high_rep_demand / low_rep_demand if low_rep_demand > 0 else float("inf")
-    )
+    actual_ratio = high_rep_demand / low_rep_demand if low_rep_demand > 0 else float("inf")
 
-    assert (
-        abs(actual_ratio - expected_ratio) < 0.1
-    ), "평판 효과가 설정값에 비례해야 합니다"
+    assert abs(actual_ratio - expected_ratio) < 0.1, "평판 효과가 설정값에 비례해야 합니다"
 
 
 def test_noRightAnswer_compute_profit_scenarios() -> None:
@@ -201,21 +183,15 @@ def test_uncertainty_adjust_inventory_edge_cases() -> None:
     불확실성 ≠ 불합리한 음수: 재고가 음수가 되지 않도록 보정되어야 합니다.
     """
     # 케이스 1: 정상 케이스 (판매량 < 재고)
-    normal_case_result = uncertainty_adjust_inventory(
-        units_sold=30, current_inventory=100
-    )
+    normal_case_result = uncertainty_adjust_inventory(units_sold=30, current_inventory=100)
     assert normal_case_result == 70, "정상 케이스에서 재고가 올바르게 계산되어야 합니다"
 
     # 케이스 2: 엣지 케이스 (판매량 = 재고)
-    edge_case_result = uncertainty_adjust_inventory(
-        units_sold=100, current_inventory=100
-    )
+    edge_case_result = uncertainty_adjust_inventory(units_sold=100, current_inventory=100)
     assert edge_case_result == 0, "재고를 모두 판매한 경우 재고는 0이 되어야 합니다"
 
     # 케이스 3: 엣지 케이스 (판매량 > 재고) - 음수 방지 검증
-    overflow_case_result = uncertainty_adjust_inventory(
-        units_sold=150, current_inventory=100
-    )
+    overflow_case_result = uncertainty_adjust_inventory(units_sold=150, current_inventory=100)
     assert (
         overflow_case_result == 0
     ), "판매량이 재고보다 많은 경우에도 재고는 음수가 되지 않아야 합니다"
@@ -272,18 +248,14 @@ def test_metrics_tracker_happiness_suffering_balance() -> None:
 
     # 검증: 고통 지표가 자동으로 조정되어야 함
     metrics = tracker.get_metrics()
-    assert (
-        metrics[Metric.SUFFERING] == 25
-    ), "행복이 75로 설정되면 고통은 25가 되어야 합니다"
+    assert metrics[Metric.SUFFERING] == 25, "행복이 75로 설정되면 고통은 25가 되어야 합니다"
 
     # 고통 지표 업데이트
     tracker.update_metric(Metric.SUFFERING, 60)
 
     # 검증: 행복 지표가 자동으로 조정되어야 함
     metrics = tracker.get_metrics()
-    assert (
-        metrics[Metric.HAPPINESS] == 40
-    ), "고통이 60으로 설정되면 행복은 40이 되어야 합니다"
+    assert metrics[Metric.HAPPINESS] == 40, "고통이 60으로 설정되면 행복은 40이 되어야 합니다"
 
     # 합계가 항상 100인지 확인
     assert (

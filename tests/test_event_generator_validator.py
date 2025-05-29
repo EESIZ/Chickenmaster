@@ -252,9 +252,7 @@ class TestEventGenerator(unittest.TestCase):
         generator = EventGenerator("test_api_key")
 
         # 이벤트 생성 (올바른 매개변수 사용)
-        events = generator.generate_events(
-            category="daily_routine", tags=["테스트"], count=1
-        )
+        events = generator.generate_events(category="daily_routine", tags=["테스트"], count=1)
 
         # 생성된 이벤트 확인
         self.assertIsInstance(events, list)
@@ -283,9 +281,7 @@ class TestEventGenerator(unittest.TestCase):
 
         for category in categories:
             # 올바른 매개변수 사용
-            prompt = generator.create_prompt(
-                category=category, tags=["테스트"], constraints={}
-            )
+            prompt = generator.create_prompt(category=category, tags=["테스트"], constraints={})
 
             # 프롬프트에 카테고리 정보가 포함되어 있는지 확인
             self.assertIn(category, prompt)

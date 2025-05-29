@@ -227,9 +227,7 @@ class Event:
 
         return False
 
-    def apply_effects(
-        self, current_metrics: Dict[Metric, float]
-    ) -> Dict[Metric, float]:
+    def apply_effects(self, current_metrics: Dict[Metric, float]) -> Dict[Metric, float]:
         """
         이벤트 효과를 적용합니다.
 
@@ -247,9 +245,7 @@ class Event:
 
         return result
 
-    def fire(
-        self, current_metrics: Dict[Metric, float], current_turn: int
-    ) -> Dict[Metric, float]:
+    def fire(self, current_metrics: Dict[Metric, float], current_turn: int) -> Dict[Metric, float]:
         """
         이벤트를 발생시키고 효과를 적용합니다.
 

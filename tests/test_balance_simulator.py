@@ -38,9 +38,7 @@ def setup_test_data():
         "name_en": "Test Event",
         "text": "이것은 테스트 이벤트입니다.",
         "text_en": "This is a test event.",
-        "effects": [
-            {"metric": "money", "formula": "100", "message": "돈이 증가했습니다."}
-        ],
+        "effects": [{"metric": "money", "formula": "100", "message": "돈이 증가했습니다."}],
         "choices": [
             {
                 "id": "choice_1",
@@ -93,9 +91,7 @@ def setup_test_data():
         "text": "이것은 연쇄 이벤트입니다.",
         "text_en": "This is a cascade event.",
         "trigger": {"metric": "happiness", "operator": "greater_than", "value": 60},
-        "effects": [
-            {"metric": "money", "formula": "50", "message": "돈이 증가했습니다."}
-        ],
+        "effects": [{"metric": "money", "formula": "50", "message": "돈이 증가했습니다."}],
         "choices": [
             {
                 "id": "cascade_choice_1",
@@ -130,14 +126,10 @@ def setup_test_data():
     }
 
     # 파일 저장
-    with open(
-        TEST_DATA_DIR / "daily_routine" / "test_event_1.json", "w", encoding="utf-8"
-    ) as f:
+    with open(TEST_DATA_DIR / "daily_routine" / "test_event_1.json", "w", encoding="utf-8") as f:
         json.dump(test_event, f, ensure_ascii=False, indent=2)
 
-    with open(
-        TEST_DATA_DIR / "daily_routine" / "cascade_event_1.json", "w", encoding="utf-8"
-    ) as f:
+    with open(TEST_DATA_DIR / "daily_routine" / "cascade_event_1.json", "w", encoding="utf-8") as f:
         json.dump(cascade_event, f, ensure_ascii=False, indent=2)
 
     with open(TEST_DATA_DIR / "metadata.json", "w", encoding="utf-8") as f:

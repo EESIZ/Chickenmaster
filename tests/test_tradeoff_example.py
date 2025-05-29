@@ -27,9 +27,7 @@ def test_price_decrease_increases_staff_fatigue() -> None:
     initial_staff_fatigue = 30
 
     # 트레이드오프 시뮬레이션 함수 (실제 구현 시 이 부분은 실제 모듈 함수 호출로 대체)
-    def tradeoff_simulate_price_change(
-        price_change: int, current_fatigue: int
-    ) -> float:
+    def tradeoff_simulate_price_change(price_change: int, current_fatigue: int) -> float:
         """가격 변경에 따른 트레이드오프 효과를 시뮬레이션"""
         # 가격이 내려가면(음수 변화) 피로도는 올라감(양수 변화)
         if price_change < 0:
@@ -44,9 +42,7 @@ def test_price_decrease_increases_staff_fatigue() -> None:
     price_decrease = -2000  # 20% 가격 인하
 
     # 트레이드오프 결과 계산
-    new_staff_fatigue = tradeoff_simulate_price_change(
-        price_decrease, initial_staff_fatigue
-    )
+    new_staff_fatigue = tradeoff_simulate_price_change(price_decrease, initial_staff_fatigue)
 
     # 검증: 가격을 내리면 직원 피로도가 올라가야 함
     assert (

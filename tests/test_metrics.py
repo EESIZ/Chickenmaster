@@ -159,9 +159,7 @@ def test_modifier_interface() -> None:
         assert hasattr(modifier, "apply"), f"{modifier.get_name()}에 apply 메서드 없음"
 
         # get_name 메서드 검증
-        assert hasattr(
-            modifier, "get_name"
-        ), f"{modifier.get_name()}에 get_name 메서드 없음"
+        assert hasattr(modifier, "get_name"), f"{modifier.get_name()}에 get_name 메서드 없음"
         assert isinstance(
             modifier.get_name(), str
         ), f"{modifier.get_name()}의 get_name 반환값이 문자열이 아님"
@@ -245,9 +243,7 @@ def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
 
     # 시설 상태에 영향이 있어야 함
     current_facility = tracker.get_metrics()[Metric.FACILITY]
-    assert (
-        current_facility < initial_facility
-    ), "직원 피로도 증가가 시설 상태에 영향을 주지 않음"
+    assert current_facility < initial_facility, "직원 피로도 증가가 시설 상태에 영향을 주지 않음"
 
     # 시설 상태 악화로 인한 연쇄 효과 검증
     initial_reputation = tracker.get_metrics()[Metric.REPUTATION]
@@ -255,9 +251,7 @@ def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
 
     # 평판에 영향이 있어야 함
     current_reputation = tracker.get_metrics()[Metric.REPUTATION]
-    assert (
-        current_reputation < initial_reputation
-    ), "시설 상태 악화가 평판에 영향을 주지 않음"
+    assert current_reputation < initial_reputation, "시설 상태 악화가 평판에 영향을 주지 않음"
 
 
 def test_uncertainty_factors() -> None:
@@ -277,21 +271,15 @@ def test_uncertainty_factors() -> None:
 
     # 시드를 사용한 불확실성 적용 (결과 재현 가능)
     seed = 42
-    result1 = uncertainty_apply_random_fluctuation(
-        initial_metrics, intensity=0.1, seed=seed
-    )
-    result2 = uncertainty_apply_random_fluctuation(
-        initial_metrics, intensity=0.1, seed=seed
-    )
+    result1 = uncertainty_apply_random_fluctuation(initial_metrics, intensity=0.1, seed=seed)
+    result2 = uncertainty_apply_random_fluctuation(initial_metrics, intensity=0.1, seed=seed)
 
     # 동일한 시드로 두 번 적용한 결과가 같아야 함
     for metric in initial_metrics:
         assert result1[metric] == result2[metric], f"{metric} 값이 동일한 시드에서 다름"
 
     # 다른 시드로 적용한 결과는 달라야 함
-    result3 = uncertainty_apply_random_fluctuation(
-        initial_metrics, intensity=0.1, seed=seed + 1
-    )
+    result3 = uncertainty_apply_random_fluctuation(initial_metrics, intensity=0.1, seed=seed + 1)
 
     # 적어도 하나의 지표는 값이 달라야 함
     different_values = False
@@ -382,9 +370,7 @@ def test_snapshot_creation_and_loading(
     assert "테스트 이벤트 2" in loaded_events, "이벤트 2가 로드되지 않음"
 
 
-def test_max_snapshots_limit(
-    test_metrics: Dict[Metric, float], temp_data_dir: str
-) -> None:
+def test_max_snapshots_limit(test_metrics: Dict[Metric, float], temp_data_dir: str) -> None:
     """
     최대 스냅샷 개수 제한이 올바르게 작동하는지 검증합니다.
     """
@@ -411,9 +397,7 @@ def test_max_snapshots_limit(
         if f.startswith("metrics_snap_") and f.endswith(".json")
     ]
 
-    assert (
-        len(snapshot_files) == 3
-    ), f"스냅샷 파일 수가 3이 아님 (실제: {len(snapshot_files)})"
+    assert len(snapshot_files) == 3, f"스냅샷 파일 수가 3이 아님 (실제: {len(snapshot_files)})"
 
     # 최근 3개의 스냅샷만 유지되어야 함 (파일 존재 여부만 확인)
     recent_snapshots = snapshot_paths[-3:]
@@ -436,30 +420,22 @@ def test_threshold_events(test_metrics: Dict[Metric, float]) -> None:
     # 자금 위기 임계값 테스트
     tracker.update_metric(Metric.MONEY, 900.0)
     events = tracker.check_threshold_events()
-    assert any(
-        "자금 위기" in event for event in events
-    ), "자금 위기 이벤트가 트리거되지 않음"
+    assert any("자금 위기" in event for event in events), "자금 위기 이벤트가 트리거되지 않음"
 
     # 평판 위기 임계값 테스트
     tracker.update_metric(Metric.REPUTATION, 15.0)
     events = tracker.check_threshold_events()
-    assert any(
-        "평판 위기" in event for event in events
-    ), "평판 위기 이벤트가 트리거되지 않음"
+    assert any("평판 위기" in event for event in events), "평판 위기 이벤트가 트리거되지 않음"
 
     # 시설 위기 임계값 테스트
     tracker.update_metric(Metric.FACILITY, 25.0)
     events = tracker.check_threshold_events()
-    assert any(
-        "시설 위기" in event for event in events
-    ), "시설 위기 이벤트가 트리거되지 않음"
+    assert any("시설 위기" in event for event in events), "시설 위기 이벤트가 트리거되지 않음"
 
     # 직원 위기 임계값 테스트
     tracker.update_metric(Metric.STAFF_FATIGUE, 85.0)
     events = tracker.check_threshold_events()
-    assert any(
-        "직원 위기" in event for event in events
-    ), "직원 위기 이벤트가 트리거되지 않음"
+    assert any("직원 위기" in event for event in events), "직원 위기 이벤트가 트리거되지 않음"
 
 
 def test_extreme_case_bankruptcy(test_metrics: Dict[Metric, float]) -> None:
@@ -601,9 +577,7 @@ def test_performance_10k_turns() -> None:
     elapsed_time = end_time - start_time
 
     # 5초 이내에 완료되어야 함
-    assert (
-        elapsed_time < 5.0
-    ), f"10,000턴 시뮬레이션이 5초를 초과함 (실제: {elapsed_time:.2f}초)"
+    assert elapsed_time < 5.0, f"10,000턴 시뮬레이션이 5초를 초과함 (실제: {elapsed_time:.2f}초)"
 
     # 행복-고통 시소 불변식 검증
     metrics = tracker.get_metrics()

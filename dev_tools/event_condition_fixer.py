@@ -63,9 +63,7 @@ class EventConditionFixer:
             print(f"❌ 파일 로드 오류: {str(e)}")
             return {"events": []}
 
-    def fix_trigger_conditions(
-        self, events: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def fix_trigger_conditions(self, events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         이벤트의 트리거 조건 수정
 
@@ -97,9 +95,7 @@ class EventConditionFixer:
                             if "condition" in cascade:
                                 old_condition = cascade["condition"]
                                 if old_condition in self.CONDITION_MAPPING:
-                                    cascade["condition"] = self.CONDITION_MAPPING[
-                                        old_condition
-                                    ]
+                                    cascade["condition"] = self.CONDITION_MAPPING[old_condition]
 
             fixed_events.append(fixed_event)
 

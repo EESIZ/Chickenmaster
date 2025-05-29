@@ -112,9 +112,7 @@ def game_event_system() -> GameEventSystem:
     )
 
 
-def test_event_application(
-    event_engine: EventEngine, sample_metrics: dict[Metric, float]
-) -> None:
+def test_event_application(event_engine: EventEngine, sample_metrics: dict[Metric, float]) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
     # 테스트용 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="-500")
@@ -135,9 +133,7 @@ def test_event_application(
     assert updated_metrics[Metric.MONEY] == sample_metrics[Metric.MONEY] - 500
 
 
-def test_threshold_trigger(
-    event_engine: EventEngine, sample_metrics: dict[Metric, float]
-) -> None:
+def test_threshold_trigger(event_engine: EventEngine, sample_metrics: dict[Metric, float]) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
     # 테스트용 임계값 이벤트 생성
     trigger = Trigger(
@@ -213,13 +209,9 @@ def test_cascade_chain(
     updated_metrics = event_engine.apply_effects()
 
     # 결과 검증
-    assert (
-        updated_metrics[Metric.REPUTATION] < sample_metrics[Metric.REPUTATION]
-    )  # 평판 하락
+    assert updated_metrics[Metric.REPUTATION] < sample_metrics[Metric.REPUTATION]  # 평판 하락
     assert updated_metrics[Metric.MONEY] < sample_metrics[Metric.MONEY]  # 자금 감소
-    assert (
-        updated_metrics[Metric.FACILITY] < sample_metrics[Metric.FACILITY]
-    )  # 시설 악화
+    assert updated_metrics[Metric.FACILITY] < sample_metrics[Metric.FACILITY]  # 시설 악화
     assert (
         updated_metrics[Metric.STAFF_FATIGUE] > sample_metrics[Metric.STAFF_FATIGUE]
     )  # 직원 피로도 증가
@@ -420,12 +412,7 @@ def test_uncertainty_factor() -> None:
 
     # 행복-고통 시소 불변식 확인
     assert (
-        abs(
-            updated_metrics[Metric.HAPPINESS]
-            + updated_metrics[Metric.SUFFERING]
-            - 100.0
-        )
-        < 0.001
+        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < 0.001
     )
 
 
@@ -445,10 +432,7 @@ def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) ->
     assert len(events) > 0  # 이벤트 발생 확인
 
     # 행복-고통 시소 불변식 확인
-    assert (
-        abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0)
-        < 0.001
-    )
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < 0.001
 
 
 def test_tradeoff_matrix_loading(game_event_system: GameEventSystem) -> None:
@@ -526,7 +510,4 @@ def test_noRightAnswer_simulate_scenario(game_event_system: GameEventSystem) -> 
 
     # 행복-고통 시소 불변식 확인
     final_metrics = result["final_metrics"]
-    assert (
-        abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0)
-        < 0.001
-    )
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < 0.001

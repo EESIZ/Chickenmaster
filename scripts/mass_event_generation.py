@@ -77,9 +77,7 @@ class MassEventGenerator:
 
         for attempt_num in range(max_attempts):
             try:
-                print(
-                    f"🔄 {category} 이벤트 생성 중... (시도 {attempt_num + 1}/{max_attempts})"
-                )
+                print(f"🔄 {category} 이벤트 생성 중... (시도 {attempt_num + 1}/{max_attempts})")
 
                 # 이벤트 생성
                 events = self.generator.generate_events(category, tags, count=1)
@@ -212,9 +210,7 @@ class MassEventGenerator:
 
         for category, info in plan.items():
             try:
-                events = self.generate_category_events(
-                    category, info["count"], info["tags"]
-                )
+                events = self.generate_category_events(category, info["count"], info["tags"])
                 results[category] = len(events)
 
             except KeyboardInterrupt:

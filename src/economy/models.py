@@ -66,9 +66,7 @@ def load_economy_config() -> Dict[str, Any]:
     }
 
 
-def tradeoff_compute_demand(
-    price: int, reputation: float, config: Dict[str, Any]
-) -> int:
+def tradeoff_compute_demand(price: int, reputation: float, config: Dict[str, Any]) -> int:
     """
     가격과 평판을 기반으로 수요를 계산합니다.
 
@@ -95,9 +93,7 @@ def tradeoff_compute_demand(
 
     # 가격 효과 계산 (최적 가격에서 멀어질수록 감소)
 
-    price_effect = 1.0 - (
-        price_sensitivity * abs(price - optimal_price) / (max_price - min_price)
-    )
+    price_effect = 1.0 - (price_sensitivity * abs(price - optimal_price) / (max_price - min_price))
 
     # 평판 효과 계산 (평판이 높을수록 증가)
 

@@ -139,9 +139,7 @@ def tradeoff_apply_price_change(
     return updated_metrics
 
 
-def apply_tradeoff(
-    decision: Dict[str, Any], metrics: Dict[Metric, float]
-) -> Dict[Metric, float]:
+def apply_tradeoff(decision: Dict[str, Any], metrics: Dict[Metric, float]) -> Dict[Metric, float]:
     """
     플레이어의 결정에 따른 트레이드오프 효과를 적용합니다.
 
@@ -166,9 +164,7 @@ def apply_tradeoff(
     return metrics.copy()
 
 
-def update_economy_state(
-    current_state: Dict[str, Any], decision: Dict[str, Any]
-) -> Dict[str, Any]:
+def update_economy_state(current_state: Dict[str, Any], decision: Dict[str, Any]) -> Dict[str, Any]:
     """
     현재 경제 상태와 플레이어의 결정을 기반으로 새로운 경제 상태를 계산합니다.
 

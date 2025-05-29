@@ -115,9 +115,7 @@ class GameEventSystem:
         """
         return self.metrics_tracker.get_events(count)
 
-    def get_metrics_history(
-        self, steps: Optional[int] = None
-    ) -> List[Dict[Metric, float]]:
+    def get_metrics_history(self, steps: Optional[int] = None) -> List[Dict[Metric, float]]:
         """
         지표 변화 히스토리를 가져옵니다.
 

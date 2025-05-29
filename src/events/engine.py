@@ -218,9 +218,7 @@ class EventEngine:
 
         return current_metrics
 
-    def _process_cascade_effects(
-        self, changed_metrics: Set[Metric], depth: int
-    ) -> None:
+    def _process_cascade_effects(self, changed_metrics: Set[Metric], depth: int) -> None:
         """
         지표 변화의 연쇄 효과를 처리합니다.
 
@@ -282,9 +280,7 @@ class EventEngine:
                             # 수식에 'value'가 포함되어 있는지 확인
                             if "value" in formula:
                                 # value를 사용하는 수식 (예: "value * 0.9")
-                                result = eval(
-                                    formula, {"__builtins__": {}}, {"value": value}
-                                )
+                                result = eval(formula, {"__builtins__": {}}, {"value": value})
                             else:
                                 # value를 사용하지 않는 수식 (예: "10")
                                 # 이 경우 변화량으로 처리

@@ -35,9 +35,7 @@ except ImportError:
             """이벤트 검증"""
             return True
 
-        def calculate_quality_metrics(
-            self, events: List[Dict[str, Any]]
-        ) -> Dict[str, float]:
+        def calculate_quality_metrics(self, events: List[Dict[str, Any]]) -> Dict[str, float]:
             """품질 메트릭 계산"""
             return {
                 "diversity_score": 0.0,
@@ -269,9 +267,7 @@ class EventBankManager:
                     print(f"   오류: {', '.join(self.validator.errors)}")
                     sys.stdout.flush()
 
-        print(
-            f"\n📊 검증 결과: 성공 {self.success_count}개, 실패 {self.failure_count}개"
-        )
+        print(f"\n📊 검증 결과: 성공 {self.success_count}개, 실패 {self.failure_count}개")
         sys.stdout.flush()
         return (self.success_count, self.failure_count)
 
@@ -340,9 +336,7 @@ class EventBankManager:
 
         return metrics
 
-    def run_balance_simulation(
-        self, turns: int = 100, seed: int = 42
-    ) -> dict[str, Any]:
+    def run_balance_simulation(self, turns: int = 100, seed: int = 42) -> dict[str, Any]:
         """
         밸런스 시뮬레이션 실행
 
@@ -516,9 +510,7 @@ class EventBankManager:
                 json.dump(output_data, f, ensure_ascii=False, indent=2)
             print(f"✅ {len(all_events)}개 이벤트가 {output_path}에 저장되었습니다.")
         else:
-            print(
-                f"🔍 [DRY RUN] {len(all_events)}개 이벤트가 {output_path}에 저장됩니다."
-            )
+            print(f"🔍 [DRY RUN] {len(all_events)}개 이벤트가 {output_path}에 저장됩니다.")
 
         sys.stdout.flush()
         return str(output_path)
@@ -584,24 +576,16 @@ def main() -> int:
     print("🚀 이벤트 뱅크 관리 도구 시작...")
     sys.stdout.flush()
 
-    parser = argparse.ArgumentParser(
-        description="치킨집 경영 게임 이벤트 뱅크 관리 도구"
-    )
+    parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 뱅크 관리 도구")
     parser.add_argument("--load", action="store_true", help="모든 이벤트 로드")
     parser.add_argument("--validate", action="store_true", help="모든 이벤트 검증")
     parser.add_argument("--metrics", action="store_true", help="품질 메트릭 계산")
-    parser.add_argument(
-        "--simulate", action="store_true", help="밸런스 시뮬레이션 실행"
-    )
-    parser.add_argument(
-        "--turns", type=int, default=100, help="시뮬레이션할 턴 수 (기본값: 100)"
-    )
+    parser.add_argument("--simulate", action="store_true", help="밸런스 시뮬레이션 실행")
+    parser.add_argument("--turns", type=int, default=100, help="시뮬레이션할 턴 수 (기본값: 100)")
     parser.add_argument("--export", type=str, help="이벤트 뱅크를 JSON 파일로 내보내기")
     parser.add_argument("--backup", action="store_true", help="이벤트 뱅크 백업")
     parser.add_argument("--stats", action="store_true", help="이벤트 뱅크 통계 출력")
-    parser.add_argument(
-        "--save-report", type=str, help="검증 결과를 지정된 경로에 저장"
-    )
+    parser.add_argument("--save-report", type=str, help="검증 결과를 지정된 경로에 저장")
     parser.add_argument(
         "--dry-run", action="store_true", help="실제 파일 변경 없이 시뮬레이션만 수행"
     )
@@ -644,9 +628,7 @@ def main() -> int:
     if args.validate:
         print("🔍 이벤트 검증 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         manager.validate_all_events()
 
@@ -660,9 +642,7 @@ def main() -> int:
     if args.metrics:
         print("📊 품질 메트릭 계산 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         manager.calculate_quality_metrics()
 
@@ -670,9 +650,7 @@ def main() -> int:
     if args.simulate:
         print("🔄 밸런스 시뮬레이션 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         manager.run_balance_simulation(turns=args.turns)
 
@@ -680,9 +658,7 @@ def main() -> int:
     if args.export:
         print("📤 이벤트 뱅크 내보내기 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         manager.export_bank_to_json(Path(args.export))
 
@@ -690,9 +666,7 @@ def main() -> int:
     if args.backup:
         print("💾 이벤트 뱅크 백업 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         manager.backup_event_bank()
 
@@ -700,9 +674,7 @@ def main() -> int:
     if args.stats:
         print("📊 이벤트 뱅크 통계 옵션 실행")
         sys.stdout.flush()
-        if not manager.events or all(
-            len(events) == 0 for events in manager.events.values()
-        ):
+        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
             manager.load_all_events()
         stats = manager.generate_bank_statistics()
 
@@ -731,9 +703,7 @@ def main() -> int:
 
         print("\n  상위 태그:")
         sys.stdout.flush()
-        sorted_tags = sorted(stats["tags"].items(), key=lambda x: x[1], reverse=True)[
-            :10
-        ]
+        sorted_tags = sorted(stats["tags"].items(), key=lambda x: x[1], reverse=True)[:10]
         for tag, count in sorted_tags:
             print(f"    - {tag}: {count}개")
             sys.stdout.flush()

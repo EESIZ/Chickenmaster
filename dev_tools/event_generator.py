@@ -36,9 +36,7 @@ class EventGenerator:
             api_key: Anthropic API 키
         """
         self.api_key = api_key
-        self.client = (
-            anthropic.Anthropic(api_key=api_key) if ANTHROPIC_AVAILABLE else None
-        )
+        self.client = anthropic.Anthropic(api_key=api_key) if ANTHROPIC_AVAILABLE else None
 
     def _call_claude_api(self, prompt: str) -> Dict[str, Any]:
         """
@@ -66,9 +64,7 @@ class EventGenerator:
             print(f"❌ API 호출 오류: {str(e)}")
             return {}
 
-    def create_prompt(
-        self, category: str, tags: List[str], constraints: Dict[str, Any]
-    ) -> str:
+    def create_prompt(self, category: str, tags: List[str], constraints: Dict[str, Any]) -> str:
         """
         이벤트 생성 프롬프트 생성
 

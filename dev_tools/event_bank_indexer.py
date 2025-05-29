@@ -135,21 +135,13 @@ class EventBankIndexer:
             else:
                 metadata[event_id].update(
                     {
-                        "category": event.get(
-                            "category", metadata[event_id]["category"]
-                        ),
+                        "category": event.get("category", metadata[event_id]["category"]),
                         "type": event.get("type", metadata[event_id]["type"]),
                         "name_ko": event.get("name_ko", metadata[event_id]["name_ko"]),
                         "name_en": event.get("name_en", metadata[event_id]["name_en"]),
-                        "tags": set(
-                            event.get("tags", list(metadata[event_id]["tags"]))
-                        ),
-                        "probability": event.get(
-                            "probability", metadata[event_id]["probability"]
-                        ),
-                        "cooldown": event.get(
-                            "cooldown", metadata[event_id]["cooldown"]
-                        ),
+                        "tags": set(event.get("tags", list(metadata[event_id]["tags"]))),
+                        "probability": event.get("probability", metadata[event_id]["probability"]),
+                        "cooldown": event.get("cooldown", metadata[event_id]["cooldown"]),
                         "trigger": event.get("trigger", metadata[event_id]["trigger"]),
                         "last_modified": current_time,
                     }

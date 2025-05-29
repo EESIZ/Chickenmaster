@@ -132,38 +132,27 @@ class EventSchemaValidator:
         try:
             event_category = EventCategory[event_type]
         except (KeyError, ValueError):
-            self.errors.append(
-                f"이벤트 {event_id}의 타입이 유효하지 않습니다: {event_type}"
-            )
+            self.errors.append(f"이벤트 {event_id}의 타입이 유효하지 않습니다: {event_type}")
             return
 
         # 타입별 필수 필드 검증
         if event_category == EventCategory.RANDOM:
             if "probability" not in event:
-                self.errors.append(
-                    f"RANDOM 이벤트 {event_id}에 probability가 없습니다."
-                )
+                self.errors.append(f"RANDOM 이벤트 {event_id}에 probability가 없습니다.")
             elif not (0 <= event["probability"] <= 1):
                 self.errors.append(
                     f"이벤트 {event_id}의 probability가 범위를 벗어났습니다: {event['probability']}"
                 )
 
-        elif (
-            event_category == EventCategory.THRESHOLD
-            or event_category == EventCategory.CASCADE
-        ):
+        elif event_category == EventCategory.THRESHOLD or event_category == EventCategory.CASCADE:
             if "trigger" not in event:
-                self.errors.append(
-                    f"{event_type} 이벤트 {event_id}에 trigger가 없습니다."
-                )
+                self.errors.append(f"{event_type} 이벤트 {event_id}에 trigger가 없습니다.")
             else:
                 self._validate_trigger(event["trigger"], event_id)
 
         elif event_category == EventCategory.SCHEDULED:
             if "schedule" not in event:
-                self.errors.append(
-                    f"SCHEDULED 이벤트 {event_id}에 schedule이 없습니다."
-                )
+                self.errors.append(f"SCHEDULED 이벤트 {event_id}에 schedule이 없습니다.")
             elif not isinstance(event["schedule"], int) or event["schedule"] <= 0:
                 self.errors.append(
                     f"이벤트 {event_id}의 schedule이 유효하지 않습니다: {event['schedule']}"
@@ -252,17 +241,13 @@ class EventSchemaValidator:
             try:
                 Metric[metric_name]
             except (KeyError, ValueError):
-                self.errors.append(
-                    f"효과 {effect_id}의 metric이 유효하지 않습니다: {metric_name}"
-                )
+                self.errors.append(f"효과 {effect_id}의 metric이 유효하지 않습니다: {metric_name}")
 
         # 수식 검증
         if "formula" in effect:
             formula = effect["formula"]
             if not isinstance(formula, str):
-                self.errors.append(
-                    f"효과 {effect_id}의 formula가 문자열이 아닙니다: {formula}"
-                )
+                self.errors.append(f"효과 {effect_id}의 formula가 문자열이 아닙니다: {formula}")
             else:
                 self._validate_formula(formula, effect_id)
 

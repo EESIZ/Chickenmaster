@@ -177,9 +177,7 @@ class EventValidator:
 
         elif event_type in [EventType.THRESHOLD, EventType.CASCADE]:
             if "trigger" not in event:
-                self.errors.append(
-                    f"{event_type.value} 이벤트에 trigger 필드 누락: {event_id}"
-                )
+                self.errors.append(f"{event_type.value} 이벤트에 trigger 필드 누락: {event_id}")
                 return False
             if not self._validate_trigger(event["trigger"]):
                 return False
@@ -287,9 +285,7 @@ class EventValidator:
             self.errors.append(f"포뮬러 구문 오류: {formula}")
             return False
 
-    def calculate_quality_metrics(
-        self, events: List[Dict[str, Any]]
-    ) -> Dict[str, float]:
+    def calculate_quality_metrics(self, events: List[Dict[str, Any]]) -> Dict[str, float]:
         """
         이벤트 품질 메트릭 계산
 
@@ -493,13 +489,9 @@ class EventValidator:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 검증기")
-    parser.add_argument(
-        "--file", type=str, help="검증할 단일 이벤트 파일 경로 (TOML 또는 JSON)"
-    )
+    parser.add_argument("--file", type=str, help="검증할 단일 이벤트 파일 경로 (TOML 또는 JSON)")
     parser.add_argument("--dir", type=str, help="검증할 이벤트 디렉토리 경로")
-    parser.add_argument(
-        "--metrics", action="store_true", help="품질 메트릭 계산 및 출력"
-    )
+    parser.add_argument("--metrics", action="store_true", help="품질 메트릭 계산 및 출력")
 
     args = parser.parse_args()
 
