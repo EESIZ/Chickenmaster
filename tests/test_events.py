@@ -480,7 +480,7 @@ def test_event_file_loading(game_event_system: GameEventSystem) -> None:
     assert len(event_engine.events) > 0
 
 
-def test_noRightAnswer_simulate_scenario(game_event_system: GameEventSystem) -> None:
+def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -> None:
     """시나리오 시뮬레이션을 테스트합니다."""
     # 테스트 시나리오 정의
     scenario = {

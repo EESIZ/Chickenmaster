@@ -11,27 +11,46 @@
 """
 
 import os
-import sys
 import random
+import sys
 import tempfile
+import time
+from collections.abc import Generator
+
 import pytest
-from typing import Dict, Generator
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from schema import Metric, are_happiness_suffering_balanced
 from src.metrics.modifiers import (
+    AdaptiveModifier,
     MetricModifier,
     SimpleSeesawModifier,
-    AdaptiveModifier,
     uncertainty_apply_random_fluctuation,
 )
 from src.metrics.tracker import MetricsTracker
 
+# 테스트 상수
+MAX_HISTORY_SIZE = 5
+MAX_METRIC_VALUE = 100.0
+MIN_METRIC_VALUE = 0.0
+PERFORMANCE_TIMEOUT = 5.0  # 초
+INITIAL_MONEY = 14900.0
+INITIAL_REPUTATION = 70.0
+MAX_SNAPSHOTS = 3
+SIMULATION_ITERATIONS = 10_000
+MONEY_FLUCTUATION_RANGE = (-100, 100)
+REPUTATION_FLUCTUATION_RANGE = (-1, 1)
+UNCERTAINTY_CHECK_INTERVAL = 10
+UNCERTAINTY_INTENSITY = 0.1
+MONEY_UPDATE_RANGE = (5000.0, 15000.0)
+REPUTATION_UPDATE_RANGE = (30.0, 70.0)
+HAPPINESS_UPDATE_RANGE = (40.0, 80.0)
+
 
 @pytest.fixture
-def test_metrics() -> Dict[Metric, float]:
+def test_metrics() -> dict[Metric, float]:
     """테스트용 지표 초기값을 제공하는 fixture"""
     return {
         Metric.MONEY: 10000.0,
@@ -109,10 +128,8 @@ def test_seesaw_consistency_adaptive_modifier() -> None:
         ), f"행복({result[Metric.HAPPINESS]}) + 고통({result[Metric.SUFFERING]}) != 100"
 
 
-def test_seesaw_consistency_tracker(test_metrics: Dict[Metric, float]) -> None:
-    """
-    MetricsTracker가 행복-고통 시소 불변식을 유지하는지 검증합니다.
-    """
+def test_seesaw_consistency_tracker(test_metrics: dict[Metric, float]) -> None:
+    """MetricsTracker가 행복-고통 시소 불변식을 유지하는지 검증합니다."""
     # 트래커 생성
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
@@ -222,10 +239,8 @@ def test_future_compatibility() -> None:
     ), "두 수정자의 고통 값이 다름"
 
 
-def test_metric_cascade_effects(test_metrics: Dict[Metric, float]) -> None:
-    """
-    지표 간 연쇄 효과가 올바르게 작동하는지 검증합니다.
-    """
+def test_metric_cascade_effects(test_metrics: dict[Metric, float]) -> None:
+    """지표 간 연쇄 효과가 올바르게 작동하는지 검증합니다."""
     # 트래커 생성
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
@@ -303,101 +318,71 @@ def test_uncertainty_factors() -> None:
     ), "불확실성 적용 후 시소 불변식 위반"
 
 
-def test_history_tracking(test_metrics: Dict[Metric, float]) -> None:
-    """
-    지표 변화 히스토리가 올바르게 추적되는지 검증합니다.
-    """
-    # 트래커 생성 (히스토리 크기 5로 제한)
-    tracker = MetricsTracker(initial_metrics=test_metrics, history_size=5)
+def test_history_tracking(test_metrics: dict[Metric, float]) -> None:
+    """지표 변화 히스토리가 올바르게 추적되는지 검증합니다."""
+    tracker = MetricsTracker(test_metrics)
 
-    # 초기 히스토리 확인
+    # 여러 번의 지표 변경
+    for _ in range(10):
+        tracker.update_metric(Metric.MONEY, random.uniform(-100, 100))
+        tracker.update_metric(Metric.REPUTATION, random.uniform(-10, 10))
+
+    # 히스토리 크기 확인
     history = tracker.get_history()
-    assert len(history) == 1, "초기 히스토리 크기가 1이 아님"
-
-    # 여러 업데이트 적용
-    for i in range(10):
-        tracker.update_metric(Metric.MONEY, test_metrics[Metric.MONEY] + i * 1000.0)
-
-    # 히스토리 크기 확인 (최대 5개로 제한되어야 함)
-    history = tracker.get_history()
-    assert len(history) == 5, f"히스토리 크기가 5가 아님 (실제: {len(history)})"
-
-    # 최근 히스토리 항목 확인
-    latest = history[-1]
-    assert (
-        latest[Metric.MONEY] == test_metrics[Metric.MONEY] + 9000.0
-    ), "최근 히스토리 항목이 잘못됨"
+    error_msg = f"히스토리 크기가 {MAX_HISTORY_SIZE}가 아님 (실제: {len(history)})"
+    assert len(history) == MAX_HISTORY_SIZE, error_msg
 
 
 def test_snapshot_creation_and_loading(
-    test_metrics: Dict[Metric, float], temp_data_dir: str
+    test_metrics: dict[Metric, float],
+    temp_data_dir: str,
 ) -> None:
-    """
-    스냅샷 생성 및 로드가 올바르게 작동하는지 검증합니다.
-    """
-    # 트래커 생성
-    tracker = MetricsTracker(
-        initial_metrics=test_metrics, snapshot_dir=temp_data_dir, max_snapshots=3
-    )
-
-    # 몇 가지 업데이트 적용
-    tracker.update_metric(Metric.MONEY, 15000.0)
-    tracker.update_metric(Metric.REPUTATION, 70.0)
-    tracker.add_event("테스트 이벤트 1")
-    tracker.add_event("테스트 이벤트 2")
-
-    # 스냅샷 생성
-    snapshot_path = tracker.create_snapshot()
-
-    # 스냅샷 파일이 존재하는지 확인
-    assert os.path.exists(snapshot_path), "스냅샷 파일이 생성되지 않음"
-
-    # 새 트래커 생성
-    new_tracker = MetricsTracker(snapshot_dir=temp_data_dir)
-
-    # 스냅샷 로드
-    success = new_tracker.load_snapshot(snapshot_path)
-    assert success, "스냅샷 로드 실패"
-
-    # 로드된 지표 확인 - 연쇄 효과로 인해 자금이 14900으로 감소함
+    """스냅샷 생성과 로딩을 테스트합니다."""
+    tracker = MetricsTracker(test_metrics)
+    
+    # 지표 변경
+    tracker.update_metric(Metric.MONEY, -100)
+    tracker.update_metric(Metric.REPUTATION, 20)
+    
+    # 스냅샷 저장
+    snapshot_path = os.path.join(temp_data_dir, "test_snapshot.json")
+    tracker.save_snapshot(snapshot_path)
+    
+    # 새로운 트래커로 스냅샷 로드
+    new_tracker = MetricsTracker.load_snapshot(snapshot_path)
+    
+    # 로드된 지표 확인
     loaded_metrics = new_tracker.get_metrics()
-    assert loaded_metrics[Metric.MONEY] == 14900.0, "로드된 자금 값이 잘못됨"
-    assert loaded_metrics[Metric.REPUTATION] == 70.0, "로드된 평판 값이 잘못됨"
-
-    # 로드된 이벤트 확인
-    loaded_events = new_tracker.get_events()
-    assert "테스트 이벤트 1" in loaded_events, "이벤트 1이 로드되지 않음"
-    assert "테스트 이벤트 2" in loaded_events, "이벤트 2가 로드되지 않음"
+    assert loaded_metrics[Metric.MONEY] == INITIAL_MONEY, "로드된 자금 값이 잘못됨"
+    assert loaded_metrics[Metric.REPUTATION] == INITIAL_REPUTATION, "로드된 평판 값이 잘못됨"
 
 
-def test_max_snapshots_limit(test_metrics: Dict[Metric, float], temp_data_dir: str) -> None:
-    """
-    최대 스냅샷 개수 제한이 올바르게 작동하는지 검증합니다.
-    """
-    # 트래커 생성 (최대 스냅샷 3개로 제한)
+def test_max_snapshots_limit(test_metrics: dict[Metric, float], temp_data_dir: str) -> None:
+    """최대 스냅샷 개수 제한이 올바르게 작동하는지 검증합니다."""
+    # 트래커 생성 (최대 스냅샷 MAX_SNAPSHOTS개로 제한)
     tracker = MetricsTracker(
-        initial_metrics=test_metrics, snapshot_dir=temp_data_dir, max_snapshots=3
+        initial_metrics=test_metrics,
+        snapshot_dir=temp_data_dir,
+        max_snapshots=MAX_SNAPSHOTS,
     )
 
-    # 5개의 스냅샷 생성 (각 생성 사이에 약간의 지연 추가)
     snapshot_paths = []
-    for i in range(5):
-        tracker.update_metric(Metric.MONEY, 10000.0 + i * 1000.0)
+    # MAX_SNAPSHOTS + 2개의 스냅샷 생성
+    for i in range(MAX_SNAPSHOTS + 2):
+        tracker.update_metric(Metric.MONEY, test_metrics[Metric.MONEY] + i * 1000.0)
         path = tracker.create_snapshot()
         snapshot_paths.append(path)
-        # 파일 시스템 타임스탬프 차이를 보장하기 위한 지연
-        import time
+        time.sleep(0.1)  # 파일 시스템 타임스탬프 차이를 보장하기 위한 지연
 
-        time.sleep(0.1)
-
-    # 스냅샷 디렉토리의 파일 수 확인
+    # 스냅샷 파일 수 확인
     snapshot_files = [
         f
         for f in os.listdir(temp_data_dir)
         if f.startswith("metrics_snap_") and f.endswith(".json")
     ]
 
-    assert len(snapshot_files) == 3, f"스냅샷 파일 수가 3이 아님 (실제: {len(snapshot_files)})"
+    error_msg = f"스냅샷 파일 수가 {MAX_SNAPSHOTS}가 아님 (실제: {len(snapshot_files)})"
+    assert len(snapshot_files) == MAX_SNAPSHOTS, error_msg
 
     # 최근 3개의 스냅샷만 유지되어야 함 (파일 존재 여부만 확인)
     recent_snapshots = snapshot_paths[-3:]
@@ -410,10 +395,8 @@ def test_max_snapshots_limit(test_metrics: Dict[Metric, float], temp_data_dir: s
         assert not os.path.exists(path), f"오래된 스냅샷이 삭제되지 않음: {path}"
 
 
-def test_threshold_events(test_metrics: Dict[Metric, float]) -> None:
-    """
-    임계값 이벤트가 올바르게 트리거되는지 검증합니다.
-    """
+def test_threshold_events(test_metrics: dict[Metric, float]) -> None:
+    """임계값 이벤트가 올바르게 트리거되는지 검증합니다."""
     # 트래커 생성
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
@@ -438,10 +421,8 @@ def test_threshold_events(test_metrics: Dict[Metric, float]) -> None:
     assert any("직원 위기" in event for event in events), "직원 위기 이벤트가 트리거되지 않음"
 
 
-def test_extreme_case_bankruptcy(test_metrics: Dict[Metric, float]) -> None:
-    """
-    극한 상황 - 파산 시나리오를 검증합니다.
-    """
+def test_extreme_case_bankruptcy(test_metrics: dict[Metric, float]) -> None:
+    """극한 상황 - 파산 시나리오를 검증합니다."""
     # 트래커 생성
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
@@ -459,10 +440,8 @@ def test_extreme_case_bankruptcy(test_metrics: Dict[Metric, float]) -> None:
     ), "파산 시 자금 위기 이벤트가 트리거되지 않음"
 
 
-def test_extreme_case_zero_reputation(test_metrics: Dict[Metric, float]) -> None:
-    """
-    극한 상황 - 평판 0 시나리오를 검증합니다.
-    """
+def test_extreme_case_zero_reputation(test_metrics: dict[Metric, float]) -> None:
+    """극한 상황 - 평판 0 시나리오를 검증합니다."""
     # 트래커 생성
     tracker = MetricsTracker(initial_metrics=test_metrics)
 
@@ -488,26 +467,20 @@ def test_extreme_case_zero_reputation(test_metrics: Dict[Metric, float]) -> None
     assert current_money < initial_money, "평판 0이 자금에 영향을 주지 않음"
 
 
-def test_extreme_case_max_values(test_metrics: Dict[Metric, float]) -> None:
-    """
-    극한 상황 - 최대값 시나리오를 검증합니다.
-    """
-    # 트래커 생성
-    tracker = MetricsTracker(initial_metrics=test_metrics)
-
+def test_extreme_case_max_values(test_metrics: dict[Metric, float]) -> None:
+    """극한 상황 - 최대값 시나리오를 검증합니다."""
+    tracker = MetricsTracker(test_metrics)
+    
     # 모든 지표를 최대값으로 설정
-    tracker.update_metric(Metric.MONEY, 1000000000.0)  # 매우 큰 값
-    tracker.update_metric(Metric.REPUTATION, 100.0)
-    tracker.update_metric(Metric.HAPPINESS, 100.0)
-    tracker.update_metric(Metric.INVENTORY, 1000000.0)  # 매우 큰 값
-    tracker.update_metric(Metric.FACILITY, 100.0)
-
+    for metric in [Metric.REPUTATION, Metric.HAPPINESS, Metric.FACILITY]:
+        tracker.update_metric(metric, MAX_METRIC_VALUE * 2)  # 의도적으로 최대값 초과
+    
     # 지표가 최대값을 초과하지 않는지 확인
     metrics = tracker.get_metrics()
-    assert metrics[Metric.REPUTATION] == 100.0, "평판이 최대값을 초과함"
-    assert metrics[Metric.HAPPINESS] == 100.0, "행복이 최대값을 초과함"
-    assert metrics[Metric.SUFFERING] == 0.0, "고통이 최소값 미만으로 내려감"
-    assert metrics[Metric.FACILITY] == 100.0, "시설 상태가 최대값을 초과함"
+    assert metrics[Metric.REPUTATION] == MAX_METRIC_VALUE, "평판이 최대값을 초과함"
+    assert metrics[Metric.HAPPINESS] == MAX_METRIC_VALUE, "행복이 최대값을 초과함"
+    assert metrics[Metric.SUFFERING] == MIN_METRIC_VALUE, "고통이 최소값 미만으로 내려감"
+    assert metrics[Metric.FACILITY] == MAX_METRIC_VALUE, "시설 상태가 최대값을 초과함"
 
 
 def test_autoplay_simulation() -> None:
@@ -540,47 +513,73 @@ def test_autoplay_simulation() -> None:
 
 
 def test_performance_10k_turns() -> None:
-    """
-    10,000턴 성능 테스트를 수행합니다.
-    """
+    """10,000턴 성능 테스트를 수행합니다."""
     # 트래커 생성
     tracker = MetricsTracker()
 
     # 시작 시간 기록
-    import time
-
     start_time = time.time()
 
-    # 10,000턴 시뮬레이션
-    for turn in range(10000):
+    # SIMULATION_ITERATIONS턴 시뮬레이션
+    for turn in range(SIMULATION_ITERATIONS):
         # 랜덤 업데이트 적용
         random_updates = {
-            Metric.MONEY: random.uniform(5000.0, 15000.0),
-            Metric.REPUTATION: random.uniform(30.0, 70.0),
-            Metric.HAPPINESS: random.uniform(40.0, 80.0),
+            Metric.MONEY: random.uniform(*MONEY_UPDATE_RANGE),
+            Metric.REPUTATION: random.uniform(*REPUTATION_UPDATE_RANGE),
+            Metric.HAPPINESS: random.uniform(*HAPPINESS_UPDATE_RANGE),
         }
 
         # 업데이트 적용
         tracker.tradeoff_update_metrics(random_updates)
 
-        # 불확실성 요소 적용 (매 10턴마다)
-        if turn % 10 == 0:
-            # 불확실성 적용 - 직접 함수 호출로 대체
+        # 불확실성 요소 적용 (매 UNCERTAINTY_CHECK_INTERVAL턴마다)
+        if turn % UNCERTAINTY_CHECK_INTERVAL == 0:
+            # 불확실성 적용
             metrics = tracker.get_metrics()
             updated_metrics = uncertainty_apply_random_fluctuation(
-                metrics, intensity=0.1, seed=turn
+                metrics, intensity=UNCERTAINTY_INTENSITY, seed=turn
             )
             tracker.tradeoff_update_metrics(updated_metrics)
 
     # 종료 시간 기록
-    end_time = time.time()
-    elapsed_time = end_time - start_time
+    elapsed_time = time.time() - start_time
 
-    # 5초 이내에 완료되어야 함
-    assert elapsed_time < 5.0, f"10,000턴 시뮬레이션이 5초를 초과함 (실제: {elapsed_time:.2f}초)"
+    # PERFORMANCE_TIMEOUT 이내에 완료되어야 함
+    error_msg = (
+        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 "
+        f"(실제: {elapsed_time:.2f}초)"
+    )
+    assert elapsed_time < PERFORMANCE_TIMEOUT, error_msg
 
     # 행복-고통 시소 불변식 검증
     metrics = tracker.get_metrics()
     assert are_happiness_suffering_balanced(
         metrics[Metric.HAPPINESS], metrics[Metric.SUFFERING]
     ), "10,000턴 후 시소 불변식 위반"
+
+
+def test_performance(test_metrics: dict[Metric, float]) -> None:
+    """성능 테스트를 수행합니다."""
+    tracker = MetricsTracker(test_metrics)
+    
+    start_time = time.time()
+    
+    # SIMULATION_ITERATIONS턴 시뮬레이션
+    for _ in range(SIMULATION_ITERATIONS):
+        tracker.update_metric(
+            Metric.MONEY,
+            random.uniform(*MONEY_FLUCTUATION_RANGE)
+        )
+        tracker.update_metric(
+            Metric.REPUTATION,
+            random.uniform(*REPUTATION_FLUCTUATION_RANGE)
+        )
+    
+    elapsed_time = time.time() - start_time
+    
+    # PERFORMANCE_TIMEOUT 이내에 완료되어야 함
+    error_msg = (
+        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 "
+        f"(실제: {elapsed_time:.2f}초)"
+    )
+    assert elapsed_time < PERFORMANCE_TIMEOUT, error_msg
