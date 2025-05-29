@@ -14,18 +14,17 @@
 
 import json
 import os
-from typing import Dict, Any, cast
+from typing import Any, cast
 
 # schema.py에서 필요한 상수와 Enum 가져오기
-
 from schema import (
-    Metric,  # noqa: F401 - 향후 확장을 위해 유지
     METRIC_RANGES,  # noqa: F401 - 향후 확장을 위해 유지
+    Metric,  # noqa: F401 - 향후 확장을 위해 유지
     cap_metric_value,  # noqa: F401 - 향후 확장을 위해 유지
 )
 
 
-def load_economy_config() -> Dict[str, Any]:
+def load_economy_config() -> dict[str, Any]:
     """
     경제 설정 파일을 로드합니다.
 
@@ -39,8 +38,8 @@ def load_economy_config() -> Dict[str, Any]:
     )
 
     if os.path.exists(config_path):
-        with open(config_path, "r", encoding="utf-8") as f:
-            return cast(Dict[str, Any], json.load(f))
+        with open(config_path, encoding="utf-8") as f:
+            return cast(dict[str, Any], json.load(f))
     # 기본 설정 (파일이 없을 경우)
 
     return {
@@ -66,7 +65,7 @@ def load_economy_config() -> Dict[str, Any]:
     }
 
 
-def tradeoff_compute_demand(price: int, reputation: float, config: Dict[str, Any]) -> int:
+def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any]) -> int:
     """
     가격과 평판을 기반으로 수요를 계산합니다.
 

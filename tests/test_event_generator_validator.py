@@ -8,18 +8,18 @@
 
 import json
 import os
-import unittest
-import tempfile
 import shutil
-from unittest.mock import patch
 import sys
+import tempfile
+import unittest
 from typing import Any
+from unittest.mock import patch
 
 # 프로젝트 루트 디렉토리를 Python 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from dev_tools.event_validator import EventValidator
 from dev_tools.event_generator import EventGenerator
+from dev_tools.event_validator import EventValidator
 
 
 class TestEventValidator(unittest.TestCase):
@@ -314,7 +314,7 @@ class TestEventGenerator(unittest.TestCase):
         self.assertTrue(os.path.exists(output_file))
 
         # 저장된 내용 확인
-        with open(output_file, "r", encoding="utf-8") as f:
+        with open(output_file, encoding="utf-8") as f:
             data = json.load(f)
 
         self.assertEqual(len(data["events"]), 1)
@@ -366,8 +366,8 @@ class TestIntegrationPipeline(unittest.TestCase):
 
     def test_end_to_end_pipeline_tradeoff(self) -> None:
         """엔드투엔드 파이프라인 - 트레이드오프 테스트"""
-        from dev_tools.event_condition_fixer import EventConditionFixer
         from dev_tools.event_bank_indexer import EventBankIndexer
+        from dev_tools.event_condition_fixer import EventConditionFixer
 
         # 1. 트리거 조건 수정 (검증 단계 건너뜀)
         fixed_file = os.path.join(self.temp_dir, "fixed_events.json")
@@ -385,7 +385,7 @@ class TestIntegrationPipeline(unittest.TestCase):
         metadata_file = os.path.join(self.events_dir, "metadata.json")
         self.assertTrue(os.path.exists(metadata_file))
 
-        with open(metadata_file, "r", encoding="utf-8") as f:
+        with open(metadata_file, encoding="utf-8") as f:
             metadata = json.load(f)
 
         self.assertEqual(metadata["total_events"], 1)

@@ -1,0 +1,17 @@
+# 코드 품질 도구
+black==23.12.1
+ruff==0.1.11
+mypy==1.8.0
+pre-commit==3.6.0
+pytest==7.4.3
+pytest-cov==4.1.0
+isort==5.13.2
+
+# 핵심 의존성
+pydantic>=2.5.0
+fuzzywuzzy[speedup]>=0.18.0
+pandas>=2.1.0
+jinja2>=3.1.0
+
+# 타입 지원
+types-all

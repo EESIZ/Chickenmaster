@@ -18,7 +18,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from schema import Metric, cap_metric_value
 from src.economy.engine import (
     no_right_answer_compute_profit,
-    tradeoff_apply_price_change,
     uncertainty_adjust_inventory,
 )
 from src.economy.models import tradeoff_compute_demand

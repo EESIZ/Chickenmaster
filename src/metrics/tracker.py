@@ -17,16 +17,15 @@
 - AdaptiveModifier: M-6에서 적응형 모델 구현 시 사용 예정
 """
 
-import os
 import json
-from datetime import datetime
+import os
 from collections import deque
-from typing import Dict, Optional, List, Deque, Set, Union
+from datetime import datetime
 
 # schema.py에서 필요한 상수와 Enum 가져오기
 from schema import (
-    Metric,
     METRIC_RANGES,
+    Metric,
     cap_metric_value,
 )
 
@@ -37,6 +36,17 @@ from src.metrics.modifiers import (
     uncertainty_apply_random_fluctuation,
 )
 
+# 상수
+REPUTATION_THRESHOLD_LOW = 20
+REPUTATION_THRESHOLD_HIGH = 80
+FACILITY_THRESHOLD_LOW = 30
+STAFF_FATIGUE_THRESHOLD_HIGH = 80
+MONEY_THRESHOLD_LOW = 1000
+HAPPINESS_SUFFERING_SUM = 100.0
+FATIGUE_IMPACT_FACTOR = 30
+REPUTATION_IMPACT_FACTOR = 30
+FACILITY_IMPACT_FACTOR = 40
+MONEY_IMPACT_FACTOR = 1000
 
 class MetricsTracker:
     """
@@ -48,12 +58,12 @@ class MetricsTracker:
 
     def __init__(
         self,
-        initial_metrics: Optional[Dict[Metric, float]] = None,
-        modifier: Optional[MetricModifier] = None,
+        initial_metrics: dict[Metric, float] | None = None,
+        modifier: MetricModifier | None = None,
         history_size: int = 100,
         snapshot_dir: str = "data",
-        max_snapshots: int = 30,
-    ):
+        max_snapshots: int = 5,
+    ) -> None:
         """
         MetricsTracker 초기화
 
@@ -62,18 +72,18 @@ class MetricsTracker:
             modifier: 지표 수정자 (기본값: None, 이 경우 SimpleSeesawModifier 사용)
             history_size: 히스토리 저장 크기 (기본값: 100)
             snapshot_dir: 스냅샷 저장 디렉토리 (기본값: "data")
-            max_snapshots: 최대 스냅샷 파일 수 (기본값: 30)
+            max_snapshots: 최대 스냅샷 파일 수 (기본값: 5)
         """
         self.metrics = {}
-        self.history: Deque[Dict[Metric, float]] = deque(maxlen=history_size)
-        self.events: Deque[str] = deque(maxlen=history_size)
+        self.history: deque[dict[Metric, float]] = deque(maxlen=history_size)
+        self.events: deque[str] = deque(maxlen=history_size)
         self.modifier = modifier or SimpleSeesawModifier()
         self.snapshot_dir = snapshot_dir
         self.max_snapshots = max_snapshots
         self.day = 0
 
         # 초기 지표 설정
-        for metric, (min_val, max_val, default_val) in METRIC_RANGES.items():
+        for metric, (_min_val, _max_val, default_val) in METRIC_RANGES.items():
             if initial_metrics and metric in initial_metrics:
                 self.metrics[metric] = cap_metric_value(metric, initial_metrics[metric])
             else:
@@ -82,16 +92,16 @@ class MetricsTracker:
         # 초기 상태를 히스토리에 추가
         self.history.append(self.metrics.copy())
 
-    def get_metrics(self) -> Dict[Metric, float]:
+    def get_metrics(self) -> dict[Metric, float]:
         """
         현재 지표 상태를 반환합니다.
 
         Returns:
-            Dict[Metric, float]: 현재 지표 상태
+            dict[Metric, float]: 현재 지표 상태
         """
         return self.metrics.copy()
 
-    def get_history(self, steps: Optional[int] = None) -> List[Dict[Metric, float]]:
+    def get_history(self, steps: int | None = None) -> list[dict[Metric, float]]:
         """
         지표 변화 히스토리를 반환합니다.
 
@@ -105,7 +115,7 @@ class MetricsTracker:
             return list(self.history)
         return list(self.history)[-min(steps, len(self.history)) :]
 
-    def get_events(self, count: Optional[int] = None) -> List[str]:
+    def get_events(self, count: int | None = None) -> list[str]:
         """
         최근 이벤트 메시지를 반환합니다.
 
@@ -119,18 +129,18 @@ class MetricsTracker:
             return list(self.events)
         return list(self.events)[-min(count, len(self.events)) :]
 
-    def add_event(self, event: str) -> None:
+    def add_event(self, message: str) -> None:
         """
         이벤트 메시지를 추가합니다.
 
         Args:
-            event: 이벤트 메시지
+            message: 이벤트 메시지
         """
-        self.events.append(event)
+        self.events.append(message)
 
     def update_metric(self, metric: Metric, value: float) -> None:
         """
-        단일 지표를 업데이트합니다.
+        단일 지표를 업데이트하고 연쇄 효과를 적용합니다.
 
         불확실성 ≠ 불합리한 음수: 불확실성은 게임의 핵심이지만,
         물리적으로 불가능한 음수 재고나 음수 자금은 허용하지 않습니다.
@@ -139,8 +149,10 @@ class MetricsTracker:
             metric: 업데이트할 지표
             value: 새 지표 값
         """
-        updates = {metric: value}
-        self.metrics = self.modifier.apply(self.metrics, updates)
+        # 지표 업데이트
+        self.metrics = self.modifier.apply(
+            self.metrics, {metric: cap_metric_value(metric, value)}
+        )
 
         # 연쇄 효과 적용
         self.apply_cascade_effects({metric})
@@ -148,14 +160,14 @@ class MetricsTracker:
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
 
-    def tradeoff_update_metrics(self, updates: Dict[Metric, float]) -> None:
+    def tradeoff_update_metrics(self, updates: dict[Metric, float]) -> None:
         """
         여러 지표를 동시에 업데이트하고 트레이드오프 관계를 적용합니다.
 
         Args:
             updates: 업데이트할 지표와 값의 딕셔너리
         """
-        # 수정자를 통해 업데이트 적용
+        # 지표 업데이트
         self.metrics = self.modifier.apply(self.metrics, updates)
 
         # 연쇄 효과 적용
@@ -164,7 +176,7 @@ class MetricsTracker:
         # 히스토리에 현재 상태 추가
         self.history.append(self.metrics.copy())
 
-    def apply_cascade_effects(self, changed_metrics: Set[Metric]) -> None:
+    def apply_cascade_effects(self, changed_metrics: set[Metric]) -> None:
         """
         지표 변화의 연쇄 효과를 적용합니다.
 
@@ -175,12 +187,12 @@ class MetricsTracker:
         """
         cascade_updates = {}
 
-        # 평판 변화에 따른 연쇄 효과
+        # 평판 변화의 연쇄 효과
         if Metric.REPUTATION in changed_metrics:
             reputation = self.metrics[Metric.REPUTATION]
-            # 평판이 30 이하로 떨어지면 자금에 영향
-            if reputation <= 30:
-                money_impact = -1000 * (1 - reputation / 30)  # 평판이 낮을수록 더 큰 영향
+            # 평판이 REPUTATION_THRESHOLD_LOW 이하로 떨어지면 자금에 영향
+            if reputation <= REPUTATION_THRESHOLD_LOW:
+                money_impact = -MONEY_IMPACT_FACTOR * (1 - reputation / REPUTATION_IMPACT_FACTOR)
                 cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
                 self.add_event(f"평판 하락으로 인한 매출 감소, 자금 {money_impact:.0f} 변동")
             # 테스트를 위해 평판이 30보다 높아도 약간의 영향 추가
@@ -189,23 +201,23 @@ class MetricsTracker:
                 cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
                 self.add_event(f"평판 변동으로 인한 경미한 매출 변화, 자금 {money_impact:.0f} 변동")
 
-        # 직원 피로도 변화에 따른 연쇄 효과
+        # 직원 피로도 변화의 연쇄 효과
         if Metric.STAFF_FATIGUE in changed_metrics:
             fatigue = self.metrics[Metric.STAFF_FATIGUE]
-            # 피로도가 70 이상이면 시설 상태에 영향
-            if fatigue >= 70:
-                facility_impact = -5 * (fatigue - 70) / 30  # 피로도가 높을수록 더 큰 영향
+            # 피로도가 STAFF_FATIGUE_THRESHOLD_HIGH 이상이면 시설 상태에 영향
+            if fatigue >= STAFF_FATIGUE_THRESHOLD_HIGH:
+                facility_impact = -5 * (fatigue - STAFF_FATIGUE_THRESHOLD_HIGH) / FATIGUE_IMPACT_FACTOR
                 cascade_updates[Metric.FACILITY] = self.metrics[Metric.FACILITY] + facility_impact
                 self.add_event(
                     f"직원 피로도 증가로 인한 시설 관리 소홀, 시설 상태 {facility_impact:.1f} 변동"
                 )
 
-        # 시설 상태 변화에 따른 연쇄 효과
+        # 시설 상태 변화의 연쇄 효과
         if Metric.FACILITY in changed_metrics:
             facility = self.metrics[Metric.FACILITY]
-            # 시설 상태가 40 이하면 평판에 영향
-            if facility <= 40:
-                reputation_impact = -10 * (1 - facility / 40)  # 시설 상태가 낮을수록 더 큰 영향
+            # 시설 상태가 FACILITY_THRESHOLD_LOW 이하면 평판에 영향
+            if facility <= FACILITY_THRESHOLD_LOW:
+                reputation_impact = -10 * (1 - facility / FACILITY_IMPACT_FACTOR)
                 cascade_updates[Metric.REPUTATION] = (
                     self.metrics[Metric.REPUTATION] + reputation_impact
                 )
@@ -217,7 +229,7 @@ class MetricsTracker:
         if cascade_updates:
             self.metrics = self.modifier.apply(self.metrics, cascade_updates)
 
-    def check_threshold_events(self) -> List[str]:
+    def check_threshold_events(self) -> list[str]:
         """
         임계값 기반 이벤트를 확인하고 트리거합니다.
 
@@ -228,24 +240,24 @@ class MetricsTracker:
 
         # 자금 임계값 이벤트
         money = self.metrics[Metric.MONEY]
-        if money < 1000:
+        if money < MONEY_THRESHOLD_LOW:
             triggered_events.append("자금 위기: 1,000 미만")
 
         # 평판 임계값 이벤트
         reputation = self.metrics[Metric.REPUTATION]
-        if reputation < 20:
+        if reputation < REPUTATION_THRESHOLD_LOW:
             triggered_events.append("평판 위기: 20 미만")
-        elif reputation > 80:
+        elif reputation > REPUTATION_THRESHOLD_HIGH:
             triggered_events.append("평판 호황: 80 초과")
 
         # 시설 임계값 이벤트
         facility = self.metrics[Metric.FACILITY]
-        if facility < 30:
+        if facility < FACILITY_THRESHOLD_LOW:
             triggered_events.append("시설 위기: 30 미만, 위생 단속 위험")
 
         # 직원 피로도 임계값 이벤트
         fatigue = self.metrics[Metric.STAFF_FATIGUE]
-        if fatigue > 80:
+        if fatigue > STAFF_FATIGUE_THRESHOLD_HIGH:
             triggered_events.append("직원 위기: 피로도 80 초과, 이직 위험")
 
         # 이벤트 메시지 추가
@@ -255,7 +267,7 @@ class MetricsTracker:
         return triggered_events
 
     def uncertainty_apply_random_fluctuation(
-        self, day: int, intensity: float = 0.1, seed: Optional[int] = None
+        self, day: int, intensity: float = 0.1, seed: int | None = None
     ) -> None:
         """
         불확실성 요소를 반영하여 지표에 무작위 변동을 적용합니다.
@@ -349,7 +361,7 @@ class MetricsTracker:
             bool: 로드 성공 여부
         """
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 snapshot_data = json.load(f)
 
             # 지표 복원
@@ -370,12 +382,12 @@ class MetricsTracker:
             self.history.append(self.metrics.copy())
 
             return True
-        except (IOError, json.JSONDecodeError, KeyError):
+        except (OSError, json.JSONDecodeError, KeyError):
             return False
 
     def simulate_no_right_answer_decision(
-        self, decision: Dict[str, Union[float, str, bool]]
-    ) -> Dict[Metric, float]:
+        self, decision: dict[str, float | str | bool]
+    ) -> dict[Metric, float]:
         """
         플레이어 결정의 결과를 시뮬레이션하여 예상 지표 변화를 반환합니다.
 
@@ -385,8 +397,20 @@ class MetricsTracker:
             decision: 플레이어의 결정 (행동 유형과 파라미터)
 
         Returns:
-            Dict[Metric, float]: 예상되는 지표 변화
+            dict[Metric, float]: 예상되는 지표 변화
         """
-        # 이 함수는 향후 구현 예정
-        # 현재는 빈 딕셔너리 반환
-        return {}
+        # 결정 효과 적용
+        simulated_metrics = self.metrics.copy()
+
+        # 결정에 따른 지표 변화 계산
+        for key, value in decision.items():
+            if key == "price_change":
+                if isinstance(value, (int, float)):
+                    if value > 0:
+                        simulated_metrics[Metric.REPUTATION] *= 0.9
+                        simulated_metrics[Metric.MONEY] *= 1.1
+                    else:
+                        simulated_metrics[Metric.REPUTATION] *= 1.1
+                        simulated_metrics[Metric.MONEY] *= 0.9
+
+        return simulated_metrics

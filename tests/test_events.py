@@ -11,26 +11,27 @@
 """
 
 import os
-import pytest
 import tempfile
 import time
 
+import pytest
+
 from schema import Metric
-from src.metrics.tracker import MetricsTracker
+from src.events.engine import EventEngine
+from src.events.integration import GameEventSystem
 from src.events.models import (
-    Event,
-    Trigger,
     Effect,
+    Event,
     EventCategory,
+    Trigger,
     TriggerCondition,
 )
 from src.events.schema import (
-    load_events_from_toml,
     load_events_from_json,
+    load_events_from_toml,
     save_events_to_json,
 )
-from src.events.engine import EventEngine
-from src.events.integration import GameEventSystem
+from src.metrics.tracker import MetricsTracker
 
 # 테스트 상수
 PERFORMANCE_TIMEOUT = 3.0  # 초

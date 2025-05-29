@@ -8,14 +8,14 @@
 
 import argparse
 import json
-from typing import Dict, Any, List
+from typing import Any, ClassVar
 
 
 class EventConditionFixer:
     """이벤트 조건 수정 도구"""
 
     # 조건 매핑 정의
-    CONDITION_MAPPING: Dict[str, str] = {
+    CONDITION_MAPPING: ClassVar[dict[str, str]] = {
         "equal": "equal",
         "not_equal": "not_equal",
         "greater_than": "greater_than",
@@ -46,7 +46,7 @@ class EventConditionFixer:
         self.input_file = input_file
         self.output_file = output_file
 
-    def load_events(self) -> Dict[str, List[Dict[str, Any]]]:
+    def load_events(self) -> dict[str, list[dict[str, Any]]]:
         """
         이벤트 JSON 파일 로드
 
@@ -54,16 +54,16 @@ class EventConditionFixer:
             이벤트 데이터 딕셔너리
         """
         try:
-            with open(self.input_file, "r", encoding="utf-8") as f:
+            with open(self.input_file, encoding="utf-8") as f:
                 data = json.load(f)
                 if not isinstance(data, dict) or "events" not in data:
                     return {"events": []}
                 return data
         except Exception as e:
-            print(f"❌ 파일 로드 오류: {str(e)}")
+            print(f"❌ 파일 로드 오류: {e!s}")
             return {"events": []}
 
-    def fix_trigger_conditions(self, events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def fix_trigger_conditions(self, events: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         이벤트의 트리거 조건 수정
 
@@ -101,7 +101,7 @@ class EventConditionFixer:
 
         return fixed_events
 
-    def save_events(self, events: List[Dict[str, Any]]) -> None:
+    def save_events(self, events: list[dict[str, Any]]) -> None:
         """
         수정된 이벤트를 JSON 파일로 저장
 
@@ -113,7 +113,7 @@ class EventConditionFixer:
                 json.dump({"events": events}, f, ensure_ascii=False, indent=2)
             print(f"✅ 수정된 이벤트가 {self.output_file}에 저장되었습니다.")
         except Exception as e:
-            print(f"❌ 파일 저장 오류: {str(e)}")
+            print(f"❌ 파일 저장 오류: {e!s}")
 
     def process(self) -> None:
         """이벤트 조건 수정 프로세스 실행"""

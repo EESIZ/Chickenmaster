@@ -5,10 +5,9 @@
 
 import os
 from pathlib import Path
-from typing import Optional, List
 
 # 이벤트 카테고리 정의 (event_bank_manager.py에서 사용)
-EVENT_CATEGORIES: List[str] = [
+EVENT_CATEGORIES: list[str] = [
     "daily_routine",
     "crisis_events",
     "opportunity",
@@ -21,7 +20,7 @@ class Config:
     """API 키 및 설정 관리"""
 
     @staticmethod
-    def get_api_key() -> Optional[str]:
+    def get_api_key() -> str | None:
         """우선순위에 따라 API 키 로드"""
 
         # 1. 환경 변수 확인 (CI/CD)

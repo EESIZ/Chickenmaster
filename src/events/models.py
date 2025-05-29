@@ -10,10 +10,10 @@ Event, Trigger, Effect 등의 데이터클래스를 통해 이벤트 구조를 �
 - 불확실성: 이벤트 발생과 효과는 예측 불가능한 요소에 영향을 받습니다
 """
 
-from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import Dict, List, Optional
 import random
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum, auto
 
 # schema.py에서 필요한 상수와 Enum 가져오기
 from schema import Metric
@@ -27,9 +27,14 @@ class TriggerCondition(Enum):
     불확실성 요소로 인해 예상치 못한 시점에 조건이 충족될 수 있습니다.
     """
 
-    LESS_THAN = "less_than"
-    GREATER_THAN = "greater_than"
-    EQUAL = "equal"
+    LESS_THAN = auto()
+    GREATER_THAN = auto()
+    EQUAL = auto()
+    NOT_EQUAL = auto()
+    GREATER_THAN_OR_EQUAL = auto()
+    LESS_THAN_OR_EQUAL = auto()
+    IN_RANGE = auto()
+    NOT_IN_RANGE = auto()
 
 
 class EventCategory(Enum):
@@ -44,6 +49,9 @@ class EventCategory(Enum):
     THRESHOLD = auto()  # 임계값 기반 발생
     SCHEDULED = auto()  # 일정 주기로 발생
     CASCADE = auto()  # 다른 이벤트의 결과로 발생
+    DAILY_ROUTINE = auto()  # 일상 업무
+    CRISIS = auto()  # 위기 상황
+    OPPORTUNITY = auto()  # 기회
 
 
 @dataclass
@@ -57,9 +65,11 @@ class Trigger:
 
     metric: Metric
     condition: TriggerCondition
-    value: float
+    value: float | None = None
+    range_min: float | None = None
+    range_max: float | None = None
 
-    def evaluate(self, current_metrics: Dict[Metric, float]) -> bool:
+    def evaluate(self, current_metrics: dict[Metric, float]) -> bool:
         """
         트리거 조건을 평가합니다.
 
@@ -81,6 +91,14 @@ class Trigger:
         elif self.condition == TriggerCondition.EQUAL:
             # 부동소수점 비교를 위한 작은 오차 허용
             return abs(current_value - self.value) < 0.001
+        elif self.condition == TriggerCondition.GREATER_THAN_OR_EQUAL:
+            return current_value >= self.value
+        elif self.condition == TriggerCondition.LESS_THAN_OR_EQUAL:
+            return current_value <= self.value
+        elif self.condition == TriggerCondition.IN_RANGE:
+            return self.range_min <= current_value <= self.range_max
+        elif self.condition == TriggerCondition.NOT_IN_RANGE:
+            return not (self.range_min <= current_value <= self.range_max)
 
         return False
 
@@ -96,9 +114,9 @@ class Effect:
 
     metric: Metric
     formula: str
-    message: Optional[str] = None
+    message: str | None = None
 
-    def apply(self, current_metrics: Dict[Metric, float]) -> float:
+    def apply(self, current_metrics: dict[Metric, float]) -> float:
         """
         효과를 적용하여 새 지표 값을 계산합니다.
 
@@ -158,16 +176,27 @@ class Event:
 
     id: str
     type: EventCategory
-    effects: List[Effect]
+    name: str
+    description: str
+    effects: list[Effect]
+    trigger: Trigger | None = None
+    probability: float = 1.0
     priority: int = 0
     cooldown: int = 0
-    probability: Optional[float] = None
-    trigger: Optional[Trigger] = None
-    schedule: Optional[int] = None
-    message: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    category: str = "default"
+    last_triggered: datetime | None = None
+    turn: int = 0
+    severity: str = "INFO"
+    timestamp: str | None = None
+    tags: list[str] = field(default_factory=list)
     cascade_depth: int = 0
-    last_fired: int = -1  # 마지막으로 발생한 턴 (-1은 아직 발생하지 않음)
+
+    def __post_init__(self) -> None:
+        """
+        초기화 후 추가 작업을 수행합니다.
+        """
+        if self.timestamp is None:
+            self.timestamp = datetime.now().isoformat()
 
     def can_fire(self, current_turn: int) -> bool:
         """
@@ -180,13 +209,15 @@ class Event:
             bool: 발생 가능하면 True, 그렇지 않으면 False
         """
         # 쿨다운 확인
-        if self.last_fired >= 0 and current_turn - self.last_fired < self.cooldown:
-            return False
+        if self.cooldown > 0 and self.last_triggered:
+            elapsed_turns = current_turn - self.turn
+            if elapsed_turns < self.cooldown:
+                return False
 
         return True
 
     def evaluate_trigger(
-        self, current_metrics: Dict[Metric, float], rng: Optional[random.Random] = None
+        self, current_metrics: dict[Metric, float], rng: random.Random | None = None
     ) -> bool:
         """
         이벤트 트리거 조건을 평가합니다.
@@ -227,7 +258,7 @@ class Event:
 
         return False
 
-    def apply_effects(self, current_metrics: Dict[Metric, float]) -> Dict[Metric, float]:
+    def apply_effects(self, current_metrics: dict[Metric, float]) -> dict[Metric, float]:
         """
         이벤트 효과를 적용합니다.
 
@@ -245,7 +276,7 @@ class Event:
 
         return result
 
-    def fire(self, current_metrics: Dict[Metric, float], current_turn: int) -> Dict[Metric, float]:
+    def fire(self, current_metrics: dict[Metric, float], current_turn: int) -> dict[Metric, float]:
         """
         이벤트를 발생시키고 효과를 적용합니다.
 
@@ -257,7 +288,7 @@ class Event:
             Dict[Metric, float]: 효과가 적용된 새 지표 상태
         """
         # 마지막 발생 턴 업데이트
-        self.last_fired = current_turn
+        self.last_triggered = datetime.now()
 
         # 효과 적용
         return self.apply_effects(current_metrics)
@@ -274,16 +305,14 @@ class Alert:
 
     event_id: str
     message: str
-    metrics: Dict[Metric, float]
+    metrics: dict[Metric, float]
     turn: int
     severity: str = "INFO"
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
 
     def __post_init__(self) -> None:
         """
         초기화 후 추가 작업을 수행합니다.
         """
         if self.timestamp is None:
-            from datetime import datetime
-
             self.timestamp = datetime.now().isoformat()

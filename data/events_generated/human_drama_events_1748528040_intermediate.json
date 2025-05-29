@@ -1,0 +1,492 @@
+{
+  "metadata": {
+    "category": "human_drama",
+    "count": 10,
+    "generated_at": "2025-05-29 23:14:00",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "human_drama_regular_customer_2288",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "10년 단골의 특별한 부탁",
+      "name_en": "A Special Request from 10-Year Regular",
+      "text_ko": "가게를 10년 동안 다녀온 단골손님이 딸의 결혼식 피로연용 치킨 100인분을 시장가보다 20% 할인된 가격으로 주문하고 싶다고 합니다. 오랜 단골이라 난처한 부탁을 했네요.",
+      "text_en": "A customer who has been visiting for 10 years wants to order 100 servings of chicken for his daughter's wedding reception at a 20% discount from market price. It's an awkward request from a long-time regular.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "할인해드리기",
+          "text_en": "Offer the discount",
+          "effects": {
+            "money": -500000,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "정중히 거절하기",
+          "text_en": "Politely decline",
+          "effects": {
+            "money": 0,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_8556",
+      "category": "human_drama",
+      "type": "THRESHOLD",
+      "name_ko": "단골손님의 특별한 부탁",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "10년째 매주 금요일마다 방문하시는 단골손님이 딸의 결혼식 피로연용 치킨 100인분을 주문하고 싶다고 합니다. 하지만 당일은 이미 예약이 꽉 찬 상태입니다.",
+      "text_en": "A loyal customer who has been visiting every Friday for 10 years wants to order chicken for 100 people for his daughter's wedding reception. However, you're fully booked for that day.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "다른 예약들을 조정해서라도 단골손님의 부탁을 들어준다",
+          "text_en": "Adjust other reservations to accommodate the loyal customer's request",
+          "effects": {
+            "money": 1000000,
+            "reputation": 15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "죄송하지만 기존 예약을 지켜야 한다고 설명한다",
+          "text_en": "Apologetically explain that you must honor existing reservations",
+          "effects": {
+            "money": -50000,
+            "reputation": -20,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 70
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_6425",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "20-Year Regular Customer's Visit",
+      "text_ko": "20년간 매주 치킨을 사 가시던 할아버지께서 오늘도 방문하셨습니다. 하지만 최근 건강이 좋지 않아 의사가 치킨을 금지했다고 하시네요. 그래도 마지막으로 한 번만 드시고 싶다고 하십니다.",
+      "text_en": "An elderly customer who has been buying chicken weekly for 20 years visits today. However, his doctor has recently prohibited him from eating chicken due to health issues. Still, he wants to have it one last time.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "건강을 위해 정중히 거절한다",
+          "text_en": "Politely decline for his health",
+          "effects": {
+            "money": -100,
+            "reputation": 15
+          }
+        },
+        {
+          "text_ko": "마지막이라고 하시니 특별히 조금만 드리기로 한다",
+          "text_en": "Make an exception and serve a small portion",
+          "effects": {
+            "money": 100,
+            "reputation": -10
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_6554",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별한 부탁",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "10년째 우리 가게를 찾아주시는 단골손님이 딸의 결혼식 피로연용 치킨 100인분을 시장가보다 20% 할인된 가격에 부탁하십니다.",
+      "text_en": "A loyal customer of 10 years asks for 100 servings of chicken for his daughter's wedding reception at a 20% discount.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "할인해드리고 특별 서비스로 양념 소스를 추가로 제공한다",
+          "text_en": "Offer the discount and provide extra seasoning sauce as special service",
+          "effects": {
+            "money": -200000,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "죄송하지만 현재 원가가 너무 올라 할인은 어렵다고 설명한다",
+          "text_en": "Politely explain that discount is difficult due to increased costs",
+          "effects": {
+            "money": 100000,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_8429",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별한 부탁",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "10년째 우리 가게를 찾아주시는 단골손님이 딸의 결혼식 피로연용으로 치킨 100인분을 주문하고 싶다고 합니다. 하지만 평소보다 20% 할인된 가격으로 부탁하네요.",
+      "text_en": "A loyal customer of 10 years wants to order 100 servings of chicken for his daughter's wedding reception. However, he's asking for a 20% discount from the regular price.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "할인해드리고 특별 서비스로 떡볶이도 서비스로 제공한다",
+          "text_en": "Offer the discount and provide complimentary tteokbokki",
+          "effects": {
+            "money": -500000,
+            "reputation": 30,
+            "customer_satisfaction": 50
+          }
+        },
+        {
+          "text_ko": "죄송하지만 할인은 어렵다고 정중히 거절한다",
+          "text_en": "Politely decline the discount request",
+          "effects": {
+            "money": 1000000,
+            "reputation": -20,
+            "customer_satisfaction": -30
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_3994",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 마지막 방문",
+      "name_en": "Last Visit of 20-Year Regular Customer",
+      "text_ko": "20년간 매주 치킨을 주문하시던 김할아버지께서 타지로 이사를 가신다고 합니다. 마지막 주문이라며 찾아오셨네요.",
+      "text_en": "Mr. Kim, who has been ordering chicken weekly for 20 years, is moving away. He came for his last order.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별히 서비스로 더 많은 치킨을 드리고 감사 편지를 써드린다",
+          "text_en": "Serve extra chicken and write a thank you letter",
+          "effects": {
+            "money": -50000,
+            "reputation": 30,
+            "customer_satisfaction": 25
+          }
+        },
+        {
+          "text_ko": "평소처럼 정성껏 치킨만 대접한다",
+          "text_en": "Serve chicken as usual with care",
+          "effects": {
+            "money": 15000,
+            "reputation": 10,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_4109",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "10년 단골손님의 마지막 방문",
+      "name_en": "Last Visit of 10-Year Regular Customer",
+      "text_ko": "10년 동안 매주 금요일마다 방문하시던 김할아버지께서 타지로 이사를 가신다고 합니다. 마지막 방문이라며 평소처럼 후라이드 치킨을 주문하셨습니다.",
+      "text_en": "Mr. Kim, who has been visiting every Friday for 10 years, is moving away. He orders his usual fried chicken for his last visit.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별히 더 큰 치킨을 서비스로 드리고 마지막 인사를 나눈다",
+          "text_en": "Serve a larger chicken as service and say farewell",
+          "effects": {
+            "money": -30000,
+            "reputation": 50,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "평소처럼 대하고 정중히 인사한다",
+          "text_en": "Treat as usual and bid farewell politely",
+          "effects": {
+            "money": 0,
+            "reputation": 10,
+            "customer_satisfaction": 10
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_5679",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별한 부탁",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "10년째 단골손님이신 김할아버지께서 손자의 생일파티를 위해 치킨 20마리를 주문하셨습니다. 하지만 시장가보다 30% 할인된 가격으로 부탁하시네요.",
+      "text_en": "Mr. Kim, a loyal customer for 10 years, orders 20 chickens for his grandson's birthday party. However, he asks for a 30% discount from the market price.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "죄송하지만 할인은 어렵다고 말씀드린다",
+          "text_en": "Politely decline the discount request",
+          "effects": {
+            "money": 400000,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "30% 할인해드리고 서비스로 콜라도 드린다",
+          "text_en": "Accept the discount and offer free cola",
+          "effects": {
+            "money": -280000,
+            "reputation": 25,
+            "customer_satisfaction": 20
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_6353",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 마지막 방문",
+      "name_en": "Last Visit of 20-Year Regular Customer",
+      "text_ko": "20년간 매주 금요일마다 방문하시던 할아버지께서 타지역으로 이사를 가신다고 합니다. 마지막 주문이라며 평소처럼 후라이드 치킨을 주문하셨습니다.",
+      "text_en": "An elderly customer who has visited every Friday for 20 years announces this will be his last order as he's moving away. He orders his usual fried chicken.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별히 더 큰 치킨을 서비스로 드리고 감사 편지를 써드린다",
+          "text_en": "Serve a larger chicken as service and write a thank you letter",
+          "effects": {
+            "money": -50000,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 대하고 작별 인사만 건넨다",
+          "text_en": "Treat as usual and just say goodbye",
+          "effects": {
+            "money": 0,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "human_drama_regular_customer_7579",
+      "category": "human_drama",
+      "type": "RANDOM",
+      "name_ko": "10년 단골손님의 방문",
+      "name_en": "Visit from a 10-year Regular Customer",
+      "text_ko": "개업 때부터 10년간 매주 치킨을 주문하신 단골손님이 오늘도 방문하셨습니다. 최근 건강이 좋지 않아 의사가 치킨을 금지했다고 하시네요. 마지막으로 드시고 싶다고 하시는데...",
+      "text_en": "A regular customer who has ordered chicken weekly for 10 years since opening has visited today. They say the doctor has forbidden chicken due to health issues, but they want to have it one last time...",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "건강을 위해 정중히 거절한다",
+          "text_en": "Politely decline for their health",
+          "effects": {
+            "money": -50,
+            "reputation": 15,
+            "customer_satisfaction": -5
+          }
+        },
+        {
+          "text_ko": "마지막이라고 하시니 특별히 조금만 드리고 과일도 함께 서비스한다",
+          "text_en": "Serve a small portion with complimentary fruit",
+          "effects": {
+            "money": 50,
+            "reputation": 20,
+            "customer_satisfaction": 10
+          }
+        }
+      ],
+      "tags": [
+        "인간관계",
+        "감정",
+        "드라마"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    }
+  ]
+}

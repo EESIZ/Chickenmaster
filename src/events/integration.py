@@ -11,12 +11,12 @@
 """
 
 import os
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 from schema import Metric
-from src.metrics.tracker import MetricsTracker
 from src.events.engine import EventEngine
 from src.events.models import Alert
+from src.metrics.tracker import MetricsTracker
 
 
 class GameEventSystem:
@@ -29,10 +29,10 @@ class GameEventSystem:
 
     def __init__(
         self,
-        metrics_tracker: Optional[MetricsTracker] = None,
-        events_file: Optional[str] = "data/events.toml",
-        tradeoff_file: Optional[str] = "data/tradeoff_matrix.toml",
-        seed: Optional[int] = None,
+        metrics_tracker: MetricsTracker | None = None,
+        events_file: str | None = "data/events.toml",
+        tradeoff_file: str | None = "data/tradeoff_matrix.toml",
+        seed: int | None = None,
     ):
         """
         GameEventSystem 초기화
@@ -65,7 +65,7 @@ class GameEventSystem:
         # 현재 게임 일수
         self.day = 0
 
-    def update_day(self) -> Dict[Metric, float]:
+    def update_day(self) -> dict[Metric, float]:
         """
         하루를 진행하고 이벤트를 처리합니다.
 
@@ -91,7 +91,7 @@ class GameEventSystem:
 
         return metrics
 
-    def get_alerts(self, count: Optional[int] = None) -> List[Alert]:
+    def get_alerts(self, count: int | None = None) -> list[Alert]:
         """
         알림을 가져옵니다.
 
@@ -103,7 +103,7 @@ class GameEventSystem:
         """
         return self.event_engine.get_alerts(count)
 
-    def get_events_history(self, count: Optional[int] = None) -> List[str]:
+    def get_events_history(self, count: int | None = None) -> list[str]:
         """
         이벤트 히스토리를 가져옵니다.
 
@@ -115,7 +115,7 @@ class GameEventSystem:
         """
         return self.metrics_tracker.get_events(count)
 
-    def get_metrics_history(self, steps: Optional[int] = None) -> List[Dict[Metric, float]]:
+    def get_metrics_history(self, steps: int | None = None) -> list[dict[Metric, float]]:
         """
         지표 변화 히스토리를 가져옵니다.
 
@@ -136,7 +136,7 @@ class GameEventSystem:
         """
         return self.event_engine.is_dag_safe()
 
-    def set_seed(self, seed: Optional[int] = None) -> None:
+    def set_seed(self, seed: int | None = None) -> None:
         """
         난수 생성 시드를 설정합니다.
 
@@ -145,20 +145,18 @@ class GameEventSystem:
         """
         self.event_engine.set_seed(seed)
 
-    def noRightAnswer_simulate_scenario(
-        self, scenario: Dict[str, Any], days: int = 10
-    ) -> Dict[str, Any]:
+    def simulate_scenario_no_right_answer(
+        self, scenario: dict[str, Any], days: int = 10
+    ) -> dict[str, Any]:
         """
-        특정 시나리오를 시뮬레이션합니다.
-
-        이 함수는 '정답 없음' 원칙을 반영하여, 모든 시나리오에 장단점이 있음을 보여줍니다.
-
+        시나리오를 시뮬레이션합니다. 정답이 없는 문제에서 사용됩니다.
+        
         Args:
-            scenario: 시뮬레이션할 시나리오 설정
-            days: 시뮬레이션할 일수 (기본값: 10)
-
+            scenario: 시뮬레이션할 시나리오
+            days: 시뮬레이션 일수
+            
         Returns:
-            Dict[str, Any]: 시뮬레이션 결과
+            dict[str, Any]: 시뮬레이션 결과
         """
         # 시드 설정
         if "seed" in scenario:
@@ -172,7 +170,7 @@ class GameEventSystem:
         # 시뮬레이션 실행
         history = []
         events_history = []
-        metrics: Dict[Metric, float] = {}
+        metrics: dict[Metric, float] = {}
 
         for _ in range(days):
             # 하루 진행

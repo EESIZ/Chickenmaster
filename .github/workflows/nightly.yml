@@ -1,0 +1,83 @@
+name: Nightly CI
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 매일 자정에 실행
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  generate-validate-simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          
+      - name: Run Ruff
+        run: ruff check .
+        
+      - name: Run Black
+        run: black --check .
+        
+      - name: Run MyPy
+        run: mypy --strict .
+        
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=. --cov-report=xml
+          coverage_result=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
+          echo "Coverage is $coverage_result%"
+          if (( $(echo "$coverage_result < 80" | bc -l) )); then
+            echo "Coverage is below 80%"
+            exit 1
+          fi
+          
+      - name: Generate events
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/mass_event_generation.py
+        
+      - name: Validate events
+        run: python -m dev_tools.event_validator --check-all
+        
+      - name: Run balance simulation
+        run: python -m dev_tools.balance_simulator --turns 1000 --seeds 100
+        
+      - name: Generate reports
+        run: |
+          python scripts/generate_reports.py
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: event-reports
+          path: |
+            reports/
+            data/events_generated/
+            
+      - name: Check quality metrics
+        run: |
+          python scripts/check_metrics.py \
+            --min-diversity 0.8 \
+            --min-tradeoff 0.9 \
+            --min-cultural 0.7
+            
+      - name: Update badges
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: event-quality.json
+          label: Event Quality
+          message: "✓ Passed"
+          color: green 

@@ -10,46 +10,43 @@
 - 불확실성: 경제 상황은 예측 불가능하게 변화할 수 있습니다
 """
 
-from typing import Dict, Any, Optional
+from typing import Any
 
 # schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric, ActionType  # noqa: F401 - ActionType은 향후 확장을 위해 유지
-from schema import cap_metric_value
+from schema import (
+    ActionType,
+    Metric,
+    cap_metric_value,
+)
 
 # 경제 모델 함수 가져오기
-from src.economy.models import load_economy_config  # noqa: F401 - 향후 확장을 위해 유지
+from src.economy.models import load_economy_config
 
+# 트레이드오프 상수
+TRADEOFF_FACTORS = {
+    "PRICE_TO_REPUTATION": 0.3,
+    "PRICE_TO_FATIGUE": 0.2
+}
 
-def noRightAnswer_compute_profit(
+def compute_profit_no_right_answer(
     units_sold: int, unit_cost: float, price: float, fixed_cost: float
 ) -> float:
     """
-    판매 단위, 단가, 가격, 고정비를 기반으로 이익을 계산합니다.
-
-    이 함수는 '정답 없음' 원칙을 반영합니다:
-    - 가격을 높이면 단위당 이익은 증가하지만 판매량은 감소합니다
-    - 가격을 낮추면 판매량은 증가하지만 단위당 이익은 감소합니다
-
+    이익을 계산합니다. 정답이 없는 문제에서 사용됩니다.
+    
     Args:
         units_sold: 판매된 단위 수
-        unit_cost: 단위당 원가
+        unit_cost: 단위당 비용
         price: 판매 가격
-        fixed_cost: 고정 비용 (임대료, 인건비 등)
-
+        fixed_cost: 고정 비용
+        
     Returns:
-        float: 계산된 이익 (손실인 경우 음수)
+        float: 계산된 이익
     """
-    # 총 수익 계산
-    total_revenue = units_sold * price
-
-    # 총 비용 계산
-    total_variable_cost = units_sold * unit_cost
-    total_cost = total_variable_cost + fixed_cost
-
-    # 이익 계산
-    profit = total_revenue - total_cost
-
-    return profit
+    revenue = units_sold * price
+    variable_cost = units_sold * unit_cost
+    total_cost = variable_cost + fixed_cost
+    return revenue - total_cost
 
 
 def uncertainty_adjust_inventory(units_sold: int, current_inventory: int) -> int:
@@ -69,17 +66,16 @@ def uncertainty_adjust_inventory(units_sold: int, current_inventory: int) -> int
     new_inventory = current_inventory - units_sold
 
     # 재고가 음수가 되지 않도록 보정
-    if new_inventory < 0:
-        new_inventory = 0
+    new_inventory = max(new_inventory, 0)
 
     return new_inventory
 
 
 def tradeoff_apply_price_change(
     price_change: float,
-    metrics: Dict[Metric, float],
-    config: Optional[Dict[str, Any]] = None,
-) -> Dict[Metric, float]:
+    metrics: dict[Metric, float],
+    config: dict[str, Any] | None = None,
+) -> dict[Metric, float]:
     """
     가격 변경에 따른 트레이드오프 효과를 적용합니다.
 
@@ -139,7 +135,7 @@ def tradeoff_apply_price_change(
     return updated_metrics
 
 
-def apply_tradeoff(decision: Dict[str, Any], metrics: Dict[Metric, float]) -> Dict[Metric, float]:
+def apply_tradeoff(decision: dict[str, Any], metrics: dict[Metric, float]) -> dict[Metric, float]:
     """
     플레이어의 결정에 따른 트레이드오프 효과를 적용합니다.
 
@@ -164,7 +160,7 @@ def apply_tradeoff(decision: Dict[str, Any], metrics: Dict[Metric, float]) -> Di
     return metrics.copy()
 
 
-def update_economy_state(current_state: Dict[str, Any], decision: Dict[str, Any]) -> Dict[str, Any]:
+def update_economy_state(current_state: dict[str, Any], decision: dict[str, Any]) -> dict[str, Any]:
     """
     현재 경제 상태와 플레이어의 결정을 기반으로 새로운 경제 상태를 계산합니다.
 

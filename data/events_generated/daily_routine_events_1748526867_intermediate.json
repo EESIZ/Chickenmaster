@@ -1,0 +1,500 @@
+{
+  "metadata": {
+    "category": "daily_routine",
+    "count": 10,
+    "generated_at": "2025-05-29 22:54:27",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "daily_routine_regular_customer_5185",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 매주 금요일마다 방문하시는 단골손님이 오셨습니다. 오늘은 손자와 함께 오셨네요.",
+      "text_en": "A loyal customer who has been visiting every Friday for 20 years came today with his grandson.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별 서비스로 수제 콜라 한 병을 무료로 드린다",
+          "text_en": "Offer a free bottle of craft cola as special service",
+          "effects": {
+            "money": -30,
+            "reputation": 25,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "평소처럼 친절하게 응대한다",
+          "text_en": "Serve them as usual with kindness",
+          "effects": {
+            "money": 0,
+            "reputation": 5,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_delivery_rush_7433",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골 손님의 특별 주문",
+      "name_en": "Regular Customer's Special Order",
+      "text_ko": "매주 금요일마다 방문하는 단골손님이 오늘은 평소보다 2배 많은 양을 주문했습니다. 하지만 현재 재료가 부족한 상황입니다.",
+      "text_en": "A regular customer who visits every Friday has ordered twice as much as usual. However, ingredients are currently running low.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "150"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "죄송하다고 설명하고 평소 주문량만 받기",
+          "text_en": "Apologize and accept only the usual order amount",
+          "effects": {
+            "money": 100,
+            "reputation": -5
+          }
+        },
+        {
+          "text_ko": "급하게 마트에서 재료를 추가 구매해서 맞추기",
+          "text_en": "Quickly purchase additional ingredients from the market",
+          "effects": {
+            "money": -50,
+            "reputation": 20
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.4,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_1426",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 주문",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 금요일마다 오시는 단골손님이 오늘은 매운맛을 평소보다 2배로 해달라고 요청하셨습니다. 하지만 이렇게 되면 레시피가 달라져 일관성이 떨어질 수 있습니다.",
+      "text_en": "A regular Friday customer requests their chicken twice as spicy as usual. However, this might affect recipe consistency.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "손님 요청대로 매운맛을 높인다",
+          "text_en": "Increase the spiciness as requested",
+          "effects": {
+            "money": 50,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "레시피 일관성을 위해 정중히 거절한다",
+          "text_en": "Politely decline to maintain recipe consistency",
+          "effects": {
+            "money": -30,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_new_sauce_8671",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "새로운 양념 소스 개발",
+      "name_en": "New Sauce Development",
+      "text_ko": "손님들이 기존 양념치킨 소스가 지겹다고 합니다. 새로운 소스를 개발할 기회입니다.",
+      "text_en": "Customers are getting tired of the current sauce. It's time to develop a new one.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-200"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "매콤달콤한 신규 레시피 개발에 투자하기",
+          "text_en": "Invest in developing a new sweet and spicy recipe",
+          "effects": {
+            "money": -300,
+            "reputation": 25,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "기존 소스에 약간의 변화만 주기",
+          "text_en": "Make minor modifications to the existing sauce",
+          "effects": {
+            "money": -50,
+            "reputation": -5,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.4,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_3342",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 요청",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 화요일마다 방문하는 단골손님이 오늘은 양념치킨을 '아주 맵게' 해달라고 요청합니다. 하지만 이렇게 맵게 만들면 레시피가 달라질 수 있습니다.",
+      "text_en": "A regular customer who visits every Tuesday requests their seasoned chicken 'extra spicy' today. However, this could alter the original recipe.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "손님의 요청대로 매운맛을 높인다",
+          "text_en": "Increase the spiciness as requested",
+          "effects": {
+            "money": 50,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "기존 레시피를 고수한다",
+          "text_en": "Stick to the original recipe",
+          "effects": {
+            "money": 0,
+            "reputation": -5,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_9720",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 한결같이 찾아주시는 단골손님이 오셨습니다. 최근 건강이 좋지 않으시다고 하네요. 평소처럼 양념치킨을 주문하셨지만, 의사가 기름진 음식을 피하라고 권고했다고 합니다.",
+      "text_en": "A loyal customer who has been visiting for 20 years has arrived. They mention recent health issues. They ordered their usual yangnyeom chicken, but say their doctor advised against oily foods.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "건강을 생각해서 오늘만큼은 튀기지 않고 오븐으로 구운 치킨을 추천드린다",
+          "text_en": "Recommend oven-baked chicken instead of fried chicken for their health",
+          "effects": {
+            "money": -50,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 양념치킨을 서빙한다",
+          "text_en": "Serve the usual yangnyeom chicken",
+          "effects": {
+            "money": 100,
+            "reputation": -20,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 20,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_1685",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골 손님의 특별 주문",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 화요일마다 방문하는 단골손님이 오늘은 매운맛을 3단계 높여달라고 요청합니다. 하지만 이렇게 맵게 만들면 레시피가 달라질 수 있습니다.",
+      "text_en": "A regular customer who visits every Tuesday asks to increase the spiciness level by 3 steps. However, this might alter the original recipe.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "손님의 요청대로 매운맛을 높인다",
+          "text_en": "Increase the spiciness as requested",
+          "effects": {
+            "money": 50,
+            "reputation": -5,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "원래 레시피를 고수하고 정중히 거절한다",
+          "text_en": "Politely decline and stick to the original recipe",
+          "effects": {
+            "money": -30,
+            "reputation": 10,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "CUSTOMER_SATISFACTION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_delivery_complaint_1715",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "배달 늦음 항의",
+      "name_en": "Late Delivery Complaint",
+      "text_ko": "배달이 30분을 초과하여 손님이 강하게 항의하고 있습니다. 주방이 바빠서 늦어진 상황입니다.",
+      "text_en": "A customer is strongly complaining about delivery taking over 30 minutes. The kitchen was too busy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-3"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "사과하고 치킨 한 마리를 더 서비스로 드립니다",
+          "text_en": "Apologize and offer one free chicken",
+          "effects": {
+            "money": -15000,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "죄송하다고 사과하고 음료수를 서비스로 드립니다",
+          "text_en": "Apologize and offer free drinks",
+          "effects": {
+            "money": -3000,
+            "reputation": 5,
+            "customer_satisfaction": 8
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 15,
+      "trigger": {
+        "metric": "CUSTOMER_SATISFACTION",
+        "condition": "less_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_7786",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 매주 금요일마다 방문하시는 할아버지께서 오늘도 어김없이 방문하셨습니다. 항상 양념치킨 한 마리를 주문하시는데, 오늘은 양념 소스가 거의 바닥났네요.",
+      "text_en": "The elderly gentleman who has been visiting every Friday for 20 years has come again today. He always orders one spicy chicken, but we're almost out of sauce today.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 근처 마트에서 재료를 사서 양념치킨을 만든다",
+          "text_en": "Quickly buy ingredients from nearby market to make spicy chicken",
+          "effects": {
+            "money": -30000,
+            "reputation": 15,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "죄송하다고 말씀드리고 후라이드치킨을 추천한다",
+          "text_en": "Apologize and recommend plain fried chicken instead",
+          "effects": {
+            "money": 18000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_3121",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 매주 치킨을 사 가시는 단골손님이 오셨습니다. 최근 건강 때문에 치킨을 줄이라는 의사의 권고가 있었다고 하시네요.",
+      "text_en": "A regular customer who has been buying chicken weekly for 20 years visits. They mention their doctor advised reducing chicken consumption for health reasons.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "건강을 생각해서 오늘만큼은 반마리로 권유드린다",
+          "text_en": "Suggest a half portion today for their health",
+          "effects": {
+            "money": -50,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 한 마리를 튀겨드린다",
+          "text_en": "Fry a whole chicken as usual",
+          "effects": {
+            "money": 100,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 14,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    }
+  ]
+}

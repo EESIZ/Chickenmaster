@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "category": "crisis_events",
+    "count": 1,
+    "generated_at": "2025-05-29 23:06:56",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "crisis_events_delivery_rush_7280",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식재료 가격 폭등",
+      "name_en": "Ingredient Price Surge",
+      "text_ko": "갑작스러운 닭고기 가격 상승으로 인해 원가가 30% 증가했습니다. 가격을 올려야 할까요?",
+      "text_en": "Chicken prices have suddenly increased by 30%. Should you raise your prices?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-500"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "가격을 인상한다",
+          "text_en": "Raise prices",
+          "effects": {
+            "money": 300,
+            "reputation": -15,
+            "customer_satisfaction": -20
+          }
+        },
+        {
+          "text_ko": "현재 가격을 유지하고 손해를 감수한다",
+          "text_en": "Maintain current prices and accept losses",
+          "effects": {
+            "money": -800,
+            "reputation": 25,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.4,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 5000
+      }
+    }
+  ]
+}

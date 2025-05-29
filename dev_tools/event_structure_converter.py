@@ -6,13 +6,13 @@
 날짜: 2025-05-27
 """
 
-import json
 import argparse
+import json
 import re
-from typing import Dict, List, Any
+from typing import Any
 
 
-def convert_effects_structure(effects_dict: Dict[str, Any]) -> List[Dict[str, Any]]:
+def convert_effects_structure(effects_dict: dict[str, Any]) -> list[dict[str, Any]]:
     """
     effects 딕셔너리 구조를 표준 배열 구조로 변환
 
@@ -47,7 +47,7 @@ def convert_effects_structure(effects_dict: Dict[str, Any]) -> List[Dict[str, An
     return result
 
 
-def add_trigger_field(event: Dict[str, Any]) -> Dict[str, Any]:
+def add_trigger_field(event: dict[str, Any]) -> dict[str, Any]:
     """
     THRESHOLD 타입 이벤트에 trigger 필드 추가
     conditions 배열의 첫 번째 조건을 파싱하여 trigger 필드 생성
@@ -121,7 +121,7 @@ def add_trigger_field(event: Dict[str, Any]) -> Dict[str, Any]:
     return event
 
 
-def convert_event_structure(event: Dict[str, Any]) -> Dict[str, Any]:
+def convert_event_structure(event: dict[str, Any]) -> dict[str, Any]:
     """
     이벤트 구조를 표준 템플릿에 맞게 변환
     """
@@ -142,7 +142,7 @@ def convert_events_file(input_file: str, output_file: str) -> None:
     이벤트 파일 전체를 변환
     """
     try:
-        with open(input_file, "r", encoding="utf-8") as f:
+        with open(input_file, encoding="utf-8") as f:
             data = json.load(f)
 
         if "events" in data and isinstance(data["events"], list):
@@ -162,7 +162,7 @@ def convert_events_file(input_file: str, output_file: str) -> None:
         print(f"✅ 총 {len(data.get('events', []))}개 이벤트 변환됨")
 
     except Exception as e:
-        print(f"❌ 변환 중 오류 발생: {str(e)}")
+        print(f"❌ 변환 중 오류 발생: {e!s}")
 
 
 def main() -> None:

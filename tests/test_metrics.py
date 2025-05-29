@@ -16,7 +16,6 @@ import sys
 import tempfile
 import time
 from collections.abc import Generator
-from typing import Any
 
 import pytest
 

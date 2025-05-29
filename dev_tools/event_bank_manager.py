@@ -9,12 +9,13 @@ import argparse
 import json
 import shutil
 import sys
+import tomllib  # Python 3.11+
+from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Tuple, Generator, Dict, List, Type
-from tqdm import tqdm
+from typing import Any, ClassVar
 
-import tomllib  # Python 3.11+
+from tqdm import tqdm
 
 from dev_tools.config import EVENT_CATEGORIES
 
@@ -29,13 +30,13 @@ except ImportError:
         """이벤트 검증기 스텁"""
 
         def __init__(self) -> None:
-            self.errors: List[str] = []
+            self.errors: list[str] = []
 
-        def validate_event(self, event: Dict[str, Any]) -> bool:
+        def validate_event(self, event: dict[str, Any]) -> bool:
             """이벤트 검증"""
             return True
 
-        def calculate_quality_metrics(self, events: List[Dict[str, Any]]) -> Dict[str, float]:
+        def calculate_quality_metrics(self, events: list[dict[str, Any]]) -> dict[str, float]:
             """품질 메트릭 계산"""
             return {
                 "diversity_score": 0.0,
@@ -44,7 +45,7 @@ except ImportError:
                 "replayability": 0.0,
             }
 
-    _EventValidator: Type[Any] = _EventValidatorStub  # type: ignore
+    _EventValidator: type[Any] = _EventValidatorStub  # type: ignore
 
 
 try:
@@ -73,7 +74,7 @@ except ImportError:
             """시뮬레이션 실행"""
             return None
 
-        def generate_report(self, results: Any, output_path: str) -> Dict[str, Any]:
+        def generate_report(self, results: Any, output_path: str) -> dict[str, Any]:
             """보고서 생성"""
             return {
                 "bankruptcy_rate": 0.0,
@@ -89,8 +90,8 @@ except ImportError:
             """CSV 보고서 저장"""
             return ""
 
-    _EventSimulator: Type[Any] = _EventSimulatorStub  # type: ignore
-    _SimulationConfig: Type[Any] = _SimulationConfigStub  # type: ignore
+    _EventSimulator: type[Any] = _EventSimulatorStub  # type: ignore
+    _SimulationConfig: type[Any] = _SimulationConfigStub  # type: ignore
 
 
 class EventBankManager:
@@ -99,8 +100,10 @@ class EventBankManager:
     # 이벤트 카테고리 정의 - config.py에서 가져오도록 수정
     CATEGORIES = EVENT_CATEGORIES
 
-    # 이벤트 타입 정의
-    EVENT_TYPES = ["RANDOM", "THRESHOLD", "SCHEDULED", "CASCADE"]
+    # 상수 정의
+    SCORE_THRESHOLD_HIGH = 0.7
+    SCORE_THRESHOLD_MEDIUM = 0.5
+    EVENT_TYPES: ClassVar[list[str]] = ["RANDOM", "THRESHOLD", "SCHEDULED", "CASCADE"]
 
     def __init__(self) -> None:
         """초기화"""
@@ -152,20 +155,20 @@ class EventBankManager:
                         event["_source_file"] = str(file_path)
                         yield event
             except Exception as e:
-                print(f"❌ 파일 로드 오류 ({file_path}): {str(e)}")
+                print(f"❌ 파일 로드 오류 ({file_path}): {e!s}")
                 sys.stdout.flush()
 
         # JSON 파일 처리
         for file_path in category_dir.glob("*.json"):
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     data = json.load(f)
                     events = data.get("events", [])
                     for event in events:
                         event["_source_file"] = str(file_path)
                         yield event
             except Exception as e:
-                print(f"❌ 파일 로드 오류 ({file_path}): {str(e)}")
+                print(f"❌ 파일 로드 오류 ({file_path}): {e!s}")
                 sys.stdout.flush()
 
     def load_all_events(self) -> int:
@@ -202,7 +205,7 @@ class EventBankManager:
                             print(f"✅ {len(events)}개 이벤트 로드: {file_path}")
                             sys.stdout.flush()
                 except Exception as e:
-                    print(f"❌ 파일 로드 오류 ({file_path}): {str(e)}")
+                    print(f"❌ 파일 로드 오류 ({file_path}): {e!s}")
                     sys.stdout.flush()
 
             # JSON 파일 로드
@@ -212,7 +215,7 @@ class EventBankManager:
 
             for file_path in json_files:
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         data = json.load(f)
                         events = data.get("events", [])
                         if events:
@@ -221,14 +224,14 @@ class EventBankManager:
                             print(f"✅ {len(events)}개 이벤트 로드: {file_path}")
                             sys.stdout.flush()
                 except Exception as e:
-                    print(f"❌ 파일 로드 오류 ({file_path}): {str(e)}")
+                    print(f"❌ 파일 로드 오류 ({file_path}): {e!s}")
                     sys.stdout.flush()
 
         print(f"📊 총 {total_events}개 이벤트 로드 완료")
         sys.stdout.flush()
         return total_events
 
-    def validate_all_events(self) -> Tuple[int, int]:
+    def validate_all_events(self) -> tuple[int, int]:
         """
         모든 이벤트 검증
 
@@ -271,7 +274,7 @@ class EventBankManager:
         sys.stdout.flush()
         return (self.success_count, self.failure_count)
 
-    def save_validation_report(self, report_path: Optional[Path] = None) -> str:
+    def save_validation_report(self, report_path: Path | None = None) -> str:
         """
         검증 결과를 파일로 저장
 
@@ -329,12 +332,15 @@ class EventBankManager:
 
             metrics[category] = category_metrics
 
-            for name, score in category_metrics.items():
-                status = "✅" if score >= 0.7 else "⚠️" if score >= 0.5 else "❌"
-                print(f"  {status} {name}: {score:.2f}")
-                sys.stdout.flush()
+            self._print_metrics(category_metrics)
 
         return metrics
+
+    def _print_metrics(self, category_metrics: dict[str, float]) -> None:
+        for name, score in category_metrics.items():
+            status = "✅" if score >= self.SCORE_THRESHOLD_HIGH else "⚠️" if score >= self.SCORE_THRESHOLD_MEDIUM else "❌"
+            print(f"  {status} {name}: {score:.2f}")
+            sys.stdout.flush()
 
     def run_balance_simulation(self, turns: int = 100, seed: int = 42) -> dict[str, Any]:
         """

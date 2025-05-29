@@ -11,13 +11,13 @@
 """
 
 import random
-from typing import Dict, List, Optional, Set, Tuple, Any, Deque
-from collections import deque, defaultdict
+from collections import defaultdict, deque
+from typing import Any
 
 from schema import Metric
+from src.events.models import Alert, Event, EventCategory
+from src.events.schema import load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker
-from src.events.models import Event, EventCategory, Alert
-from src.events.schema import load_events_from_toml, load_events_from_json
 
 
 class EventEngine:
@@ -31,9 +31,9 @@ class EventEngine:
     def __init__(
         self,
         metrics_tracker: MetricsTracker,
-        events_file: Optional[str] = None,
-        tradeoff_file: Optional[str] = None,
-        seed: Optional[int] = None,
+        events_file: str | None = None,
+        tradeoff_file: str | None = None,
+        seed: int | None = None,
         max_cascade_depth: int = 10,
     ):
         """
@@ -47,10 +47,10 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-        self.events: List[Event] = []
-        self.event_queue: Deque[Event] = deque()
-        self.alert_queue: Deque[Alert] = deque()
-        self.cascade_matrix: Dict[Metric, List[Dict[str, Any]]] = {}
+        self.events: list[Event] = []
+        self.event_queue: deque[Event] = deque()
+        self.alert_queue: deque[Alert] = deque()
+        self.cascade_matrix: dict[Metric, list[dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
         self.current_turn = 0
 
@@ -103,7 +103,7 @@ class EventEngine:
         except Exception as e:
             print(f"트레이드오프 매트릭스 로드 실패: {e}")
 
-    def poll(self) -> List[Event]:
+    def poll(self) -> list[Event]:
         """
         현재 턴에 발생 가능한 이벤트를 폴링합니다.
 
@@ -135,7 +135,7 @@ class EventEngine:
 
         return triggered_events
 
-    def evaluate_triggers(self) -> List[Event]:
+    def evaluate_triggers(self) -> list[Event]:
         """
         임계값 기반 트리거를 평가합니다.
 
@@ -176,7 +176,7 @@ class EventEngine:
 
         return threshold_events
 
-    def apply_effects(self) -> Dict[Metric, float]:
+    def apply_effects(self) -> dict[Metric, float]:
         """
         큐에 있는 모든 이벤트의 효과를 적용합니다.
 
@@ -218,7 +218,7 @@ class EventEngine:
 
         return current_metrics
 
-    def _process_cascade_effects(self, changed_metrics: Set[Metric], depth: int) -> None:
+    def _process_cascade_effects(self, changed_metrics: set[Metric], depth: int) -> None:
         """
         지표 변화의 연쇄 효과를 처리합니다.
 
@@ -306,7 +306,7 @@ class EventEngine:
             if next_changed_metrics:
                 self._process_cascade_effects(next_changed_metrics, depth + 1)
 
-    def update(self) -> Dict[Metric, float]:
+    def update(self) -> dict[Metric, float]:
         """
         이벤트 엔진을 한 턴 업데이트합니다.
 
@@ -325,7 +325,7 @@ class EventEngine:
         # 효과 적용
         return self.apply_effects()
 
-    def get_alerts(self, count: Optional[int] = None) -> List[Alert]:
+    def get_alerts(self, count: int | None = None) -> list[Alert]:
         """
         알림 큐에서 알림을 가져옵니다.
 
@@ -370,7 +370,7 @@ class EventEngine:
         # Kahn의 위상 정렬 알고리즘으로 DAG 확인
         return self._is_dag_kahn(edges)
 
-    def _is_dag_kahn(self, edges: List[Tuple[str, str]]) -> bool:
+    def _is_dag_kahn(self, edges: list[tuple[str, str]]) -> bool:
         """
         Kahn의 위상 정렬 알고리즘으로 DAG 여부를 확인합니다.
 
@@ -381,7 +381,7 @@ class EventEngine:
             bool: DAG이면 True, 그렇지 않으면 False
         """
         # 진입 차수와 인접 리스트 초기화
-        in_degree: Dict[str, int] = defaultdict(int)
+        in_degree: dict[str, int] = defaultdict(int)
         adj_list = defaultdict(list)
 
         # 그래프 구성
@@ -409,7 +409,7 @@ class EventEngine:
         all_nodes = set(adj_list.keys()) | set(in_degree.keys())
         return visited == len(all_nodes)
 
-    def set_seed(self, seed: Optional[int] = None) -> None:
+    def set_seed(self, seed: int | None = None) -> None:
         """
         난수 생성 시드를 설정합니다.
 

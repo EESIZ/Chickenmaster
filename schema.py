@@ -11,8 +11,7 @@ Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈
 """
 
 from enum import Enum, auto
-from typing import Dict, Final, Tuple, Union
-
+from typing import Final
 
 # 무한대 값을 위한 타입 힌트 호환 상수
 INF: Final = float("inf")
@@ -72,7 +71,7 @@ class EventType(Enum):
 
 
 # 지표 범위 정의 (최소값, 최대값, 초기값)
-METRIC_RANGES: Final[Dict[Metric, Tuple[int, Union[int, float], int]]] = {
+METRIC_RANGES: Final[dict[Metric, tuple[int, int | float, int]]] = {
     Metric.MONEY: (0, INF, 10000),  # 음수 불가, 무한대 가능
     Metric.REPUTATION: (0, 100, 50),  # 0-100 범위
     Metric.HAPPINESS: (0, 100, 50),  # 0-100 범위
@@ -85,7 +84,7 @@ METRIC_RANGES: Final[Dict[Metric, Tuple[int, Union[int, float], int]]] = {
 
 
 # 트레이드오프 관계 정의 (상승 시 하락하는 지표들)
-TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, list[Metric]]] = {
+TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
     Metric.MONEY: [Metric.REPUTATION, Metric.HAPPINESS],
     Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],
     Metric.HAPPINESS: [Metric.SUFFERING],
@@ -98,7 +97,7 @@ TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, list[Metric]]] = {
 
 
 # 불확실성 요소 가중치 (높을수록 예측 불가능한 이벤트 발생 확률 증가)
-UNCERTAINTY_WEIGHTS: Final[Dict[Metric, float]] = {
+UNCERTAINTY_WEIGHTS: Final[dict[Metric, float]] = {
     Metric.MONEY: 0.3,  # 돈이 많을수록 위험 증가
     Metric.REPUTATION: 0.25,  # 평판이 높을수록 기대치 상승
     Metric.HAPPINESS: -0.1,  # 행복이 높을수록 위험 감소
@@ -112,7 +111,7 @@ UNCERTAINTY_WEIGHTS: Final[Dict[Metric, float]] = {
 
 # 게임 진행 관련 상수
 MAX_ACTIONS_PER_DAY: Final[int] = 3  # 하루 최대 행동 횟수
-GAME_OVER_CONDITIONS: Final[Dict[str, str]] = {
+GAME_OVER_CONDITIONS: Final[dict[str, str]] = {
     "위생 단속 실패": "INSPECTION 이벤트 발생 시 FACILITY < 30이면 게임 오버",
     "파산": "MONEY가 0 이하이고 추가 대출이 불가능한 경우",
 }
@@ -136,8 +135,7 @@ def cap_metric_value(metric: Metric, value: float) -> float:
     min_val, max_val, _ = METRIC_RANGES[metric]
 
     # 최소값 보정 (음수 방지)
-    if value < min_val:
-        value = min_val
+    value = max(value, min_val)
 
     # 최대값 보정 (범위 초과 방지)
     if max_val != INF and value > max_val:

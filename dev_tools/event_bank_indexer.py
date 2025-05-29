@@ -6,11 +6,11 @@
 날짜: 2025-05-27
 """
 
-import json
 import argparse
+import json
 import os
-from typing import Dict, Any, List, Optional, Set, TypedDict
 from datetime import datetime
+from typing import Any, TypedDict
 
 
 class EventMetadata(TypedDict):
@@ -21,11 +21,11 @@ class EventMetadata(TypedDict):
     type: str
     name_ko: str
     name_en: str
-    tags: Set[str]
+    tags: set[str]
     probability: float
     cooldown: int
-    trigger: Dict[str, Any]
-    metrics: Dict[str, float]
+    trigger: dict[str, Any]
+    metrics: dict[str, float]
     last_modified: str
 
 
@@ -44,7 +44,7 @@ class EventBankIndexer:
         self.output_dir = output_dir
         self.metadata_file = os.path.join(output_dir, "metadata.json")
 
-    def load_events(self) -> Dict[str, List[Dict[str, Any]]]:
+    def load_events(self) -> dict[str, list[dict[str, Any]]]:
         """
         이벤트 JSON 파일 로드
 
@@ -52,16 +52,16 @@ class EventBankIndexer:
             이벤트 데이터 딕셔너리
         """
         try:
-            with open(self.input_file, "r", encoding="utf-8") as f:
+            with open(self.input_file, encoding="utf-8") as f:
                 data = json.load(f)
                 if not isinstance(data, dict) or "events" not in data:
                     return {"events": []}
                 return data
         except Exception as e:
-            print(f"❌ 파일 로드 오류: {str(e)}")
+            print(f"❌ 파일 로드 오류: {e!s}")
             return {"events": []}
 
-    def load_metadata(self) -> Dict[str, EventMetadata]:
+    def load_metadata(self) -> dict[str, EventMetadata]:
         """
         메타데이터 JSON 파일 로드
 
@@ -70,16 +70,16 @@ class EventBankIndexer:
         """
         try:
             if os.path.exists(self.metadata_file):
-                with open(self.metadata_file, "r", encoding="utf-8") as f:
+                with open(self.metadata_file, encoding="utf-8") as f:
                     data = json.load(f)
                     if not isinstance(data, dict):
                         return {}
                     return data
         except Exception as e:
-            print(f"❌ 메타데이터 로드 오류: {str(e)}")
+            print(f"❌ 메타데이터 로드 오류: {e!s}")
         return {}
 
-    def save_metadata(self, metadata: Dict[str, EventMetadata]) -> None:
+    def save_metadata(self, metadata: dict[str, EventMetadata]) -> None:
         """
         메타데이터 JSON 파일 저장
 
@@ -92,11 +92,11 @@ class EventBankIndexer:
                 json.dump(metadata, f, ensure_ascii=False, indent=2)
             print(f"✅ 메타데이터가 {self.metadata_file}에 저장되었습니다.")
         except Exception as e:
-            print(f"❌ 메타데이터 저장 오류: {str(e)}")
+            print(f"❌ 메타데이터 저장 오류: {e!s}")
 
     def update_metadata(
-        self, events: List[Dict[str, Any]], metrics: Optional[Dict[str, float]] = None
-    ) -> Dict[str, EventMetadata]:
+        self, events: list[dict[str, Any]], metrics: dict[str, float] | None = None
+    ) -> dict[str, EventMetadata]:
         """
         이벤트 메타데이터 업데이트
 

@@ -1,0 +1,498 @@
+{
+  "metadata": {
+    "category": "daily_routine",
+    "count": 10,
+    "generated_at": "2025-05-29 23:01:40",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "daily_routine_new_sauce_8320",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "신비한 양념 레시피",
+      "name_en": "Mysterious Sauce Recipe",
+      "text_ko": "단골손님이 본인만의 특별한 양념 레시피를 공유하겠다고 제안했습니다. 하지만 레시피 개발에는 시간과 재료비가 들 것 같습니다.",
+      "text_en": "A regular customer offers to share their special sauce recipe. However, it will require time and ingredients to develop.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "레시피를 받아서 개발해본다",
+          "text_en": "Accept and develop the recipe",
+          "effects": {
+            "money": -300000,
+            "reputation": 25,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "현재 레시피로 충분하다고 거절한다",
+          "text_en": "Decline politely",
+          "effects": {
+            "money": 0,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000000
+      }
+    },
+    {
+      "id": "daily_routine_new_sauce_7049",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "비밀 양념 레시피",
+      "name_en": "Secret Sauce Recipe",
+      "text_ko": "오랫동안 연구한 새로운 양념 소스를 개발했습니다. 기존 메뉴에 적용할까요?",
+      "text_en": "You've developed a new sauce recipe after long research. Would you like to apply it to the existing menu?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-200"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "새로운 양념을 메인 메뉴에 적용한다",
+          "text_en": "Apply the new sauce to main menu",
+          "effects": {
+            "money": -500,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "기존 레시피를 유지한다",
+          "text_en": "Keep the original recipe",
+          "effects": {
+            "money": 0,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_5835",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 주문",
+      "name_en": "Regular Customer's Special Order",
+      "text_ko": "매주 화요일마다 오시는 단골손님이 오늘은 평소와 다르게 20인분을 주문하셨습니다. 하지만 현재 재료가 부족한 상황입니다.",
+      "text_en": "A regular customer who comes every Tuesday ordered 20 servings today, which is unusual. However, ingredients are currently low in stock.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "죄송하다고 말씀드리고 10인분만 받기",
+          "text_en": "Apologize and accept only 10 servings",
+          "effects": {
+            "money": 150000,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "급하게 마트에서 재료 구매해서 맞추기",
+          "text_en": "Quickly buy ingredients from the market",
+          "effects": {
+            "money": 100000,
+            "reputation": 20,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_3220",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 요청",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 금요일마다 방문하는 단골손님이 오늘은 양념치킨을 '아주 매콤하게' 만들어달라고 요청합니다. 평소보다 양념을 더 넣으면 맵기는 올라가지만 원가가 상승합니다.",
+      "text_en": "A regular Friday customer requests their seasoned chicken to be 'extra spicy' today. Adding more sauce will increase spiciness but also raise costs.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "요청대로 양념을 넉넉히 넣어준다",
+          "text_en": "Add extra sauce as requested",
+          "effects": {
+            "money": -30,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 기본 양념으로 제공한다",
+          "text_en": "Serve with regular amount of sauce",
+          "effects": {
+            "money": 0,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "CUSTOMER_SATISFACTION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_sauce_shortage_4964",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "양념 소스 재고 부족",
+      "name_en": "Sauce Shortage Crisis",
+      "text_ko": "인기 있는 양념치킨 소스가 거의 바닥났습니다. 오늘 저녁 러시아워가 다가오는데 어떻게 대처하시겠습니까?",
+      "text_en": "You're running low on the popular seasoned chicken sauce. Evening rush hour is approaching. How will you handle this?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "근처 마트에서 비싸더라도 당장 소스 재료를 구매한다",
+          "text_en": "Buy sauce ingredients from nearby mart despite higher prices",
+          "effects": {
+            "money": -150000,
+            "reputation": 5,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "오늘 하루는 양념치킨 주문을 받지 않는다",
+          "text_en": "Stop taking orders for seasoned chicken today",
+          "effects": {
+            "money": -100000,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 15,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "daily_routine_sauce_shortage_5287",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "양념 소스 품절 위기",
+      "name_en": "Sauce Shortage Crisis",
+      "text_ko": "인기 있는 양념치킨 소스가 거의 바닥났습니다. 오늘 저녁 주문이 많이 들어올 것으로 예상됩니다.",
+      "text_en": "You're running low on the popular seasoned chicken sauce. Many orders are expected this evening.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 근처 마트에서 비싼 값에 재료를 구매한다",
+          "text_en": "Urgently buy ingredients at a higher price from nearby market",
+          "effects": {
+            "money": -100000,
+            "reputation": 5,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "오늘 하루 양념치킨 판매를 중단한다",
+          "text_en": "Stop selling seasoned chicken for today",
+          "effects": {
+            "money": -50000,
+            "reputation": -15,
+            "customer_satisfaction": -20
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 15,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "daily_routine_delivery_rider_5747",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "배달 라이더의 제안",
+      "name_en": "Delivery Rider's Proposal",
+      "text_ko": "단골 배달 라이더가 찾아와 독점 계약을 제안합니다. 배달 수수료를 10% 낮춰주는 대신 다른 라이더는 받지 않겠다고 합니다.",
+      "text_en": "A regular delivery rider suggests an exclusive contract. He offers a 10% lower delivery fee but wants exclusivity.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-50"
+        },
+        {
+          "metric": "DELIVERY_SPEED",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "독점 계약 수락하기",
+          "text_en": "Accept exclusive contract",
+          "effects": {
+            "money": 200,
+            "reputation": -5,
+            "delivery_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "현재 시스템 유지하기",
+          "text_en": "Maintain current system",
+          "effects": {
+            "money": -100,
+            "reputation": 5,
+            "delivery_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "DELIVERY_COUNT",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_chicken_review_2546",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "SNS 인플루언서의 방문",
+      "name_en": "Social Media Influencer Visit",
+      "text_ko": "10만 팔로워를 보유한 유명 먹방 인플루언서가 가게를 방문했습니다. 무료로 치킨을 제공하면 리뷰를 해주겠다고 합니다.",
+      "text_en": "A famous food reviewer with 100k followers visited your shop and offers to review your chicken in exchange for free meals.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "무료로 치킨을 제공하고 리뷰를 받는다",
+          "text_en": "Provide free chicken for the review",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "정중히 거절한다",
+          "text_en": "Politely decline",
+          "effects": {
+            "money": 0,
+            "reputation": -20,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_7630",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 매주 치킨을 주문하신 단골손님이 방문하셨습니다. 최근 건강 때문에 치킨을 줄이려고 한다고 하시네요.",
+      "text_en": "A regular customer who has been ordering chicken weekly for 20 years visits. They mention wanting to reduce chicken consumption for health reasons.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "건강한 치킨 메뉴를 새로 개발하여 제안한다",
+          "text_en": "Develop and suggest a healthier chicken menu",
+          "effects": {
+            "money": -200,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "portion 크기를 줄인 미니 세트를 제안한다",
+          "text_en": "Suggest a mini portion set",
+          "effects": {
+            "money": 100,
+            "reputation": 10,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_2491",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 요청",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 금요일마다 오시는 단골손님이 오늘은 양념치킨을 매콤하게 해달라고 요청하셨습니다. 평소보다 양념을 더 넣으면 맵기를 좋아하는 다른 손님들의 호응을 얻을 수 있지만, 일부 손님들은 불만을 가질 수 있습니다.",
+      "text_en": "A regular customer who visits every Friday requests their seasoned chicken to be spicier than usual. Adding more seasoning might attract spicy food lovers but could disappoint others.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "요청대로 양념을 더 넣는다",
+          "text_en": "Add more seasoning as requested",
+          "effects": {
+            "money": 150,
+            "reputation": 15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "기존 레시피를 고수한다",
+          "text_en": "Stick to the original recipe",
+          "effects": {
+            "money": -50,
+            "reputation": -5,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    }
+  ]
+}
