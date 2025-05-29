@@ -32,6 +32,16 @@ from src.events.schema import (
 from src.events.engine import EventEngine
 from src.events.integration import GameEventSystem
 
+# 테스트 상수
+PERFORMANCE_TIMEOUT = 3.0  # 초
+MEMORY_LIMIT = 256.0  # MB
+EVENT_PRIORITY = 10
+EVENT_PROBABILITY = 0.5
+CHAIN_EFFECT_MIN = 3
+HISTORY_DAYS = 5
+EPSILON = 0.001
+MONEY_RANGE = (9000.0, 11000.0)
+REPUTATION_RANGE = (45.0, 55.0)
 
 @pytest.fixture
 def sample_metrics() -> dict[Metric, float]:
@@ -275,8 +285,8 @@ def test_perf_1000_events(game_event_system: GameEventSystem) -> None:
     print(f"소요 시간: {elapsed_time:.2f}초, 메모리 사용량: {memory_usage:.2f} MB")
 
     # 성능 요구사항 검증
-    assert elapsed_time <= 3.0  # 3초 이내
-    assert memory_usage <= 256.0  # 256 MB 이내
+    assert elapsed_time <= PERFORMANCE_TIMEOUT  # 3초 이내
+    assert memory_usage <= MEMORY_LIMIT  # 256 MB 이내
 
 
 def test_event_schema_parsing() -> None:
@@ -311,8 +321,8 @@ def test_event_schema_parsing() -> None:
         assert len(events) == 1
         assert events[0].id == "test_event"
         assert events[0].type == EventCategory.RANDOM
-        assert events[0].priority == 10
-        assert events[0].probability == 0.5
+        assert events[0].priority == EVENT_PRIORITY
+        assert events[0].probability == EVENT_PROBABILITY
         assert len(events[0].effects) == 1
         assert events[0].effects[0].metric == Metric.MONEY
         assert events[0].effects[0].formula == "-500"
@@ -328,8 +338,8 @@ def test_event_schema_parsing() -> None:
         assert len(json_events) == 1
         assert json_events[0].id == "test_event"
         assert json_events[0].type == EventCategory.RANDOM
-        assert json_events[0].priority == 10
-        assert json_events[0].probability == 0.5
+        assert json_events[0].priority == EVENT_PRIORITY
+        assert json_events[0].probability == EVENT_PROBABILITY
         assert len(json_events[0].effects) == 1
         assert json_events[0].effects[0].metric == Metric.MONEY
         assert json_events[0].effects[0].formula == "-500"
@@ -407,19 +417,19 @@ def test_uncertainty_factor() -> None:
     updated_metrics = metrics_tracker.get_metrics()
 
     # 원래 값의 ±10% 범위 내에 있는지 확인
-    assert 9000.0 <= updated_metrics[Metric.MONEY] <= 11000.0
-    assert 45.0 <= updated_metrics[Metric.REPUTATION] <= 55.0
+    assert MONEY_RANGE[0] <= updated_metrics[Metric.MONEY] <= MONEY_RANGE[1]
+    assert REPUTATION_RANGE[0] <= updated_metrics[Metric.REPUTATION] <= REPUTATION_RANGE[1]
 
     # 행복-고통 시소 불변식 확인
     assert (
-        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < 0.001
+        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < EPSILON
     )
 
 
 def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) -> None:
     """이벤트 엔진과 MetricsTracker의 통합을 테스트합니다."""
     # 여러 일 진행
-    for _ in range(5):
+    for _ in range(HISTORY_DAYS):
         game_event_system.update_day()
 
     # 결과 검증
@@ -428,11 +438,11 @@ def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) ->
     events = game_event_system.get_events_history()
 
     # 지표 변화 확인
-    assert len(history) > 5  # 초기 상태 + 5일
+    assert len(history) > HISTORY_DAYS  # 초기 상태 + 5일
     assert len(events) > 0  # 이벤트 발생 확인
 
     # 행복-고통 시소 불변식 확인
-    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < 0.001
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < EPSILON
 
 
 def test_tradeoff_matrix_loading(game_event_system: GameEventSystem) -> None:
@@ -510,4 +520,4 @@ def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -
 
     # 행복-고통 시소 불변식 확인
     final_metrics = result["final_metrics"]
-    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < 0.001
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < EPSILON

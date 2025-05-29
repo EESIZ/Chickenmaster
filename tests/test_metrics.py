@@ -16,6 +16,7 @@ import sys
 import tempfile
 import time
 from collections.abc import Generator
+from typing import Any
 
 import pytest
 
@@ -47,6 +48,14 @@ UNCERTAINTY_INTENSITY = 0.1
 MONEY_UPDATE_RANGE = (5000.0, 15000.0)
 REPUTATION_UPDATE_RANGE = (30.0, 70.0)
 HAPPINESS_UPDATE_RANGE = (40.0, 80.0)
+REPUTATION_THRESHOLD_LOW = 20
+REPUTATION_THRESHOLD_HIGH = 80
+FACILITY_THRESHOLD_LOW = 30
+STAFF_FATIGUE_THRESHOLD_HIGH = 80
+MONEY_THRESHOLD_LOW = 1000
+EPSILON = 0.001
+HISTORY_DAYS = 5
+EVENT_COUNT_MIN = 3
 
 
 @pytest.fixture
@@ -567,3 +576,36 @@ def test_performance(test_metrics: dict[Metric, float]) -> None:
         f"(실제: {elapsed_time:.2f}초)"
     )
     assert elapsed_time < PERFORMANCE_TIMEOUT, error_msg
+
+
+def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -> None:
+    """시나리오 시뮬레이션을 테스트합니다."""
+    # 테스트 시나리오 정의
+    scenario = {
+        "seed": 42,
+        "initial_metrics": {
+            Metric.MONEY: 5000.0,
+            Metric.REPUTATION: 30.0,
+            Metric.HAPPINESS: 40.0,
+            Metric.SUFFERING: 60.0,
+            Metric.INVENTORY: 50.0,
+            Metric.STAFF_FATIGUE: 70.0,
+            Metric.FACILITY: 40.0,
+        },
+    }
+
+    # 시나리오 시뮬레이션
+    result = game_event_system.no_right_answer_simulate_scenario(scenario, days=HISTORY_DAYS)
+
+    # 결과 검증
+    assert "final_metrics" in result
+    assert "metrics_history" in result
+    assert "events_history" in result
+    assert "alerts" in result
+
+    # 히스토리 길이 확인
+    assert len(result["metrics_history"]) == HISTORY_DAYS
+
+    # 행복-고통 시소 불변식 확인
+    final_metrics = result["final_metrics"]
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - MAX_METRIC_VALUE) < EPSILON
