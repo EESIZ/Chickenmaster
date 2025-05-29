@@ -11,7 +11,7 @@ import multiprocessing as mp
 import sys
 import time
 from pathlib import Path
-from typing import Any, List, Dict, Optional
+from typing import Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 
@@ -67,7 +67,7 @@ CATEGORY_TARGETS = {
 class MassEventGenerator:
     """대량 이벤트 생성기"""
 
-    def __init__(self, num_workers: int = None):
+    def __init__(self, num_workers: int | None = None):
         """
         초기화
         
@@ -143,8 +143,8 @@ class MassEventGenerator:
         return None
 
     def generate_batch(
-        self, category: str, tags: List[str], batch_size: int
-    ) -> List[Dict[str, Any]]:
+        self, category: str, tags: list[str], batch_size: int
+    ) -> list[dict[str, Any]]:
         """배치 단위로 이벤트 생성"""
         events = []
         with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
@@ -225,7 +225,7 @@ class MassEventGenerator:
         print(f"[SAVE] 저장 완료: {filepath}")
         return str(filepath)
 
-    def run_mass_generation(self) -> Dict[str, int]:
+    def run_mass_generation(self) -> dict[str, int]:
         """대량 생성 실행"""
         print(f"[START] Claude Code 이벤트 대량 생성 시작! (작업자 수: {self.num_workers})")
         print(f"[INFO] 출력 디렉토리: {self.output_dir}")
@@ -297,7 +297,7 @@ class MassEventGenerator:
         return True
 
     def _print_summary(
-        self, results: Dict[str, int], plan: Dict[str, Dict[str, Any]], start_time: float
+        self, results: dict[str, int], plan: dict[str, dict[str, Any]], start_time: float
     ) -> None:
         """결과 요약 출력"""
         end_time = time.time()
@@ -332,7 +332,7 @@ class MassEventGenerator:
         else:
             print(f"[WARNING] 목표 미달성: {total}/{GENERATION_CONFIG['TARGET_EVENT_COUNT']}개 ({total/GENERATION_CONFIG['TARGET_EVENT_COUNT']*100:.1f}%)")
 
-    def _save_final_results(self, results: Dict[str, int], duration: float) -> None:
+    def _save_final_results(self, results: dict[str, int], duration: float) -> None:
         """최종 결과 저장"""
         timestamp = int(time.time())
         filename = f"events_generated_{timestamp}.json"

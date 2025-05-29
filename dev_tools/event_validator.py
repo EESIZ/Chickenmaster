@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 파일: dev_tools/event_validator.py
 목적: 이벤트 데이터 검증 및 품질 평가 도구
@@ -12,7 +13,7 @@ import math
 import tomllib  # Python 3.11+
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Dict, ClassVar
+from typing import Any, ClassVar
 from fuzzywuzzy import fuzz
 
 # 품질 메트릭 임계값
@@ -51,7 +52,7 @@ class EventValidator:
     """이벤트 검증기"""
 
     # 한국 치킨집 문화 관련 키워드
-    CULTURAL_KEYWORDS: ClassVar[List[str]] = [
+    CULTURAL_KEYWORDS: ClassVar[list[str]] = [
         "치킨", "후라이드", "양념", "간장", "마늘", "닭강정",
         "배달", "포장", "회식", "단골", "성수기", "할인",
         "치맥", "맥주", "소주", "안주", "야식", "주문",
@@ -79,10 +80,10 @@ class EventValidator:
 
     def __init__(self):
         """초기화"""
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
         self.event_ids: set[str] = set()
-        self.validated_events: List[Dict[str, Any]] = []
+        self.validated_events: list[dict[str, Any]] = []
 
     def validate_file(self, file_path: Path) -> bool:
         """단일 파일 검증"""
@@ -269,7 +270,7 @@ class EventValidator:
             return False
 
         # value 타입 검증
-        if not isinstance(trigger["value"], (int, float)):
+        if not isinstance(trigger["value"], int | float):
             self.errors.append(f"트리거 value는 숫자여야 함: {trigger['value']} (이벤트: {event_id})")
             return False
 
@@ -314,7 +315,7 @@ class EventValidator:
         positive_effects = 0
         negative_effects = 0
         for metric, value in choice["effects"].items():
-            if not isinstance(value, (int, float)):
+            if not isinstance(value, int | float):
                 self.errors.append(f"effect 값은 숫자여야 함: {metric}={value} (이벤트: {event_id}, 선택지 {index+1})")
                 return False
             if value > 0:
@@ -464,171 +465,113 @@ class EventValidator:
         return events_with_tradeoffs / len(events)
 
     def _has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
-        """선택지들이 명확한 트레이드오프를 가지는지 확인"""
+        """선택지들이 명확한 트레이드오프를 가지는지"""
         if len(choices) < 2:
             return False
 
+        # 각 선택지의 효과 메트릭 집합
+        choice_metrics = []
         for choice in choices:
             effects = choice.get("effects", {})
-            has_positive = False
-            has_negative = False
+            metrics = {metric for metric, value in effects.items() if abs(value) > 0.1}
+            choice_metrics.append(metrics)
 
-            for metric, value in effects.items():
-                if value > 0:
-                    has_positive = True
-                elif value < 0:
-                    has_negative = True
+        # 선택지 간 메트릭 차이 확인
+        for i in range(len(choice_metrics)):
+            for j in range(i + 1, len(choice_metrics)):
+                # 두 선택지가 영향을 주는 메트릭이 다르면 트레이드오프 존재
+                if choice_metrics[i] != choice_metrics[j]:
+                    return True
 
-            if not (has_positive and has_negative):
-                return False
+                # 같은 메트릭에 영향을 주지만 방향이 다른지 확인
+                for metric in choice_metrics[i]:
+                    val_i = choices[i]["effects"].get(metric, 0)
+                    val_j = choices[j]["effects"].get(metric, 0)
+                    if val_i * val_j < 0:  # 부호가 다르면
+                        return True
 
-        return True
+        return False
 
     def _calculate_cultural_authenticity(self, events: list[dict[str, Any]]) -> float:
         """한국 치킨집 문화 반영도"""
         if not events:
             return 0.0
 
-        authentic_events = 0
+        total_score = 0.0
         for event in events:
-            text_ko = event.get("text_ko", "")
-            name_ko = event.get("name_ko", "")
+            text = f"{event.get('name_ko', '')} {event.get('text_ko', '')}"
+            matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
+            
+            # 키워드 매칭 점수 (0.0 ~ 1.0)
+            keyword_score = min(1.0, matched_keywords / VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"])
+            total_score += keyword_score
 
-            matched_keywords = sum(
-                1 for keyword in self.CULTURAL_KEYWORDS
-                if keyword in text_ko or keyword in name_ko
-            )
-
-            if matched_keywords >= VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"]:
-                authentic_events += 1
-
-        return authentic_events / len(events)
+        return total_score / len(events)
 
     def _calculate_replayability(self, events: list[dict[str, Any]]) -> float:
-        """이벤트의 재플레이 가치 점수 계산"""
+        """재플레이 가능성 (이벤트 다양성 + 선택지 다양성)"""
         if not events:
             return 0.0
 
-        total_score = 0.0
-        max_score = 0.0
+        # 이벤트 타입 다양성
+        event_types = {event.get("type", "") for event in events}
+        type_diversity = len(event_types) / 4.0  # 4가지 이벤트 타입 기준
 
-        for event in events:
-            base_score: float = 0.0
+        # 선택지 다양성
+        avg_choices = sum(len(event.get("choices", [])) for event in events) / len(events)
+        choice_diversity = min(1.0, avg_choices / 3.0)  # 평균 3개 이상 선택지면 만점
 
-            # 선택지 수에 따른 점수
-            choices = event.get("choices", [])
-            choice_count = len(choices)
-            if choice_count > 1:
-                base_score += float(choice_count * 0.1)
+        # 가중 평균
+        return 0.7 * type_diversity + 0.3 * choice_diversity
 
-            # 조건부 트리거 점수
-            if event.get("type") == "THRESHOLD":
-                base_score += 0.2
+    def get_errors(self) -> list[str]:
+        """오류 목록 반환"""
+        return self.errors
 
-            # 연쇄 이벤트 점수
-            cascade_events = 0
-            for choice in choices:
-                cascade_events += len(choice.get("cascade_events", []))
-            if cascade_events > 0:
-                base_score += float(cascade_events * 0.15)
+    def get_warnings(self) -> list[str]:
+        """경고 목록 반환"""
+        return self.warnings
 
-            # 태그 다양성 점수
-            tags = event.get("tags", [])
-            if len(tags) > 0:
-                base_score += float(len(tags) * 0.05)
-
-            total_score += base_score
-            max_score += 1.0
-
-        if max_score > 0:
-            return total_score / max_score
-        return 0.0
+    def get_validated_events(self) -> list[dict[str, Any]]:
+        """검증된 이벤트 목록 반환"""
+        return self.validated_events
 
 
-def main() -> int:
-    """메인 함수"""
-    parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 검증기")
-    parser.add_argument("--file", type=str, help="검증할 단일 이벤트 파일 경로 (TOML 또는 JSON)")
-    parser.add_argument("--dir", type=str, help="검증할 이벤트 디렉토리 경로")
-    parser.add_argument("--metrics", action="store_true", help="품질 메트릭 계산 및 출력")
-
+def main():
+    """명령행 인터페이스"""
+    parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
+    parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
+    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
     args = parser.parse_args()
 
-    if not args.file and not args.dir:
-        print("[ERROR] 파일 또는 디렉토리 경로를 지정해야 합니다.")
+    validator = EventValidator()
+    path = Path(args.path)
+
+    if path.is_file():
+        success = validator.validate_file(path)
+    elif path.is_dir():
+        success = validator.validate_directory(path)
+    else:
+        print(f"오류: 경로를 찾을 수 없음: {path}")
         return 1
 
-    validator = EventValidator()
-    success = False
+    # 오류 및 경고 출력
+    for error in validator.get_errors():
+        print(f"오류: {error}")
+    for warning in validator.get_warnings():
+        print(f"경고: {warning}")
 
-    if args.file:
-        file_path = Path(args.file)
-        if not file_path.exists():
-            print(f"[ERROR] 파일을 찾을 수 없습니다: {args.file}")
-            return 1
-
-        print(f"[INFO] 파일 검증 중: {file_path}")
-        success = validator.validate_file(file_path)
-
-    elif args.dir:
-        dir_path = Path(args.dir)
-        if not dir_path.exists() or not dir_path.is_dir():
-            print(f"[ERROR] 디렉토리를 찾을 수 없습니다: {args.dir}")
-            return 1
-
-        print(f"[INFO] 디렉토리 검증 중: {dir_path}")
-        success = validator.validate_directory(dir_path)
-
-    # 결과 출력
-    if success:
-        print("[SUCCESS] 검증 성공!")
-        if validator.warnings:
-            print("\n[WARNING]")
-            for warning in validator.warnings:
-                print(f"  - {warning}")
-    else:
-        print("[ERROR] 검증 실패!")
-        print("\n오류:")
-        for error in validator.errors:
-            print(f"  - {error}")
-
-    # 품질 메트릭 계산 (요청 시)
-    if args.metrics and success:
-        # 이벤트 데이터 로드
-        events = []
-        if args.file:
-            file_path = Path(args.file)
-            if file_path.suffix.lower() == ".toml":
-                with open(file_path, "rb") as f:
-                    data = tomllib.load(f)
-                    events = data.get("events", [])
-            elif file_path.suffix.lower() == ".json":
-                with open(file_path, encoding="utf-8") as f:
-                    data = json.load(f)
-                    events = data.get("events", [])
-
-        elif args.dir:
-            # 디렉토리 내 모든 파일에서 이벤트 수집
-            dir_path = Path(args.dir)
-            for file_path in dir_path.glob("**/*.toml"):
-                with open(file_path, "rb") as f:
-                    data = tomllib.load(f)
-                    events.extend(data.get("events", []))
-
-            for file_path in dir_path.glob("**/*.json"):
-                with open(file_path, encoding="utf-8") as f:
-                    data = json.load(f)
-                    events.extend(data.get("events", []))
-
-        # 메트릭 계산 및 출력
-        metrics = validator.calculate_quality_metrics(events)
-        print("\n[METRICS]")
+    # 품질 메트릭 계산 및 출력
+    if args.quality and validator.get_validated_events():
+        metrics = validator.calculate_quality_metrics(validator.get_validated_events())
+        print("\n품질 메트릭:")
         for name, value in metrics.items():
-            status = "[PASS]" if value >= QUALITY_THRESHOLDS.get(name.upper(), 0.7) else "[WARN]"
-            print(f"  {status} {name}: {value:.2f}")
+            threshold = QUALITY_THRESHOLDS.get(name.upper(), 0.0)
+            status = "✓" if value >= threshold else "✗"
+            print(f"  {name}: {value:.2f} {status}")
 
     return 0 if success else 1
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())
