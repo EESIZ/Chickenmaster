@@ -1,0 +1,64 @@
+{
+  "id": "morning_cleaning_check",
+  "type": "THRESHOLD",
+  "category": "daily_routine",
+  "name_ko": "청소 점검",
+  "name_en": "Cleaning Inspection",
+  "text_ko": "어젯밤 마감 청소가 완벽하지 않았습니다. 기름때가 남아있고 바닥이 끈적합니다.",
+  "text_en": "Last night's closing cleanup wasn't thorough. Grease stains remain and the floor is sticky.",
+  "effects": [
+    {
+      "metric": "HYGIENE",
+      "formula": "value - 10",
+      "message": "hygiene이(가) 감소했습니다."
+    },
+    {
+      "metric": "HEALTH_INSPECTION_RISK",
+      "formula": "value + 5",
+      "message": "health_inspection_risk이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "다시 꼼꼼히 청소한다",
+      "text_en": "Clean thoroughly again",
+      "effects": {
+        "hygiene": 15,
+        "stress": 10,
+        "preparation_time": 30
+      }
+    },
+    {
+      "text_ko": "눈에 띄는 부분만 대충 닦는다",
+      "text_en": "Just wipe visible areas quickly",
+      "effects": {
+        "hygiene": 5,
+        "stress": -5,
+        "preparation_time": 10
+      }
+    },
+    {
+      "text_ko": "직원에게 청소 교육을 다시 시킨다",
+      "text_en": "Re-train staff on cleaning procedures",
+      "effects": {
+        "hygiene": 10,
+        "staff_loyalty": -5,
+        "training_investment": 10
+      }
+    }
+  ],
+  "conditions": [
+    "hygiene < 70"
+  ],
+  "tags": [
+    "위생",
+    "시간관리",
+    "직원교육"
+  ],
+  "probability": 0.18,
+  "trigger": {
+    "metric": "HYGIENE",
+    "condition": "less_than",
+    "value": 70
+  }
+}

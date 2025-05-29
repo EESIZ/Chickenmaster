@@ -62,8 +62,18 @@ test:
 coverage_check:
   stage: test
   script:
-    - pip install pytest pytest-cov psutil types-psutil
-    - pytest --cov=. --cov-report=term --cov-report=xml --cov-fail-under=80
+    - pip install pytest pytest-cov
+    - pip install psutil
+    - pytest --cov=. --cov-report=term
+    - coverage_result=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
+    - echo "Coverage is $coverage_result%"
+    - |
+      if (( $(echo "$coverage_result < 80" | bc -l) )); then
+        echo "Coverage is below 80%"
+        exit 1
+      else
+        echo "Coverage is at or above 80%"
+      fi
   needs:
     - test
 

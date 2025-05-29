@@ -1,0 +1,56 @@
+{
+  "id": "test_event_1",
+  "type": "RANDOM",
+  "name": "테스트 이벤트",
+  "name_en": "Test Event",
+  "text": "이것은 테스트 이벤트입니다.",
+  "text_en": "This is a test event.",
+  "effects": [
+    {
+      "metric": "money",
+      "formula": "100",
+      "message": "돈이 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "id": "choice_1",
+      "text": "선택지 1",
+      "text_en": "Choice 1",
+      "effects": [
+        {
+          "metric": "happiness",
+          "formula": "10",
+          "message": "행복이 증가했습니다."
+        },
+        {
+          "metric": "pain",
+          "formula": "-10",
+          "message": "고통이 감소했습니다."
+        }
+      ]
+    },
+    {
+      "id": "choice_2",
+      "text": "선택지 2",
+      "text_en": "Choice 2",
+      "effects": [
+        {
+          "metric": "happiness",
+          "formula": "-5",
+          "message": "행복이 감소했습니다."
+        },
+        {
+          "metric": "pain",
+          "formula": "5",
+          "message": "고통이 증가했습니다."
+        },
+        {
+          "metric": "money",
+          "formula": "200",
+          "message": "돈이 증가했습니다."
+        }
+      ]
+    }
+  ]
+}
