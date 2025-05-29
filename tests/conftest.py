@@ -3,7 +3,7 @@ pytest 설정 및 fixture
 """
 
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from pydantic import BaseModel, Field
