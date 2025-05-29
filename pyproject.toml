@@ -1,7 +1,8 @@
-[lint]
+[tool.ruff]
 # 전체 프로젝트에 대한 기본 규칙
 select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+line-length = 100
 
 # 특정 파일에 대한 규칙 무시
-[lint.per-file-ignores]
+[tool.ruff.per-file-ignores]
 "scripts/mass_event_generation.py" = ["E402"]  # sys.path 수정 후 import가 필요한 경우 
