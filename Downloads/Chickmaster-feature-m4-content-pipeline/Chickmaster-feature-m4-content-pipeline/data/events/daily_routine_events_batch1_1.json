@@ -1,0 +1,792 @@
+{
+  "events": [
+    {
+      "id": "morning_prep_delay",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "오픈 준비 지연",
+      "name_en": "Opening Preparation Delay",
+      "text_ko": "오늘 아침 직원이 늦게 와서 12시 오픈이 15분 늦어질 것 같습니다. 본사에서 POS 시스템으로 감시하고 있어 경고를 받을 수도 있습니다.",
+      "text_en": "Your staff arrived late this morning, and the 12 PM opening will be delayed by 15 minutes. The franchise headquarters monitors via POS system and may issue a warning.",
+      "effects": {
+        "immediate": {"stress": 10},
+        "delayed": {"franchise_relationship": -2}
+      },
+      "choices": [
+        {
+          "text_ko": "혼자라도 시간 맞춰 오픈한다",
+          "text_en": "Open on time alone",
+          "effects": {"stress": 15, "reputation": 5, "stamina": -10}
+        },
+        {
+          "text_ko": "직원을 기다려 제대로 준비 후 오픈한다", 
+          "text_en": "Wait for staff and open properly prepared",
+          "effects": {"reputation": -5, "stress": -5, "staff_loyalty": 10}
+        },
+        {
+          "text_ko": "본사에 미리 연락해 상황을 설명한다",
+          "text_en": "Contact headquarters to explain the situation",
+          "effects": {"stress": 5, "reputation": 2, "franchise_relationship": 3}
+        }
+      ],
+      "conditions": ["time_of_day == 'morning'"],
+      "tags": ["시간관리", "직원", "본사압박"],
+      "probability": 0.15
+    },
+    {
+      "id": "ingredient_freshness_check",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "재료 신선도 체크",
+      "name_en": "Ingredient Freshness Check",
+      "text_ko": "어제 남은 양파가 조금 시들어 보입니다. 아직 쓸 수는 있지만 최상의 상태는 아닙니다.",
+      "text_en": "Yesterday's leftover onions look slightly wilted. They're still usable but not in perfect condition.",
+      "effects": {
+        "immediate": {"food_safety_concern": 5}
+      },
+      "choices": [
+        {
+          "text_ko": "그냥 사용한다 (비용 절약)",
+          "text_en": "Use them anyway (cost saving)",
+          "effects": {"money": 5000, "food_quality": -3, "reputation": -2}
+        },
+        {
+          "text_ko": "새 양파를 구매한다",
+          "text_en": "Buy fresh onions", 
+          "effects": {"money": -8000, "food_quality": 5, "reputation": 3}
+        },
+        {
+          "text_ko": "시든 부분만 제거하고 사용한다",
+          "text_en": "Remove wilted parts and use the rest",
+          "effects": {"money": 2000, "food_quality": 1, "preparation_time": 15}
+        }
+      ],
+      "conditions": ["ingredients_stock > 0"],
+      "tags": ["품질관리", "비용절약", "시간관리"],
+      "probability": 0.12
+    },
+    {
+      "id": "morning_cleaning_check",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "청소 점검",
+      "name_en": "Cleaning Inspection",
+      "text_ko": "어젯밤 마감 청소가 완벽하지 않았습니다. 기름때가 남아있고 바닥이 끈적합니다.",
+      "text_en": "Last night's closing cleanup wasn't thorough. Grease stains remain and the floor is sticky.",
+      "effects": {
+        "immediate": {"hygiene": -10},
+        "delayed": {"health_inspection_risk": 5}
+      },
+      "choices": [
+        {
+          "text_ko": "다시 꼼꼼히 청소한다",
+          "text_en": "Clean thoroughly again",
+          "effects": {"hygiene": 15, "stress": 10, "preparation_time": 30}
+        },
+        {
+          "text_ko": "눈에 띄는 부분만 대충 닦는다",
+          "text_en": "Just wipe visible areas quickly", 
+          "effects": {"hygiene": 5, "stress": -5, "preparation_time": 10}
+        },
+        {
+          "text_ko": "직원에게 청소 교육을 다시 시킨다",
+          "text_en": "Re-train staff on cleaning procedures",
+          "effects": {"hygiene": 10, "staff_loyalty": -5, "training_investment": 10}
+        }
+      ],
+      "conditions": ["hygiene < 70"],
+      "tags": ["위생", "시간관리", "직원교육"],
+      "probability": 0.18
+    },
+    {
+      "id": "fryer_morning_check",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "튀김기 점검",
+      "name_en": "Fryer Inspection",
+      "text_ko": "튀김기에서 이상한 소리가 납니다. 작동은 되지만 뭔가 평소와 다릅니다.",
+      "text_en": "The fryer is making strange noises. It works but something seems different from usual.",
+      "effects": {
+        "immediate": {"equipment_concern": 10},
+        "delayed": {"breakdown_risk": 15}
+      },
+      "choices": [
+        {
+          "text_ko": "일단 그대로 사용한다",
+          "text_en": "Continue using it for now",
+          "effects": {"equipment_risk": 15, "money": 0, "stress": 10}
+        },
+        {
+          "text_ko": "즉시 A/S를 부른다",
+          "text_en": "Call for immediate repair service",
+          "effects": {"money": -50000, "stress": 20, "equipment_safety": 15}
+        },
+        {
+          "text_ko": "직접 간단히 점검해본다",
+          "text_en": "Inspect it yourself briefly",
+          "effects": {"stress": 5, "preparation_time": 15, "equipment_knowledge": 5}
+        }
+      ],
+      "conditions": ["equipment_age > 2"],
+      "tags": ["장비관리", "안전", "비용"],
+      "probability": 0.08
+    },
+    {
+      "id": "staff_condition_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "직원 컨디션 체크",
+      "name_en": "Staff Condition Check",
+      "text_ko": "알바생이 감기에 걸린 것 같습니다. 기침을 하고 있는데 계속 일을 시켜야 할지 고민됩니다.",
+      "text_en": "Your part-time worker seems to have caught a cold. They're coughing, and you wonder if you should keep them working.",
+      "effects": {
+        "immediate": {"health_concern": 10},
+        "delayed": {"hygiene_risk": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "마스크 착용하고 계속 일시킨다",
+          "text_en": "Have them wear a mask and continue working",
+          "effects": {"staff_loyalty": -10, "hygiene": -5, "productivity": -10}
+        },
+        {
+          "text_ko": "집에 보내고 혼자 운영한다",
+          "text_en": "Send them home and work alone",
+          "effects": {"staff_loyalty": 15, "stress": 25, "productivity": -20}
+        },
+        {
+          "text_ko": "약국에서 감기약을 사다준다",
+          "text_en": "Buy cold medicine for them",
+          "effects": {"money": -8000, "staff_loyalty": 20, "hygiene": 5}
+        }
+      ],
+      "conditions": ["staff_count >= 1"],
+      "tags": ["직원관리", "위생", "인간관계"],
+      "probability": 0.10
+    },
+    {
+      "id": "delivery_app_error_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "배달앱 시스템 오류",
+      "name_en": "Delivery App System Error",
+      "text_ko": "배달앱에서 주문이 안 들어오고 있습니다. 시스템 오류인지 확인이 필요합니다.",
+      "text_en": "Orders aren't coming through the delivery app. Need to check if it's a system error.",
+      "effects": {
+        "immediate": {"tech_dependency_risk": 10},
+        "delayed": {"lost_sales": 20000}
+      },
+      "choices": [
+        {
+          "text_ko": "배달앱 고객센터에 바로 전화한다",
+          "text_en": "Call delivery app customer service immediately",
+          "effects": {"stress": 15, "preparation_time": 20, "problem_resolution": 10}
+        },
+        {
+          "text_ko": "조금 더 기다려본다",
+          "text_en": "Wait a bit longer",
+          "effects": {"stress": 10, "potential_sales": -15, "patience": 5}
+        },
+        {
+          "text_ko": "다른 배달앱을 추가로 켠다",
+          "text_en": "Turn on additional delivery apps",
+          "effects": {"commission_cost": 5, "potential_sales": 20, "workload": 10}
+        }
+      ],
+      "conditions": ["delivery_dependency > 70"],
+      "tags": ["기술문제", "배달앱", "매출"],
+      "probability": 0.07
+    },
+    {
+      "id": "chicken_radish_prep",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "치킨무 준비량 결정",
+      "name_en": "Chicken Radish Preparation Decision",
+      "text_ko": "오늘 치킨무를 얼마나 준비할지 결정해야 합니다. 어제는 부족해서 곤란했습니다.",
+      "text_en": "Need to decide how much pickled radish to prepare today. Yesterday we ran short and had trouble.",
+      "effects": {
+        "immediate": {"preparation_planning": 5}
+      },
+      "choices": [
+        {
+          "text_ko": "넉넉하게 많이 준비한다",
+          "text_en": "Prepare plenty generously",
+          "effects": {"money": -3000, "customer_satisfaction": 10, "food_waste_risk": 15}
+        },
+        {
+          "text_ko": "평소만큼만 준비한다",
+          "text_en": "Prepare the usual amount",
+          "effects": {"money": 0, "customer_satisfaction": 0, "operational_efficiency": 5}
+        },
+        {
+          "text_ko": "적게 준비하고 떨어지면 추가로 만든다",
+          "text_en": "Prepare less and make more if needed",
+          "effects": {"money": 1000, "customer_satisfaction": -5, "workload": 10}
+        }
+      ],
+      "conditions": ["time_of_day == 'morning'"],
+      "tags": ["재료관리", "고객만족", "비용"],
+      "probability": 0.20
+    },
+    {
+      "id": "store_temperature_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "매장 온도 조절",
+      "name_en": "Store Temperature Control",
+      "text_ko": "아침인데 매장이 너무 춥습니다. 난방을 켜면 전기요금이 올라가고, 안 켜면 손님이 불편해할 것 같습니다.",
+      "text_en": "The store is too cold this morning. Turning on heating increases electricity bills, but customers will be uncomfortable without it.",
+      "effects": {
+        "immediate": {"comfort_concern": 10},
+        "delayed": {"utility_cost": 5}
+      },
+      "choices": [
+        {
+          "text_ko": "난방을 적당히 켠다",
+          "text_en": "Turn on heating moderately",
+          "effects": {"money": -15000, "customer_comfort": 15, "staff_comfort": 10}
+        },
+        {
+          "text_ko": "그냥 참는다",
+          "text_en": "Just endure it",
+          "effects": {"money": 0, "customer_comfort": -10, "staff_comfort": -10}
+        },
+        {
+          "text_ko": "두꺼운 옷을 입고 버틴다",
+          "text_en": "Wear thicker clothes and endure",
+          "effects": {"money": 0, "personal_comfort": -5, "resilience": 10}
+        }
+      ],
+      "conditions": ["season == 'winter'"],
+      "tags": ["전기요금", "고객편의", "비용절약"],
+      "probability": 0.15
+    },
+    {
+      "id": "flyer_check_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "전단지 교체",
+      "name_en": "Flyer Replacement",
+      "text_ko": "매장 앞 전단지가 낡고 더러워졌습니다. 새로 제작하려면 비용이 들지만 이미지에는 중요합니다.",
+      "text_en": "The flyer in front of the store has become old and dirty. Making new ones costs money but is important for image.",
+      "effects": {
+        "immediate": {"brand_image_concern": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "새 전단지를 제작한다",
+          "text_en": "Create new flyers",
+          "effects": {"money": -25000, "reputation": 10, "marketing_appeal": 15}
+        },
+        {
+          "text_ko": "기존 것을 정리해서 다시 붙인다",
+          "text_en": "Clean up and repost existing ones",
+          "effects": {"money": 0, "reputation": 2, "preparation_time": 10}
+        },
+        {
+          "text_ko": "아예 전단지를 없앤다",
+          "text_en": "Remove flyers entirely",
+          "effects": {"money": 0, "reputation": -5, "marketing_reach": -10}
+        }
+      ],
+      "conditions": ["marketing_budget > 0"],
+      "tags": ["마케팅", "이미지", "비용"],
+      "probability": 0.06
+    },
+    {
+      "id": "new_menu_idea_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "새 메뉴 아이디어",
+      "name_en": "New Menu Idea",
+      "text_ko": "어젯밤 TV에서 본 치킨 요리가 인상적이었습니다. 우리 매장에서도 시도해볼까 생각됩니다.",
+      "text_en": "The chicken dish you saw on TV last night was impressive. You're thinking of trying it at your store.",
+      "effects": {
+        "immediate": {"creativity_inspiration": 10}
+      },
+      "choices": [
+        {
+          "text_ko": "바로 테스트해본다",
+          "text_en": "Test it right away",
+          "effects": {"innovation": 15, "money": -8000, "experimentation_risk": 10}
+        },
+        {
+          "text_ko": "주말에 시간 날 때 연구해본다",
+          "text_en": "Research it when you have time on weekends",
+          "effects": {"innovation": 5, "stress": 5, "planning": 10}
+        },
+        {
+          "text_ko": "기존 메뉴에 집중한다",
+          "text_en": "Focus on existing menu",
+          "effects": {"innovation": -2, "food_quality": 5, "operational_stability": 10}
+        }
+      ],
+      "conditions": ["creativity > 60"],
+      "tags": ["혁신", "메뉴개발", "리스크"],
+      "probability": 0.08
+    },
+    {
+      "id": "first_customer_service",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "첫 손님 응대",
+      "name_en": "First Customer Service",
+      "text_ko": "오늘 첫 손님이 들어왔습니다. 기분 좋게 맞이하고 싶지만 아직 준비가 완전하지 않습니다.",
+      "text_en": "Today's first customer has arrived. You want to greet them warmly, but preparations aren't completely finished.",
+      "effects": {
+        "immediate": {"daily_momentum": 10},
+        "delayed": {"first_impression": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "활기차게 인사하며 적극 응대한다",
+          "text_en": "Greet them energetically with active service",
+          "effects": {"customer_satisfaction": 15, "reputation": 5, "personal_energy": 10}
+        },
+        {
+          "text_ko": "정중하지만 차분하게 응대한다",
+          "text_en": "Respond politely but calmly",
+          "effects": {"customer_satisfaction": 8, "professionalism": 10, "stress": -5}
+        },
+        {
+          "text_ko": "준비가 부족함을 솔직히 말한다",
+          "text_en": "Honestly mention that preparations are incomplete",
+          "effects": {"honesty_reputation": 15, "customer_satisfaction": -5, "trust_building": 10}
+        }
+      ],
+      "conditions": ["time_of_day == 'lunch'", "customer_count == 0"],
+      "tags": ["고객서비스", "첫인상", "에너지"],
+      "probability": 0.25
+    },
+    {
+      "id": "lunch_waiting_line",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "점심시간 대기줄 관리",
+      "name_en": "Lunch Time Queue Management",
+      "text_ko": "점심시간에 손님들이 몰려 대기줄이 생겼습니다. 빨리 처리해야 하지만 품질도 중요합니다.",
+      "text_en": "Customers have crowded during lunch time creating a queue. You need to serve quickly but quality is also important.",
+      "effects": {
+        "immediate": {"service_pressure": 15},
+        "delayed": {"reputation_impact": 10}
+      },
+      "choices": [
+        {
+          "text_ko": "속도를 높여 빨리 처리한다",
+          "text_en": "Increase speed for faster service",
+          "effects": {"customer_satisfaction": 10, "food_quality": -8, "stress": 20}
+        },
+        {
+          "text_ko": "품질 유지하며 차근차근 처리한다",
+          "text_en": "Maintain quality while serving steadily",
+          "effects": {"customer_satisfaction": -5, "food_quality": 10, "reputation": 8}
+        },
+        {
+          "text_ko": "대기 손님들에게 간식을 서비스한다",
+          "text_en": "Serve snacks to waiting customers",
+          "effects": {"customer_satisfaction": 20, "money": -5000, "service_reputation": 15}
+        }
+      ],
+      "conditions": ["customer_count > 5"],
+      "tags": ["대기관리", "품질vs속도", "고객만족"],
+      "probability": 0.20
+    },
+    {
+      "id": "delivery_order_rush",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "배달 주문 폭주",
+      "name_en": "Delivery Order Rush",
+      "text_ko": "갑자기 배달 주문이 몰려들어 매장 손님과 배달 주문을 동시에 처리해야 합니다.",
+      "text_en": "Delivery orders suddenly flood in, requiring you to handle both dine-in customers and delivery orders simultaneously.",
+      "effects": {
+        "immediate": {"operational_pressure": 20},
+        "delayed": {"capacity_management_skill": 5}
+      },
+      "choices": [
+        {
+          "text_ko": "배달 주문을 우선 처리한다",
+          "text_en": "Prioritize delivery orders",
+          "effects": {"delivery_rating": 10, "dine_in_satisfaction": -10, "stress": 15}
+        },
+        {
+          "text_ko": "매장 손님을 우선 처리한다",
+          "text_en": "Prioritize dine-in customers",
+          "effects": {"dine_in_satisfaction": 10, "delivery_rating": -10, "local_reputation": 5}
+        },
+        {
+          "text_ko": "일부 배달 주문을 거절한다",
+          "text_en": "Decline some delivery orders",
+          "effects": {"stress": -10, "delivery_rating": -15, "realistic_capacity_management": 10}
+        }
+      ],
+      "conditions": ["delivery_dependency > 50"],
+      "tags": ["우선순위", "용량관리", "멀티태스킹"],
+      "probability": 0.18
+    },
+    {
+      "id": "ingredient_shortage_lunch",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "재료 부족 비상사태",
+      "name_en": "Ingredient Shortage Emergency",
+      "text_ko": "갑자기 주문이 많아져서 양념치킨 소스가 부족합니다. 손님이 기다리고 있는 상황입니다.",
+      "text_en": "Orders suddenly increased and seasoned chicken sauce is running short. Customers are waiting.",
+      "effects": {
+        "immediate": {"supply_crisis": 15},
+        "delayed": {"inventory_management_learning": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "다른 소스로 대체 제안한다",
+          "text_en": "Suggest alternative sauce",
+          "effects": {"customer_satisfaction": -5, "adaptability": 15, "sales": -3000}
+        },
+        {
+          "text_ko": "급하게 소스를 새로 만든다",
+          "text_en": "Quickly make new sauce",
+          "effects": {"preparation_time": 30, "stress": 20, "customer_satisfaction": 5}
+        },
+        {
+          "text_ko": "솔직히 설명하고 기다려달라고 한다",
+          "text_en": "Explain honestly and ask customers to wait",
+          "effects": {"honesty_reputation": 10, "customer_satisfaction": -8, "wait_time": 20}
+        }
+      ],
+      "conditions": ["ingredient_level < 30"],
+      "tags": ["재료관리", "위기대응", "고객소통"],
+      "probability": 0.15
+    },
+    {
+      "id": "staff_mistake_lunch",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "직원 실수 상황",
+      "name_en": "Staff Mistake Situation",
+      "text_ko": "알바생이 주문을 잘못 받아서 손님이 원하지 않은 메뉴를 만들었습니다. 손님이 약간 짜증을 내고 있습니다.",
+      "text_en": "Part-time worker took the wrong order and made a menu the customer didn't want. The customer is getting slightly annoyed.",
+      "effects": {
+        "immediate": {"service_failure": 10},
+        "delayed": {"staff_training_need": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "즉시 사과하고 올바른 메뉴를 만든다",
+          "text_en": "Apologize immediately and make the correct menu",
+          "effects": {"customer_satisfaction": 5, "money": -8000, "service_recovery": 10}
+        },
+        {
+          "text_ko": "직원을 대신해 사과하고 할인해준다",
+          "text_en": "Apologize on behalf of staff and offer discount",
+          "effects": {"customer_satisfaction": 15, "money": -5000, "staff_loyalty": 15}
+        },
+        {
+          "text_ko": "직원에게 직접 사과하게 한다",
+          "text_en": "Have the staff member apologize directly",
+          "effects": {"customer_satisfaction": 0, "staff_learning": 15, "responsibility_teaching": 10}
+        }
+      ],
+      "conditions": ["staff_count >= 1"],
+      "tags": ["실수처리", "고객서비스", "직원교육"],
+      "probability": 0.12
+    },
+    {
+      "id": "regular_customer_request",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "단골손님 특별 요청",
+      "name_en": "Regular Customer Special Request",
+      "text_ko": "단골손님이 메뉴에 없는 특별한 요리를 부탁했습니다. 평소 많이 도움을 받은 분입니다.",
+      "text_en": "A regular customer requested a special dish not on the menu. They're someone you've received a lot of help from.",
+      "effects": {
+        "immediate": {"relationship_test": 10},
+        "delayed": {"customer_loyalty_impact": 15}
+      },
+      "choices": [
+        {
+          "text_ko": "특별히 만들어 드린다",
+          "text_en": "Make it specially for them",
+          "effects": {"customer_loyalty": 25, "preparation_time": 20, "special_service_reputation": 15}
+        },
+        {
+          "text_ko": "정중히 거절하고 다른 메뉴를 추천한다",
+          "text_en": "Politely decline and recommend another menu",
+          "effects": {"professionalism": 10, "customer_loyalty": -5, "menu_consistency": 10}
+        },
+        {
+          "text_ko": "다음에 미리 말씀해달라고 한다",
+          "text_en": "Ask them to let you know in advance next time",
+          "effects": {"customer_loyalty": 5, "planning_improvement": 15, "future_preparation": 10}
+        }
+      ],
+      "conditions": ["regular_customers > 3"],
+      "tags": ["단골관리", "특별서비스", "관계유지"],
+      "probability": 0.10
+    },
+    {
+      "id": "delivery_driver_delay",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "배달기사 지연 문제",
+      "name_en": "Delivery Driver Delay Issue",
+      "text_ko": "배달기사가 늦어져서 치킨이 식어가고 있습니다. 고객이 전화해서 언제 오냐고 묻고 있습니다.",
+      "text_en": "The delivery driver is delayed and the chicken is getting cold. The customer called asking when it will arrive.",
+      "effects": {
+        "immediate": {"delivery_service_crisis": 15},
+        "delayed": {"delivery_reliability_reputation": -8}
+      },
+      "choices": [
+        {
+          "text_ko": "직접 배달을 간다",
+          "text_en": "Deliver it yourself",
+          "effects": {"customer_satisfaction": 20, "preparation_time": 40, "personal_service": 15}
+        },
+        {
+          "text_ko": "다른 배달기사를 긴급 호출한다",
+          "text_en": "Emergency call another delivery driver",
+          "effects": {"money": -8000, "customer_satisfaction": 10, "problem_solving": 10}
+        },
+        {
+          "text_ko": "고객에게 상황을 설명하고 새로 만들어 보낸다",
+          "text_en": "Explain to customer and make fresh food",
+          "effects": {"customer_satisfaction": 5, "money": -12000, "honesty_reputation": 15}
+        }
+      ],
+      "conditions": ["delivery_orders > 3"],
+      "tags": ["배달문제", "고객소통", "위기대응"],
+      "probability": 0.14
+    },
+    {
+      "id": "competitor_discount_event",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "경쟁업체 할인 이벤트",
+      "name_en": "Competitor Discount Event",
+      "text_ko": "옆 치킨집에서 대대적인 할인 이벤트를 시작했습니다. 우리 매장도 대응이 필요해 보입니다.",
+      "text_en": "The chicken shop next door started a major discount event. It seems your store needs to respond too.",
+      "effects": {
+        "immediate": {"competitive_pressure": 20},
+        "delayed": {"market_position_change": 10}
+      },
+      "choices": [
+        {
+          "text_ko": "즉시 맞대응 할인을 시작한다",
+          "text_en": "Start counter-discount immediately",
+          "effects": {"competitiveness": 15, "profit_margin": -20, "market_share": 10}
+        },
+        {
+          "text_ko": "품질로 승부한다고 마음먹는다",
+          "text_en": "Decide to compete with quality",
+          "effects": {"quality_focus": 20, "customer_education": 10, "differentiation": 15}
+        },
+        {
+          "text_ko": "특별 서비스로 차별화한다",
+          "text_en": "Differentiate with special service",
+          "effects": {"service_quality": 15, "operational_cost": 5, "uniqueness": 20}
+        }
+      ],
+      "conditions": ["competition_level > 60"],
+      "tags": ["경쟁대응", "가격전략", "차별화"],
+      "probability": 0.09
+    },
+    {
+      "id": "store_noise_issue",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "매장 소음 문제",
+      "name_en": "Store Noise Issue",
+      "text_ko": "점심시간에 손님들이 많아지면서 매장이 너무 시끄러워졌습니다. 일부 손님이 불편해합니다.",
+      "text_en": "The store became too noisy as more customers came during lunch time. Some customers are uncomfortable.",
+      "effects": {
+        "immediate": {"noise_complaint": 10},
+        "delayed": {"dining_environment_reputation": -5}
+      },
+      "choices": [
+        {
+          "text_ko": "음악 볼륨을 줄이고 조용히 해달라고 안내한다",
+          "text_en": "Lower music volume and ask for quieter atmosphere",
+          "effects": {"customer_comfort": 15, "atmosphere": -5, "noise_management": 15}
+        },
+        {
+          "text_ko": "그냥 내버려둔다",
+          "text_en": "Just leave it as is",
+          "effects": {"customer_comfort": -10, "natural_atmosphere": 10, "non_intervention": 5}
+        },
+        {
+          "text_ko": "흡음재 설치를 고려한다",
+          "text_en": "Consider installing sound-absorbing materials",
+          "effects": {"money": -50000, "long_term_comfort": 20, "facility_investment": 15}
+        }
+      ],
+      "conditions": ["customer_count > 8"],
+      "tags": ["소음관리", "고객편의", "매장환경"],
+      "probability": 0.08
+    },
+    {
+      "id": "cooking_time_pressure",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "조리시간 단축 압박",
+      "name_en": "Cooking Time Reduction Pressure",
+      "text_ko": "점심시간 손님이 몰려서 조리시간을 단축해달라는 요청이 들어옵니다. 품질이 걱정됩니다.",
+      "text_en": "Customers are crowding during lunch time and requesting faster cooking. You're worried about quality.",
+      "effects": {
+        "immediate": {"time_pressure": 20},
+        "delayed": {"quality_reputation_risk": 10}
+      },
+      "choices": [
+        {
+          "text_ko": "온도를 높여 빨리 튀긴다",
+          "text_en": "Raise temperature and fry faster",
+          "effects": {"cooking_speed": 15, "food_quality": -10, "safety_risk": 10}
+        },
+        {
+          "text_ko": "미리 준비된 것들을 최대한 활용한다",
+          "text_en": "Maximize use of pre-prepared items",
+          "effects": {"cooking_speed": 10, "preparation_efficiency": 15, "operational_efficiency": 20}
+        },
+        {
+          "text_ko": "정확한 시간을 안내하고 기다려달라고 한다",
+          "text_en": "Inform exact time and ask customers to wait",
+          "effects": {"honesty_reputation": 15, "customer_satisfaction": -5, "quality_commitment": 20}
+        }
+      ],
+      "conditions": ["rush_hour == true"],
+      "tags": ["시간압박", "품질유지", "고객기대"],
+      "probability": 0.17
+    },
+    {
+      "id": "lunch_menu_stock_shortage",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "인기 메뉴 재고 부족",
+      "name_en": "Popular Menu Stock Shortage",
+      "text_ko": "점심시간 인기 메뉴인 양념치킨의 재료가 떨어져갑니다. 오후까지 버틸 수 있을지 모르겠습니다.",
+      "text_en": "Ingredients for the popular lunch menu seasoned chicken are running low. Not sure if it will last until afternoon.",
+      "effects": {
+        "immediate": {"inventory_crisis": 15},
+        "delayed": {"sales_opportunity_loss": 25000}
+      },
+      "choices": [
+        {
+          "text_ko": "다른 메뉴로 유도한다",
+          "text_en": "Guide customers to other menu items",
+          "effects": {"customer_satisfaction": -8, "sales_diversification": 15, "menu_balance": 10}
+        },
+        {
+          "text_ko": "급하게 재료를 주문한다",
+          "text_en": "Order ingredients urgently",
+          "effects": {"money": -15000, "supply_cost": 5000, "customer_satisfaction": 10}
+        },
+        {
+          "text_ko": "한정 수량으로 판매한다고 공지한다",
+          "text_en": "Announce limited quantity sales",
+          "effects": {"scarcity_marketing": 15, "customer_urgency": 10, "transparency": 10}
+        }
+      ],
+      "conditions": ["ingredient_level < 25"],
+      "tags": ["재고관리", "인기메뉴", "마케팅"],
+      "probability": 0.13
+    },
+    {
+      "id": "card_payment_system_error",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "카드 결제 시스템 오류",
+      "name_en": "Card Payment System Error",
+      "text_ko": "카드 결제기가 갑자기 작동하지 않습니다. 손님들이 현금이 없다고 당황하고 있습니다.",
+      "text_en": "The card payment machine suddenly stopped working. Customers are panicking saying they don't have cash.",
+      "effects": {
+        "immediate": {"payment_crisis": 20},
+        "delayed": {"customer_convenience_reputation": -10}
+      },
+      "choices": [
+        {
+          "text_ko": "현금 결제만 받는다고 안내한다",
+          "text_en": "Inform that only cash payments are accepted",
+          "effects": {"customer_satisfaction": -15, "sales_loss": 20000, "simplicity": 5}
+        },
+        {
+          "text_ko": "외상으로 처리하고 나중에 받기로 한다",
+          "text_en": "Process as credit and collect payment later",
+          "effects": {"customer_satisfaction": 20, "financial_risk": 15, "trust_building": 15}
+        },
+        {
+          "text_ko": "스마트폰 결제 앱을 활용한다",
+          "text_en": "Use smartphone payment apps",
+          "effects": {"customer_satisfaction": 10, "tech_adaptation": 15, "convenience": 10}
+        }
+      ],
+      "conditions": ["payment_system_age > 1"],
+      "tags": ["결제시스템", "기술문제", "고객편의"],
+      "probability": 0.06
+    },
+    {
+      "id": "lunch_special_menu_reaction",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "점심 특가 메뉴 반응",
+      "name_en": "Lunch Special Menu Response",
+      "text_ko": "오늘 시작한 점심 특가 메뉴가 예상보다 반응이 좋지 않습니다. 전략을 바꿔야 할까요?",
+      "text_en": "Today's lunch special menu isn't getting as good a response as expected. Should you change strategy?",
+      "effects": {
+        "immediate": {"marketing_disappointment": 10},
+        "delayed": {"menu_strategy_learning": 8}
+      },
+      "choices": [
+        {
+          "text_ko": "가격을 더 내린다",
+          "text_en": "Lower the price further",
+          "effects": {"customer_interest": 15, "profit_margin": -15, "price_positioning": -5}
+        },
+        {
+          "text_ko": "적극적으로 홍보한다",
+          "text_en": "Promote it more actively",
+          "effects": {"marketing_effort": 20, "customer_awareness": 15, "energy_investment": 10}
+        },
+        {
+          "text_ko": "내일부터 다른 메뉴로 바꾼다",
+          "text_en": "Change to different menu from tomorrow",
+          "effects": {"adaptability": 15, "menu_flexibility": 10, "learning_application": 5}
+        }
+      ],
+      "conditions": ["special_event == true"],
+      "tags": ["마케팅", "메뉴전략", "고객반응"],
+      "probability": 0.08
+    },
+    {
+      "id": "store_temperature_lunch",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "매장 온도 조절 - 점심시간",
+      "name_en": "Store Temperature Control - Lunch Time",
+      "text_ko": "손님이 많아지면서 매장이 더워졌습니다. 에어컨을 켜면 전기요금이 걱정되고, 안 켜면 손님들이 불편해합니다.",
+      "text_en": "The store got hot as more customers came. Turning on AC worries about electricity bills, but customers will be uncomfortable without it.",
+      "effects": {
+        "immediate": {"temperature_discomfort": 15},
+        "delayed": {"customer_comfort_reputation": -8}
+      },
+      "choices": [
+        {
+          "text_ko": "에어컨을 켠다",
+          "text_en": "Turn on the air conditioner",
+          "effects": {"customer_comfort": 20, "money": -12000, "service_quality": 10}
+        },
+        {
+          "text_ko": "선풍기만 돌린다",
+          "text_en": "Use only fans",
+          "effects": {"customer_comfort": 8, "money": -3000, "compromise_solution": 10}
+        },
+        {
+          "text_ko": "창문을 열어 자연 환기한다",
+          "text_en": "Open windows for natural ventilation",
+          "effects": {"customer_comfort": 5, "money": 0, "natural_solution": 15}
+        }
+      ],
+      "conditions": ["season == 'summer'", "customer_count > 4"],
+      "tags": ["온도조절", "전기요금", "고객편의"],
+      "probability": 0.12
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "ingredient_freshness_check",
+  "type": "RANDOM",
+  "category": "daily_routine",
+  "name_ko": "재료 신선도 체크",
+  "name_en": "Ingredient Freshness Check",
+  "text_ko": "어제 남은 양파가 조금 시들어 보입니다. 아직 쓸 수는 있지만 최상의 상태는 아닙니다.",
+  "text_en": "Yesterday's leftover onions look slightly wilted. They're still usable but not in perfect condition.",
+  "effects": [
+    {
+      "metric": "FOOD_SAFETY_CONCERN",
+      "formula": "value + 5",
+      "message": "food_safety_concern이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "그냥 사용한다 (비용 절약)",
+      "text_en": "Use them anyway (cost saving)",
+      "effects": {
+        "money": 5000,
+        "food_quality": -3,
+        "reputation": -2
+      }
+    },
+    {
+      "text_ko": "새 양파를 구매한다",
+      "text_en": "Buy fresh onions",
+      "effects": {
+        "money": -8000,
+        "food_quality": 5,
+        "reputation": 3
+      }
+    },
+    {
+      "text_ko": "시든 부분만 제거하고 사용한다",
+      "text_en": "Remove wilted parts and use the rest",
+      "effects": {
+        "money": 2000,
+        "food_quality": 1,
+        "preparation_time": 15
+      }
+    }
+  ],
+  "conditions": [
+    "ingredients_stock > 0"
+  ],
+  "tags": [
+    "품질관리",
+    "비용절약",
+    "시간관리"
+  ],
+  "probability": 0.12
+}

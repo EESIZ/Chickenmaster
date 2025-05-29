@@ -1,0 +1,64 @@
+{
+  "id": "lunch_menu_stock_shortage",
+  "type": "THRESHOLD",
+  "category": "daily_routine",
+  "name_ko": "인기 메뉴 재고 부족",
+  "name_en": "Popular Menu Stock Shortage",
+  "text_ko": "점심시간 인기 메뉴인 양념치킨의 재료가 떨어져갑니다. 오후까지 버틸 수 있을지 모르겠습니다.",
+  "text_en": "Ingredients for the popular lunch menu seasoned chicken are running low. Not sure if it will last until afternoon.",
+  "effects": [
+    {
+      "metric": "INVENTORY_CRISIS",
+      "formula": "value + 15",
+      "message": "inventory_crisis이(가) 증가했습니다."
+    },
+    {
+      "metric": "SALES_OPPORTUNITY_LOSS",
+      "formula": "value + 25000",
+      "message": "sales_opportunity_loss이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "다른 메뉴로 유도한다",
+      "text_en": "Guide customers to other menu items",
+      "effects": {
+        "customer_satisfaction": -8,
+        "sales_diversification": 15,
+        "menu_balance": 10
+      }
+    },
+    {
+      "text_ko": "급하게 재료를 주문한다",
+      "text_en": "Order ingredients urgently",
+      "effects": {
+        "money": -15000,
+        "supply_cost": 5000,
+        "customer_satisfaction": 10
+      }
+    },
+    {
+      "text_ko": "한정 수량으로 판매한다고 공지한다",
+      "text_en": "Announce limited quantity sales",
+      "effects": {
+        "scarcity_marketing": 15,
+        "customer_urgency": 10,
+        "transparency": 10
+      }
+    }
+  ],
+  "conditions": [
+    "ingredient_level < 25"
+  ],
+  "tags": [
+    "재고관리",
+    "인기메뉴",
+    "마케팅"
+  ],
+  "probability": 0.13,
+  "trigger": {
+    "metric": "INGREDIENT_LEVEL",
+    "condition": "less_than",
+    "value": 25
+  }
+}

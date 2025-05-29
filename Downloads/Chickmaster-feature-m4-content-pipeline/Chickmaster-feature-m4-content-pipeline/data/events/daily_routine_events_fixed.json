@@ -1,0 +1,119 @@
+{
+  "events": [
+    {
+      "id": "morning_prep_delay",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "오픈 준비 지연",
+      "name_en": "Opening Preparation Delay",
+      "text_ko": "오늘 아침 직원이 늦게 와서 12시 오픈이 15분 늦어질 것 같습니다. 본사에서 POS 시스템으로 감시하고 있어 경고를 받을 수도 있습니다.",
+      "text_en": "Your staff arrived late this morning, and the 12 PM opening will be delayed by 15 minutes. The franchise headquarters monitors via POS system and may issue a warning.",
+      "effects": [
+        {
+          "metric": "STRESS",
+          "formula": "value + 10",
+          "message": "직원 지각으로 스트레스가 증가했습니다."
+        },
+        {
+          "metric": "FRANCHISE_RELATIONSHIP",
+          "formula": "value - 2",
+          "message": "본사와의 관계가 소폭 악화되었습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "혼자라도 시간 맞춰 오픈한다",
+          "text_en": "Open on time alone",
+          "effects": {
+            "stress": 15,
+            "reputation": 5,
+            "stamina": -10
+          }
+        },
+        {
+          "text_ko": "직원을 기다려 제대로 준비 후 오픈한다",
+          "text_en": "Wait for staff and open properly prepared",
+          "effects": {
+            "reputation": -5,
+            "stress": -5,
+            "staff_loyalty": 10
+          }
+        },
+        {
+          "text_ko": "본사에 미리 연락해 상황을 설명한다",
+          "text_en": "Contact headquarters to explain the situation",
+          "effects": {
+            "stress": 5,
+            "reputation": 2,
+            "franchise_relationship": 3
+          }
+        }
+      ],
+      "conditions": [
+        "time_of_day == 'morning'"
+      ],
+      "tags": [
+        "시간관리",
+        "직원",
+        "본사압박"
+      ],
+      "probability": 0.15,
+      "cooldown": 14
+    },
+    {
+      "id": "ingredient_freshness_check",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "재료 신선도 체크",
+      "name_en": "Ingredient Freshness Check",
+      "text_ko": "어제 남은 양파가 조금 시들어 보입니다. 아직 쓸 수는 있지만 최상의 상태는 아닙니다.",
+      "text_en": "Yesterday's leftover onions look slightly wilted. They're still usable but not in perfect condition.",
+      "effects": [
+        {
+          "metric": "FOOD_QUALITY",
+          "formula": "value - 2",
+          "message": "식재료 상태가 약간 저하되었습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "그냥 사용한다 (비용 절약)",
+          "text_en": "Use them anyway (cost saving)",
+          "effects": {
+            "money": 5000,
+            "food_quality": -3,
+            "reputation": -2
+          }
+        },
+        {
+          "text_ko": "새 양파를 구매한다",
+          "text_en": "Buy fresh onions",
+          "effects": {
+            "money": -8000,
+            "food_quality": 5,
+            "reputation": 3
+          }
+        },
+        {
+          "text_ko": "시든 부분만 제거하고 사용한다",
+          "text_en": "Remove wilted parts and use the rest",
+          "effects": {
+            "money": 2000,
+            "food_quality": 1,
+            "preparation_time": 15
+          }
+        }
+      ],
+      "conditions": [
+        "ingredients_stock > 0"
+      ],
+      "tags": [
+        "품질관리",
+        "비용절약",
+        "시간관리"
+      ],
+      "probability": 0.12,
+      "cooldown": 7
+    }
+  ]
+}
