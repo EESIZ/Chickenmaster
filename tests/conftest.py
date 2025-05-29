@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 from src.events.schema import Event, EventContainer, EventEffect, EventChoice
 from src.events.validators.base import ValidationResult
 from src.events.validators.specific import (
-    CulturalValidator,
     DuplicateValidator,
     FormulaValidator,
     TradeoffValidator
@@ -55,10 +54,7 @@ def mock_event_container(mock_event: Event) -> EventContainer[Event]:
         metadata={"test": True}
     )
 
-@pytest.fixture
-def cultural_validator() -> CulturalValidator:
-    """문화적 연관성 검증기 fixture"""
-    return CulturalValidator()
+
 
 @pytest.fixture
 def duplicate_validator() -> DuplicateValidator:

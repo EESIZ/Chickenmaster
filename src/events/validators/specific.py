@@ -8,32 +8,6 @@ from .base import BaseValidator, Event, ValidationResult
 from ..constants import QUALITY_THRESHOLDS, VALIDATION_THRESHOLDS
 from fuzzywuzzy import fuzz
 
-class CulturalValidator(BaseValidator):
-    """문화적 연관성 검증기"""
-    
-    # 한국 치킨 문화 관련 키워드
-    CULTURAL_KEYWORDS: ClassVar[list[str]] = [
-        "치킨", "후라이드", "양념", "간장", "마늘", "닭강정",
-        "배달", "포장", "회식", "단골", "성수기", "할인",
-        "치맥", "맥주", "소주", "안주", "야식", "주문"
-    ]
-    
-    def validate(self, event: Event) -> ValidationResult:
-        """문화적 연관성 검증"""
-        text = f"{event.name_ko} {event.text_ko}"
-        matched_keywords = sum(
-            1 for keyword in self.CULTURAL_KEYWORDS
-            if keyword in text
-        )
-        
-        if matched_keywords < VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"]:
-            return ValidationResult(
-                is_valid=False,
-                errors=["한국 치킨 문화 관련 키워드가 부족합니다"]
-            )
-            
-        return ValidationResult(is_valid=True)
-
 class DuplicateValidator(BaseValidator):
     """중복 검증기"""
     

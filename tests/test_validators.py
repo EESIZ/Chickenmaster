@@ -8,28 +8,12 @@ from pydantic import BaseModel
 from src.events.schema import Event, EventEffect, EventChoice
 from src.events.validators.base import ValidationResult
 from src.events.validators.specific import (
-    CulturalValidator,
     DuplicateValidator,
     FormulaValidator,
     TradeoffValidator
 )
 
-class TestCulturalValidator:
-    """문화적 연관성 검증기 테스트"""
-    
-    def test_valid_cultural_keywords(self, cultural_validator: CulturalValidator, mock_event: Event):
-        """충분한 문화적 키워드가 있는 경우"""
-        mock_event.text_ko = "치킨집에서 배달 주문이 들어왔습니다"
-        result = cultural_validator.validate(mock_event)
-        assert result.is_valid
-        assert not result.errors
-        
-    def test_insufficient_cultural_keywords(self, cultural_validator: CulturalValidator, mock_event: Event):
-        """문화적 키워드가 부족한 경우"""
-        mock_event.text_ko = "일반적인 가게 이벤트입니다"
-        result = cultural_validator.validate(mock_event)
-        assert not result.is_valid
-        assert "한국 치킨 문화 관련 키워드가 부족합니다" in result.errors
+
 
 class TestDuplicateValidator:
     """중복 검증기 테스트"""
