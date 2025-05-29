@@ -339,18 +339,14 @@ def test_snapshot_creation_and_loading(
 ) -> None:
     """스냅샷 생성과 로딩을 테스트합니다."""
     tracker = MetricsTracker(test_metrics)
-    
     # 지표 변경
     tracker.update_metric(Metric.MONEY, -100)
     tracker.update_metric(Metric.REPUTATION, 20)
-    
     # 스냅샷 저장
     snapshot_path = os.path.join(temp_data_dir, "test_snapshot.json")
     tracker.save_snapshot(snapshot_path)
-    
     # 새로운 트래커로 스냅샷 로드
     new_tracker = MetricsTracker.load_snapshot(snapshot_path)
-    
     # 로드된 지표 확인
     loaded_metrics = new_tracker.get_metrics()
     assert loaded_metrics[Metric.MONEY] == INITIAL_MONEY, "로드된 자금 값이 잘못됨"
@@ -470,11 +466,9 @@ def test_extreme_case_zero_reputation(test_metrics: dict[Metric, float]) -> None
 def test_extreme_case_max_values(test_metrics: dict[Metric, float]) -> None:
     """극한 상황 - 최대값 시나리오를 검증합니다."""
     tracker = MetricsTracker(test_metrics)
-    
     # 모든 지표를 최대값으로 설정
     for metric in [Metric.REPUTATION, Metric.HAPPINESS, Metric.FACILITY]:
         tracker.update_metric(metric, MAX_METRIC_VALUE * 2)  # 의도적으로 최대값 초과
-    
     # 지표가 최대값을 초과하지 않는지 확인
     metrics = tracker.get_metrics()
     assert metrics[Metric.REPUTATION] == MAX_METRIC_VALUE, "평판이 최대값을 초과함"
@@ -561,22 +555,12 @@ def test_performance_10k_turns() -> None:
 def test_performance(test_metrics: dict[Metric, float]) -> None:
     """성능 테스트를 수행합니다."""
     tracker = MetricsTracker(test_metrics)
-    
     start_time = time.time()
-    
     # SIMULATION_ITERATIONS턴 시뮬레이션
     for _ in range(SIMULATION_ITERATIONS):
-        tracker.update_metric(
-            Metric.MONEY,
-            random.uniform(*MONEY_FLUCTUATION_RANGE)
-        )
-        tracker.update_metric(
-            Metric.REPUTATION,
-            random.uniform(*REPUTATION_FLUCTUATION_RANGE)
-        )
-    
+        tracker.update_metric(Metric.MONEY, random.uniform(*MONEY_FLUCTUATION_RANGE))
+        tracker.update_metric(Metric.REPUTATION, random.uniform(*REPUTATION_FLUCTUATION_RANGE))
     elapsed_time = time.time() - start_time
-    
     # PERFORMANCE_TIMEOUT 이내에 완료되어야 함
     error_msg = (
         f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 "
