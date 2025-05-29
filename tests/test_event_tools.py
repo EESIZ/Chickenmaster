@@ -6,19 +6,21 @@
 날짜: 2025-05-27
 """
 
-import unittest
-import os
 import json
+import os
+import unittest
 import tempfile
 import shutil
-from unittest.mock import patch, MagicMock
 import sys
+import tomllib
 
 # 프로젝트 루트 디렉토리를 Python 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from dev_tools.event_condition_fixer import EventConditionFixer
 from dev_tools.event_bank_indexer import EventBankIndexer
+from dev_tools.event_bank_manager import EventBankManager
+from dev_tools.event_structure_converter import convert_event_structure
 
 
 class TestEventConditionFixer(unittest.TestCase):

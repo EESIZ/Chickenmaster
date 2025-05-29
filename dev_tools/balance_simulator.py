@@ -34,6 +34,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field, field_validator
+import seaborn as sns
+from tqdm import tqdm
 
 # 로깅 설정
 logging.basicConfig(
@@ -931,17 +933,17 @@ class EventSimulator:
                 issue_type = issue["type"]
 
                 if issue_type == "high_trigger_rate":
-                    event_recs.append(f"트리거 조건을 더 제한적으로 조정하세요")
+                    event_recs.append("트리거 조건을 더 제한적으로 조정하세요")
                 elif issue_type == "low_trigger_rate":
                     event_recs.append(
-                        f"트리거 조건을 완화하거나 더 일반적인 조건으로 변경하세요"
+                        "트리거 조건을 완화하거나 더 일반적인 조건으로 변경하세요"
                     )
                 elif issue_type == "dominant_choice":
                     event_recs.append(
-                        f"지배적인 선택지의 효과를 약화시키거나 다른 선택지의 효과를 강화하세요"
+                        "지배적인 선택지의 효과를 약화시키거나 다른 선택지의 효과를 강화하세요"
                     )
                 elif issue_type == "choice_imbalance":
-                    event_recs.append(f"선택지 간 균형을 맞추기 위해 효과를 조정하세요")
+                    event_recs.append("선택지 간 균형을 맞추기 위해 효과를 조정하세요")
 
             if event_recs:
                 recommendations[f"{event_id} ({event_name})"] = event_recs

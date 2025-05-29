@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import anthropic
+import tomllib  # Python 3.11+
 
 from dev_tools.config import Config
 
