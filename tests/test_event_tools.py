@@ -23,7 +23,7 @@ from dev_tools.event_bank_indexer import EventBankIndexer
 class TestEventConditionFixer(unittest.TestCase):
     """이벤트 조건 교정 도구 테스트 클래스"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """테스트 설정"""
         # 임시 디렉토리 생성
         self.test_dir = tempfile.mkdtemp()
@@ -66,12 +66,12 @@ class TestEventConditionFixer(unittest.TestCase):
         # 출력 파일 경로
         self.output_file = os.path.join(self.test_dir, "test_events_fixed.json")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """테스트 정리"""
         # 임시 디렉토리 삭제
         shutil.rmtree(self.test_dir)
 
-    def test_condition_mapping_tradeoff(self):
+    def test_condition_mapping_tradeoff(self) -> None:
         """조건 매핑 트레이드오프 테스트"""
         fixer = EventConditionFixer(self.input_file, self.output_file)
 
@@ -86,7 +86,7 @@ class TestEventConditionFixer(unittest.TestCase):
         self.assertEqual(fixer.CONDITION_MAPPING["less_than"], "less_than")
         self.assertEqual(fixer.CONDITION_MAPPING["equal"], "equal")
 
-    def test_fix_trigger_conditions_uncertainty(self):
+    def test_fix_trigger_conditions_uncertainty(self) -> None:
         """트리거 조건 수정 불확실성 테스트"""
         fixer = EventConditionFixer(self.input_file, self.output_file)
 
@@ -100,7 +100,7 @@ class TestEventConditionFixer(unittest.TestCase):
         self.assertEqual(fixed_events[0]["trigger"]["condition"], "greater_than")
         self.assertEqual(fixed_events[1]["trigger"]["condition"], "less_than")
 
-    def test_process_noRightAnswer(self):
+    def test_process_noRightAnswer(self) -> None:
         """전체 프로세스 테스트 - 정답이 없는 상황"""
         fixer = EventConditionFixer(self.input_file, self.output_file)
 
@@ -124,7 +124,7 @@ class TestEventConditionFixer(unittest.TestCase):
 class TestEventBankIndexer(unittest.TestCase):
     """이벤트 뱅크 인덱서 테스트 클래스"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """테스트 설정"""
         # 임시 디렉토리 생성
         self.test_dir = tempfile.mkdtemp()
@@ -160,12 +160,12 @@ class TestEventBankIndexer(unittest.TestCase):
         # 메타데이터 파일 경로
         self.metadata_file = os.path.join(self.output_dir, "metadata.json")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """테스트 정리"""
         # 임시 디렉토리 삭제
         shutil.rmtree(self.test_dir)
 
-    def test_integrate_events_tradeoff(self):
+    def test_integrate_events_tradeoff(self) -> None:
         """이벤트 통합 트레이드오프 테스트"""
         indexer = EventBankIndexer(self.input_file, self.output_dir)
 
@@ -187,7 +187,7 @@ class TestEventBankIndexer(unittest.TestCase):
         self.assertEqual(updated_metadata["tags"]["일상"], 1)
         self.assertEqual(updated_metadata["tags"]["위기"], 1)
 
-    def test_update_metrics_uncertainty(self):
+    def test_update_metrics_uncertainty(self) -> None:
         """메트릭 업데이트 불확실성 테스트"""
         indexer = EventBankIndexer(self.input_file, self.output_dir)
 
@@ -219,7 +219,7 @@ class TestEventBankIndexer(unittest.TestCase):
             updated_metadata["metrics"]["replayability"], 0.6 * 0.7, places=2
         )
 
-    def test_process_noRightAnswer(self):
+    def test_process_noRightAnswer(self) -> None:
         """전체 프로세스 테스트 - 정답이 없는 상황"""
         indexer = EventBankIndexer(self.input_file, self.output_dir)
 

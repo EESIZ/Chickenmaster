@@ -9,10 +9,10 @@
 import json
 import argparse
 import re
-from typing import Dict, List
+from typing import Dict, List, Any
 
 
-def convert_effects_structure(effects_dict: Dict) -> List[Dict]:
+def convert_effects_structure(effects_dict: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     effects 딕셔너리 구조를 표준 배열 구조로 변환
 
@@ -51,7 +51,7 @@ def convert_effects_structure(effects_dict: Dict) -> List[Dict]:
     return result
 
 
-def add_trigger_field(event: Dict) -> Dict:
+def add_trigger_field(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     THRESHOLD 타입 이벤트에 trigger 필드 추가
     conditions 배열의 첫 번째 조건을 파싱하여 trigger 필드 생성
@@ -131,7 +131,7 @@ def add_trigger_field(event: Dict) -> Dict:
     return event
 
 
-def convert_event_structure(event: Dict) -> Dict:
+def convert_event_structure(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     이벤트 구조를 표준 템플릿에 맞게 변환
     """
@@ -175,12 +175,11 @@ def convert_events_file(input_file: str, output_file: str) -> None:
         print(f"❌ 변환 중 오류 발생: {str(e)}")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="이벤트 구조를 표준 템플릿에 맞게 변환"
-    )
-    parser.add_argument("--input", required=True, help="입력 이벤트 JSON 파일 경로")
-    parser.add_argument("--output", required=True, help="출력 이벤트 JSON 파일 경로")
+def main() -> None:
+    """메인 함수"""
+    parser = argparse.ArgumentParser(description="이벤트 구조 변환 도구")
+    parser.add_argument("input", help="입력 이벤트 파일 경로")
+    parser.add_argument("output", help="출력 이벤트 파일 경로")
 
     args = parser.parse_args()
     convert_events_file(args.input, args.output)

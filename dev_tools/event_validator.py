@@ -417,52 +417,54 @@ class EventValidator:
 
     def _calculate_replayability(self, events: List[Dict[str, Any]]) -> float:
         """
-        재플레이 가치 (조건 다양성, 확률 분포 기반)
+        이벤트의 재플레이 가치 점수 계산
+
+        Args:
+            events: 이벤트 목록
 
         Returns:
-            0.0 ~ 1.0 (목표: >= 0.8)
+            재플레이 가치 점수 (0.0-1.0)
         """
         if not events:
             return 0.0
 
-        # 조건 다양성 및 확률 분포 평가
-        condition_variety = 0
-        probability_spread = 0
-
-        # 조건 유형 카운트
-        condition_types = set()
-        probabilities = []
+        total_score = 0.0
+        max_score = 0.0
 
         for event in events:
-            # 트리거 조건 다양성
-            if "trigger" in event:
-                condition = event["trigger"].get("condition")
-                if condition:
-                    condition_types.add(condition)
+            # 기본 점수
+            base_score: float = 0.0
 
-            # 확률 분포
-            if "probability" in event:
-                probabilities.append(event["probability"])
+            # 선택지 수에 따른 점수
+            choices = event.get("choices", [])
+            choice_count = len(choices)
+            if choice_count > 1:
+                base_score += float(choice_count * 0.1)  # 선택지가 많을수록 높은 점수
 
-        # 조건 다양성 점수 (최대 3가지 조건)
-        condition_variety = min(1.0, len(condition_types) / 3)
+            # 조건부 트리거 점수
+            if event.get("type") == "THRESHOLD":
+                base_score += 0.2  # 조건부 이벤트는 더 높은 재플레이 가치
 
-        # 확률 분포 점수 (표준편차 기반)
-        if probabilities:
-            mean = sum(probabilities) / len(probabilities)
-            variance = sum((p - mean) ** 2 for p in probabilities) / len(probabilities)
-            std_dev = math.sqrt(variance)
+            # 연쇄 이벤트 점수
+            cascade_events = 0
+            for choice in choices:
+                cascade_events += len(choice.get("cascade_events", []))
+            if cascade_events > 0:
+                base_score += float(cascade_events * 0.15)
 
-            # 적절한 표준편차 (0.1-0.3 범위가 이상적)
-            if 0.1 <= std_dev <= 0.3:
-                probability_spread = 1.0
-            elif std_dev < 0.1:
-                probability_spread = std_dev / 0.1
-            else:  # std_dev > 0.3
-                probability_spread = 0.3 / std_dev
+            # 태그 다양성 점수
+            tags = event.get("tags", [])
+            if len(tags) > 0:
+                base_score += float(len(tags) * 0.05)
 
-        # 종합 점수 (조건 다양성 50%, 확률 분포 50%)
-        return (condition_variety * 0.5) + (probability_spread * 0.5)
+            # 최종 점수 계산
+            total_score += base_score
+            max_score += 1.0  # 이벤트당 최대 점수
+
+        # 정규화된 점수 반환
+        if max_score > 0:
+            return total_score / max_score
+        return 0.0
 
 
 def main() -> int:

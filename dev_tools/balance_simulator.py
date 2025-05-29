@@ -27,12 +27,18 @@ import random
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict, cast
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from pydantic import BaseModel, Field, field_validator
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
+    import seaborn as sns
+    from pydantic import BaseModel, Field, field_validator
+    PLOTTING_AVAILABLE = True
+except ImportError:
+    PLOTTING_AVAILABLE = False
+    print("⚠️ 시각화 라이브러리를 찾을 수 없습니다. 시각화 기능이 비활성화됩니다.")
 
 # 로깅 설정
 logging.basicConfig(
@@ -45,36 +51,34 @@ logger = logging.getLogger("balance_simulator")
 class SimulationConfig(BaseModel):
     """시뮬레이션 설정을 위한 모델"""
 
-    iterations: int = Field(default=100, description="시뮬레이션 반복 횟수")
-    turns_per_sim: int = Field(default=30, description="각 시뮬레이션의 턴 수")
+    iterations: int = Field(default=100, ge=1, le=1000, description="시뮬레이션 반복 횟수")
+    turns_per_sim: int = Field(default=30, ge=1, le=1000, description="각 시뮬레이션의 턴 수")
     seed: Optional[int] = Field(default=None, description="랜덤 시드 (재현성)")
     bankruptcy_threshold: float = Field(default=-5000, description="파산 기준 자금")
     happiness_weight: float = Field(default=1.0, description="행복 지표 가중치")
     pain_weight: float = Field(default=1.0, description="고통 지표 가중치")
-    cascade_depth_limit: int = Field(default=5, description="최대 연쇄 깊이")
+    cascade_depth_limit: int = Field(default=5, ge=1, le=10, description="최대 연쇄 깊이")
     destruction_threshold: float = Field(default=0.05, description="허용 가능한 파괴율")
 
     @field_validator("iterations")
     def validate_iterations(cls, v: int) -> int:
         """반복 횟수 검증"""
-        if v <= 0:
-            raise ValueError("반복 횟수는 양수여야 합니다")
+        if not 1 <= v <= 1000:
+            raise ValueError("반복 횟수는 1-1000 사이여야 합니다.")
         return v
 
     @field_validator("turns_per_sim")
     def validate_turns(cls, v: int) -> int:
         """턴 수 검증"""
-        if v <= 0:
-            raise ValueError("턴 수는 양수여야 합니다")
+        if not 1 <= v <= 1000:
+            raise ValueError("턴 수는 1-1000 사이여야 합니다.")
         return v
 
     @field_validator("cascade_depth_limit")
     def validate_cascade_depth(cls, v: int) -> int:
         """연쇄 깊이 제한 검증"""
-        if v <= 0:
-            raise ValueError("연쇄 깊이 제한은 양수여야 합니다")
-        if v > 20:
-            raise ValueError("연쇄 깊이 제한이 너무 큽니다 (최대 20)")
+        if not 1 <= v <= 10:
+            raise ValueError("연쇄 깊이 제한은 1-10 사이여야 합니다.")
         return v
 
     def model_dump(self) -> Dict[str, Any]:
@@ -89,6 +93,14 @@ class SimulationConfig(BaseModel):
             "cascade_depth_limit": self.cascade_depth_limit,
             "destruction_threshold": self.destruction_threshold,
         }
+
+
+class EventStats(TypedDict):
+    """이벤트 통계"""
+    trigger_count: int
+    choice_distribution: Dict[str, int]
+    cascade_depth: List[int]
+    metric_changes: Dict[str, List[float]]
 
 
 @dataclass
@@ -1237,7 +1249,7 @@ class EventSimulator:
 
         return visualization_files
 
-    def _convert_numpy_types(self, obj):
+    def _convert_numpy_types(self, obj: Any) -> Any:
         """
         NumPy 타입을 Python 기본 타입으로 변환
 
@@ -1434,7 +1446,7 @@ class EventSimulator:
         return report_data
 
 
-def main():
+def main() -> None:
     """메인 함수"""
     parser = argparse.ArgumentParser(description="이벤트 밸런스 시뮬레이션 도구")
     parser.add_argument("--input", required=True, help="이벤트 뱅크 디렉토리 경로")

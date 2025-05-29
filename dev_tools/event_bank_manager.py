@@ -11,7 +11,7 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Tuple, Generator
+from typing import Any, Optional, Tuple, Generator, Dict, List, Set
 from tqdm import tqdm
 
 import tomllib  # Python 3.11+
@@ -24,24 +24,24 @@ try:
 except ImportError:
 
     class EventValidator:
-        """EventValidator 스텁 클래스"""
+        """이벤트 검증기 스텁"""
 
         def __init__(self) -> None:
-            self.errors = []
+            self.errors: List[str] = []
 
-        def validate_event(self, event: dict[str, Any]) -> bool:
-            """이벤트 검증 스텁 메서드"""
+        def validate_event(self, event: Dict[str, Any]) -> bool:
+            """이벤트 검증"""
             return True
 
         def calculate_quality_metrics(
-            self, events: list[dict[str, Any]]
-        ) -> dict[str, float]:
-            """품질 메트릭 계산 스텁 메서드"""
+            self, events: List[Dict[str, Any]]
+        ) -> Dict[str, float]:
+            """품질 메트릭 계산"""
             return {
-                "diversity_score": 0.8,
-                "tradeoff_clarity": 0.9,
-                "cultural_authenticity": 0.7,
-                "replayability": 0.8,
+                "diversity_score": 0.0,
+                "tradeoff_clarity": 0.0,
+                "cultural_authenticity": 0.0,
+                "replayability": 0.0,
             }
 
 
@@ -50,40 +50,30 @@ try:
 except ImportError:
 
     class BalanceSimulator:
-        """BalanceSimulator 스텁 클래스"""
+        """밸런스 시뮬레이터 스텁"""
 
         def __init__(self) -> None:
-            self.events = []
+            self.events: List[Dict[str, Any]] = []
 
         def run_simulation(self, turns: int = 100, seed: int = 42) -> None:
-            """시뮬레이션 실행 스텁 메서드"""
+            """시뮬레이션 실행"""
             pass
 
-        def generate_balance_report(self) -> dict[str, Any]:
-            """밸런스 리포트 생성 스텁 메서드"""
+        def generate_balance_report(self) -> Dict[str, Any]:
+            """밸런스 보고서 생성"""
             return {
-                "balance_scores": {
-                    "economic_stability": 0.7,
-                    "reputation_curve": 0.8,
-                    "event_distribution": 0.75,
-                    "overall": 0.75,
-                },
-                "recommendations": [
-                    "경제 변동성을 줄이세요.",
-                    "평판 상승 곡선을 완만하게 조정하세요.",
-                    "이벤트 발생 빈도를 균형있게 조정하세요.",
-                ],
+                "bankruptcy_rate": 0.0,
+                "avg_days_survived": 0.0,
+                "balance_maintained_rate": 0.0,
             }
 
         def save_report_to_json(self, report_dir: str) -> str:
-            """JSON 리포트 저장 스텁 메서드"""
-            timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-            return f"{report_dir}/balance_report_{timestamp}.json"
+            """JSON 보고서 저장"""
+            return ""
 
         def save_report_to_csv(self, report_dir: str) -> str:
-            """CSV 리포트 저장 스텁 메서드"""
-            timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-            return f"{report_dir}/metrics_history_{timestamp}.csv"
+            """CSV 보고서 저장"""
+            return ""
 
 
 class EventBankManager:
