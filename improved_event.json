@@ -1,0 +1,44 @@
+{
+  "events": [
+    {
+      "id": "chicken_shop_event_01",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "단골손님의 특별주문",
+      "name_en": "Special Order from a Regular Customer",
+      "text_ko": "단골손님이 특별히 양념치킨과 후라이드치킨을 반반으로 주문했습니다. 주문을 받아들일까요?",
+      "text_en": "A regular customer has placed a special order for half yangnyeom chicken and half fried chicken. Will you accept the order?",
+      "conditions": [],
+      "effects": [],
+      "choices": [
+        {
+          "text_ko": "특별주문을 받아들인다",
+          "text_en": "Accept the special order",
+          "effects": {
+            "money": 100,
+            "reputation": 20
+          }
+        },
+        {
+          "text_ko": "특별주문을 거절한다",
+          "text_en": "Decline the special order",
+          "effects": {
+            "money": 0,
+            "reputation": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "배달"
+      ],
+      "probability": 0.5,
+      "cooldown": 10,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 1000
+      }
+    }
+  ]
+}

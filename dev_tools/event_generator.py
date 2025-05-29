@@ -80,28 +80,64 @@ class EventGenerator:
 카테고리: {category}
 태그: {', '.join(tags)}
 
-제약 조건:
-- 이벤트는 JSON 형식으로 생성되어야 합니다.
-- 이벤트는 다음 필드를 포함해야 합니다:
-  - id: 고유 식별자 (문자열)
-  - category: 이벤트 카테고리 (문자열)
-  - type: 이벤트 타입 (THRESHOLD 또는 RANDOM)
-  - name_ko: 한국어 이벤트 이름 (문자열)
-  - name_en: 영어 이벤트 이름 (문자열)
-  - text_ko: 한국어 이벤트 설명 (문자열)
-  - text_en: 영어 이벤트 설명 (문자열)
-  - conditions: 이벤트 발생 조건 목록 (배열)
-  - effects: 이벤트 효과 목록 (배열)
-  - choices: 선택지 목록 (배열)
-  - tags: 이벤트 태그 목록 (배열)
-  - probability: 이벤트 발생 확률 (0.0-1.0)
-  - cooldown: 재발생 대기 시간 (턴 단위)
-  - trigger: 트리거 조건 (객체)
+중요: 다음 JSON 형식을 정확히 따라주세요:
+
+{{
+  "id": "unique_event_id",
+  "category": "{category}",
+  "type": "THRESHOLD" 또는 "RANDOM",
+  "name_ko": "한국어 이벤트 이름",
+  "name_en": "English Event Name", 
+  "text_ko": "한국어 이벤트 설명",
+  "text_en": "English event description",
+  "conditions": [],
+  "effects": [
+    {{
+      "metric": "MONEY", 
+      "formula": "100"
+    }}
+  ],
+  "choices": [
+    {{
+      "text_ko": "선택지 1",
+      "text_en": "Choice 1",
+      "effects": {{
+        "money": 100,
+        "reputation": -10
+      }}
+    }},
+    {{
+      "text_ko": "선택지 2", 
+      "text_en": "Choice 2",
+      "effects": {{
+        "money": -50,
+        "reputation": 20
+      }}
+    }}
+  ],
+  "tags": {tags},
+  "probability": 0.5,
+  "cooldown": 10,
+  "trigger": {{
+    "metric": "MONEY",
+    "condition": "greater_than",
+    "value": 1000
+  }}
+}}
+
+필수 요구사항:
+- effects 배열의 각 요소는 metric과 formula 필드를 가져야 함
+- trigger 객체는 metric, condition, value 필드를 모두 포함해야 함
+- condition은 "greater_than", "less_than", "equal" 중 하나
+- 선택지는 명확한 tradeoff를 가져야 함 (득과 실이 동시에 존재)
+- 한국 치킨집 문화를 반영해야 함 (단골, 배달, 양념치킨, 후라이드 등)
 
 추가 제약 조건:"""
 
         for key, value in constraints.items():
             prompt += f"\n- {key}: {value}"
+
+        prompt += "\n\n위 형식을 정확히 따라 한 개의 이벤트만 JSON으로 생성해주세요."
 
         return prompt
 
