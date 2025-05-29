@@ -9,12 +9,13 @@
 import json
 import argparse
 import os
-from typing import Dict, Any, List, Optional, Set, Union, TypedDict
+from typing import Dict, Any, List, Optional, Set, TypedDict
 from datetime import datetime
 
 
 class EventMetadata(TypedDict):
     """이벤트 메타데이터 타입"""
+
     id: str
     category: str
     type: str
@@ -93,7 +94,9 @@ class EventBankIndexer:
         except Exception as e:
             print(f"❌ 메타데이터 저장 오류: {str(e)}")
 
-    def update_metadata(self, events: List[Dict[str, Any]], metrics: Optional[Dict[str, float]] = None) -> Dict[str, EventMetadata]:
+    def update_metadata(
+        self, events: List[Dict[str, Any]], metrics: Optional[Dict[str, float]] = None
+    ) -> Dict[str, EventMetadata]:
         """
         이벤트 메타데이터 업데이트
 
@@ -125,22 +128,32 @@ class EventBankIndexer:
                     cooldown=event.get("cooldown", 0),
                     trigger=event.get("trigger", {}),
                     metrics={},
-                    last_modified=current_time
+                    last_modified=current_time,
                 )
 
             # 기존 메타데이터 업데이트
             else:
-                metadata[event_id].update({
-                    "category": event.get("category", metadata[event_id]["category"]),
-                    "type": event.get("type", metadata[event_id]["type"]),
-                    "name_ko": event.get("name_ko", metadata[event_id]["name_ko"]),
-                    "name_en": event.get("name_en", metadata[event_id]["name_en"]),
-                    "tags": set(event.get("tags", list(metadata[event_id]["tags"]))),
-                    "probability": event.get("probability", metadata[event_id]["probability"]),
-                    "cooldown": event.get("cooldown", metadata[event_id]["cooldown"]),
-                    "trigger": event.get("trigger", metadata[event_id]["trigger"]),
-                    "last_modified": current_time
-                })
+                metadata[event_id].update(
+                    {
+                        "category": event.get(
+                            "category", metadata[event_id]["category"]
+                        ),
+                        "type": event.get("type", metadata[event_id]["type"]),
+                        "name_ko": event.get("name_ko", metadata[event_id]["name_ko"]),
+                        "name_en": event.get("name_en", metadata[event_id]["name_en"]),
+                        "tags": set(
+                            event.get("tags", list(metadata[event_id]["tags"]))
+                        ),
+                        "probability": event.get(
+                            "probability", metadata[event_id]["probability"]
+                        ),
+                        "cooldown": event.get(
+                            "cooldown", metadata[event_id]["cooldown"]
+                        ),
+                        "trigger": event.get("trigger", metadata[event_id]["trigger"]),
+                        "last_modified": current_time,
+                    }
+                )
 
             # 품질 메트릭 업데이트 (제공된 경우)
             if metrics:

@@ -8,7 +8,8 @@
 
 import argparse
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
+
 
 class EventConditionFixer:
     """이벤트 조건 수정 도구"""
@@ -62,7 +63,9 @@ class EventConditionFixer:
             print(f"❌ 파일 로드 오류: {str(e)}")
             return {"events": []}
 
-    def fix_trigger_conditions(self, events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def fix_trigger_conditions(
+        self, events: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         이벤트의 트리거 조건 수정
 
@@ -94,7 +97,9 @@ class EventConditionFixer:
                             if "condition" in cascade:
                                 old_condition = cascade["condition"]
                                 if old_condition in self.CONDITION_MAPPING:
-                                    cascade["condition"] = self.CONDITION_MAPPING[old_condition]
+                                    cascade["condition"] = self.CONDITION_MAPPING[
+                                        old_condition
+                                    ]
 
             fixed_events.append(fixed_event)
 
@@ -129,6 +134,7 @@ class EventConditionFixer:
         # 수정된 이벤트 저장
         self.save_events(fixed_events)
 
+
 def main() -> None:
     """메인 함수"""
     parser = argparse.ArgumentParser(description="이벤트 조건 수정 도구")
@@ -138,6 +144,7 @@ def main() -> None:
     args = parser.parse_args()
     fixer = EventConditionFixer(args.input, args.output)
     fixer.process()
+
 
 if __name__ == "__main__":
     main()

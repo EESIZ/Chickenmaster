@@ -13,7 +13,7 @@ import tempfile
 import shutil
 from unittest.mock import patch
 import sys
-from typing import Any, Dict
+from typing import Any
 
 # 프로젝트 루트 디렉토리를 Python 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -230,9 +230,7 @@ class TestEventGenerator(unittest.TestCase):
                             "text_ko": "모의 이벤트 설명",
                             "text_en": "Mock event description",
                             "conditions": [],
-                            "effects": [
-                                {"metric": "MONEY", "formula": "value + 100"}
-                            ],
+                            "effects": [{"metric": "MONEY", "formula": "value + 100"}],
                             "choices": [
                                 {
                                     "text_ko": "선택 1",
@@ -255,9 +253,7 @@ class TestEventGenerator(unittest.TestCase):
 
         # 이벤트 생성 (올바른 매개변수 사용)
         events = generator.generate_events(
-            category="daily_routine", 
-            tags=["테스트"], 
-            count=1
+            category="daily_routine", tags=["테스트"], count=1
         )
 
         # 생성된 이벤트 확인
@@ -288,9 +284,7 @@ class TestEventGenerator(unittest.TestCase):
         for category in categories:
             # 올바른 매개변수 사용
             prompt = generator.create_prompt(
-                category=category, 
-                tags=["테스트"], 
-                constraints={}
+                category=category, tags=["테스트"], constraints={}
             )
 
             # 프롬프트에 카테고리 정보가 포함되어 있는지 확인
@@ -339,7 +333,7 @@ class TestIntegrationPipeline(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.events_dir = os.path.join(self.temp_dir, "events")
         self.reports_dir = os.path.join(self.temp_dir, "reports")
-        
+
         # input_file 정의 및 생성
         self.input_file = os.path.join(self.temp_dir, "input_events.json")
         input_data = {

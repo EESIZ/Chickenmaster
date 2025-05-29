@@ -124,14 +124,14 @@ class EventValidator:
         # 기존 오류 상태 저장
         old_errors = self.errors.copy()
         self.errors = []
-        
+
         # 내부 검증 메서드 호출
         result = self._validate_event(event)
-        
+
         # 오류가 발생했으면 기존 오류 목록에 추가
         if not result:
             old_errors.extend(self.errors)
-        
+
         self.errors = old_errors
         return result
 

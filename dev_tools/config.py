@@ -10,11 +10,12 @@ from typing import Optional, List
 # 이벤트 카테고리 정의 (event_bank_manager.py에서 사용)
 EVENT_CATEGORIES: List[str] = [
     "daily_routine",
-    "crisis_events", 
+    "crisis_events",
     "opportunity",
     "human_drama",
-    "chain_scenario"
+    "chain_scenario",
 ]
+
 
 class Config:
     """API 키 및 설정 관리"""

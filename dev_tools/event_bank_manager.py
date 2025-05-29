@@ -11,7 +11,7 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Tuple, Generator, Dict, List, Set, Union, Type
+from typing import Any, Optional, Tuple, Generator, Dict, List, Type
 from tqdm import tqdm
 
 import tomllib  # Python 3.11+
@@ -21,8 +21,10 @@ from dev_tools.config import EVENT_CATEGORIES
 # 조건부 import 및 스텁 클래스 구현
 try:
     from dev_tools.event_validator import EventValidator
+
     _EventValidator = EventValidator
 except ImportError:
+
     class _EventValidatorStub:
         """이벤트 검증기 스텁"""
 
@@ -43,22 +45,25 @@ except ImportError:
                 "cultural_authenticity": 0.0,
                 "replayability": 0.0,
             }
+
     _EventValidator: Type[Any] = _EventValidatorStub  # type: ignore
 
 
 try:
     from dev_tools.balance_simulator import EventSimulator, SimulationConfig
+
     _EventSimulator = EventSimulator
     _SimulationConfig = SimulationConfig
 except ImportError:
+
     class _SimulationConfigStub:
         """시뮬레이션 설정 스텁"""
-        
+
         def __init__(self, **kwargs: Any) -> None:
             self.iterations = kwargs.get("iterations", 100)
             self.turns_per_sim = kwargs.get("turns_per_sim", 30)
             self.seed = kwargs.get("seed", 42)
-            
+
     class _EventSimulatorStub:
         """이벤트 시뮬레이터 스텁"""
 
@@ -85,6 +90,7 @@ except ImportError:
         def save_report_to_csv(self, report_dir: str) -> str:
             """CSV 보고서 저장"""
             return ""
+
     _EventSimulator: Type[Any] = _EventSimulatorStub  # type: ignore
     _SimulationConfig: Type[Any] = _SimulationConfigStub  # type: ignore
 
@@ -379,12 +385,12 @@ class EventBankManager:
         timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
 
         if not self.dry_run:
-            if hasattr(self.simulator, 'save_report_to_json'):
+            if hasattr(self.simulator, "save_report_to_json"):
                 json_path = self.simulator.save_report_to_json(str(self.reports_dir))
             else:
                 json_path = f"{self.reports_dir}/balance_report_{timestamp}.json"
-                
-            if hasattr(self.simulator, 'save_report_to_csv'):
+
+            if hasattr(self.simulator, "save_report_to_csv"):
                 csv_path = self.simulator.save_report_to_csv(str(self.reports_dir))
             else:
                 csv_path = f"{self.reports_dir}/metrics_history_{timestamp}.csv"

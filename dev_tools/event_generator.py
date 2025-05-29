@@ -7,22 +7,23 @@
 """
 
 import json
-import random
 import re
-from datetime import datetime
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional
 
 try:
     import anthropic  # type: ignore
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
     print("⚠️ anthropic 라이브러리를 찾을 수 없습니다. API 호출이 비활성화됩니다.")
+
     # mypy를 위한 더미 모듈 정의
     class anthropic:  # type: ignore
         class Anthropic:
             def __init__(self, api_key: str) -> None:
                 pass
+
 
 class EventGenerator:
     """이벤트 생성기"""
@@ -35,7 +36,9 @@ class EventGenerator:
             api_key: Anthropic API 키
         """
         self.api_key = api_key
-        self.client = anthropic.Anthropic(api_key=api_key) if ANTHROPIC_AVAILABLE else None
+        self.client = (
+            anthropic.Anthropic(api_key=api_key) if ANTHROPIC_AVAILABLE else None
+        )
 
     def _call_claude_api(self, prompt: str) -> Dict[str, Any]:
         """
@@ -56,14 +59,16 @@ class EventGenerator:
                 model="claude-3-opus-20240229",
                 max_tokens=4000,
                 temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
             return {"messages": response.content[0].text}
         except Exception as e:
             print(f"❌ API 호출 오류: {str(e)}")
             return {}
 
-    def create_prompt(self, category: str, tags: List[str], constraints: Dict[str, Any]) -> str:
+    def create_prompt(
+        self, category: str, tags: List[str], constraints: Dict[str, Any]
+    ) -> str:
         """
         이벤트 생성 프롬프트 생성
 
@@ -146,7 +151,7 @@ class EventGenerator:
         category: str,
         tags: List[str],
         count: int = 1,
-        constraints: Optional[Dict[str, Any]] = None
+        constraints: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """
         이벤트 생성
@@ -207,6 +212,7 @@ class EventGenerator:
         except Exception as e:
             print(f"❌ 파일 저장 오류: {str(e)}")
 
+
 def main() -> None:
     """메인 함수"""
     import argparse
@@ -223,6 +229,7 @@ def main() -> None:
     generator = EventGenerator(args.api_key)
     events = generator.generate_events(args.category, args.tags, args.count)
     generator.save_events(events, args.output)
+
 
 if __name__ == "__main__":
     main()
