@@ -392,9 +392,8 @@ VALID_METRICS = (
             
         except SyntaxError as e:
             self.errors.append(
-                f"포뮬러 구문 오류: {original_formula} "
-                f"(이벤트: {event_id}, 효과 {index+1}, 오류: {str(e)})"
-            )
+            f"포뮬러 구문 오류: {original_formula} "
+            f"(이벤트: {event_id}, 효과 {index+1}, 오류: {e})")
             return False
 
     def _validate_cultural_relevance_raw(self, event: dict[str, Any]) -> bool:
