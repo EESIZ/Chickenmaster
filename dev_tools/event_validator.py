@@ -464,9 +464,9 @@ VALID_METRICS = (
 
         return events_with_tradeoffs / len(events)
 
-    def _has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
+    def has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
         """선택지들이 명확한 트레이드오프를 가지는지"""
-        if len(choices) < 2:
+        if len(choices) < MIN_CHOICES_FOR_TRADEOFF:
             return False
 
         # 각 선택지의 효과 메트릭 집합
