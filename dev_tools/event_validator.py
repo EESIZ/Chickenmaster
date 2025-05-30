@@ -334,8 +334,8 @@ VALID_METRICS = (
         return True
 
     def validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
-    """포뮬러 문자열 엄격한 검증"""
-    original_formula = formula
+        """포뮬러 문자열 엄격한 검증"""  # ✅ 4칸 들여쓰기
+        original_formula = formula
     
     # 퍼센트 표기법 처리
     if formula.endswith("%"):
