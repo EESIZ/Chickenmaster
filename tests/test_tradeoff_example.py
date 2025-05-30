@@ -1,18 +1,15 @@
 """
-트레이드오프 예시 테스트
+트레이드오프 관계 테스트
 
-이 테스트 파일은 Chicken-RNG 게임의 핵심 철학인 '트레이드오프'를
-구체적인 예시로 검증합니다. 모든 선택에는 득과 실이 동시에 발생하며,
-완벽한 해결책은 존재하지 않습니다.
+이 파일은 게임의 핵심 철학인 트레이드오프 관계가 올바르게 구현되어 있는지 검증합니다.
 """
 
-import os
-import sys
+import random
+from decimal import Decimal
 
-# 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import pytest
 
-from schema import TRADEOFF_RELATIONSHIPS, Metric
+from game_constants import TRADEOFF_RELATIONSHIPS, Metric
 
 
 def test_price_decrease_increases_staff_fatigue() -> None:

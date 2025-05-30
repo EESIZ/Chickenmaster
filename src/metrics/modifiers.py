@@ -1,13 +1,16 @@
 """
 지표 수정자 모듈
 
-이 모듈은 지표 변경을 처리하는 수정자 클래스들을 포함합니다.
+지표 변화에 대한 다양한 수정자를 제공합니다.
 """
+
+import random
+from typing import Dict
+
+from game_constants import Metric
 
 from abc import ABC, abstractmethod
 from typing import Any
-
-from schema import Metric
 
 
 class MetricModifier(ABC):
@@ -102,8 +105,6 @@ def uncertainty_apply_random_fluctuation(
     metrics: dict[Metric, float], intensity: float = 0.1, seed: int | None = None
 ) -> dict[Metric, float]:
     """불확실성 요소를 반영하여 지표에 무작위 변동을 적용합니다."""
-    import random
-
     # 시드 설정
     if seed is not None:
         random.seed(seed)

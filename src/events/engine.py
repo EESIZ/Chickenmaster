@@ -10,11 +10,13 @@
 - 불확실성: 이벤트 발생과 효과는 예측 불가능한 요소에 영향을 받습니다
 """
 
+import json
 import random
 from collections import defaultdict, deque
+from pathlib import Path
 from typing import Any
 
-from schema import Metric
+from game_constants import Metric
 from src.events.models import Alert, Event, EventCategory
 from src.events.schema import load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker

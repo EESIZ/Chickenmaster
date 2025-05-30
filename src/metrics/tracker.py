@@ -1,31 +1,23 @@
 """
-지표 추적 모듈
+지표 추적 및 관리 시스템
 
-이 모듈은 Chicken-RNG 게임의 지표(metrics)를 추적하고 관리합니다.
-돈, 평판, 행복/고통, 재고, 직원 피로도 등의 지표를 업데이트하고 균형을 유지합니다.
-
-핵심 철학:
-- 정답 없음: 모든 지표 변화는 득과 실을 동시에 가져옵니다
-- 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
-- 불확실성: 지표 변화는 예측 불가능한 요소에 영향을 받습니다
-
-미래 확장 (M-3, M-4, M-6):
-- import random: M-3에서 불확실성 요소 확장 시 사용 예정
-- Tuple: M-3에서 복합 리턴값 처리 시 사용 예정
-- TRADEOFF_RELATIONSHIPS: M-4에서 연쇄 효과 확장 시 사용 예정
-- are_happiness_suffering_balanced: M-6에서 시소 검증 시 사용 예정
-- AdaptiveModifier: M-6에서 적응형 모델 구현 시 사용 예정
+게임의 모든 지표를 추적하고 변화량을 기록하며, 시소 불변식을 유지합니다.
 """
 
 import json
 import os
-from collections import deque
+import uuid
+from collections import deque, defaultdict
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable
 
-# schema.py에서 필요한 상수와 Enum 가져오기
-from schema import (
+from game_constants import (
     METRIC_RANGES,
+    TRADEOFF_RELATIONSHIPS,
+    UNCERTAINTY_WEIGHTS,
     Metric,
+    are_happiness_suffering_balanced,
     cap_metric_value,
 )
 

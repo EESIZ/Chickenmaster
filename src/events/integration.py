@@ -1,19 +1,17 @@
 """
-이벤트 시스템과 MetricsTracker 통합 모듈
+게임-이벤트 시스템 통합
 
-이 모듈은 이벤트 엔진과 지표 추적기를 통합하여
-이벤트 효과가 게임 지표에 반영되도록 합니다.
-
-핵심 철학:
-- 정답 없음: 모든 이벤트는 득과 실을 동시에 가져옵니다
-- 트레이드오프: 이벤트 효과는 항상 트레이드오프 관계를 가집니다
-- 불확실성: 이벤트 발생과 효과는 예측 불가능한 요소에 영향을 받습니다
+이벤트 시스템을 게임의 메인 루프와 통합하여 매 턴마다 적절한 이벤트를 발생시킵니다.
 """
 
-import os
+import json
+import random
+import uuid
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 
-from schema import Metric
+from game_constants import Metric
 from src.events.engine import EventEngine
 from src.events.models import Alert
 from src.metrics.tracker import MetricsTracker
@@ -48,11 +46,11 @@ class GameEventSystem:
 
         # 이벤트 엔진 초기화
         events_path = None
-        if events_file and os.path.exists(events_file):
+        if events_file and Path(events_file).exists():
             events_path = events_file
 
         tradeoff_path = None
-        if tradeoff_file and os.path.exists(tradeoff_file):
+        if tradeoff_file and Path(tradeoff_file).exists():
             tradeoff_path = tradeoff_file
 
         self.event_engine = EventEngine(

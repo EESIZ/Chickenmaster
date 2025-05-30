@@ -22,7 +22,7 @@ import pytest
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from schema import Metric, are_happiness_suffering_balanced
+from game_constants import Metric, are_happiness_suffering_balanced
 from src.metrics.modifiers import (
     AdaptiveModifier,
     MetricModifier,
@@ -30,6 +30,7 @@ from src.metrics.modifiers import (
     uncertainty_apply_random_fluctuation,
 )
 from src.metrics.tracker import MetricsTracker
+from src.core.domain.metrics import GameMetrics
 
 # 테스트 상수
 MAX_HISTORY_SIZE = 5
@@ -608,3 +609,14 @@ def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -
     # 행복-고통 시소 불변식 확인
     final_metrics = result["final_metrics"]
     assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - MAX_METRIC_VALUE) < EPSILON
+
+
+def test_game_metrics_initialization():
+    """게임 지표가 올바르게 초기화되는지 테스트"""
+    metrics = GameMetrics()
+
+    # 초기값 확인
+    assert metrics.money == 10000
+    assert metrics.reputation == 50
+    assert metrics.happiness == 50
+    assert metrics.suffering == 50

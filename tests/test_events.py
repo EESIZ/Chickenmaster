@@ -11,12 +11,19 @@
 """
 
 import os
+import sys
+import json
 import tempfile
 import time
+from pathlib import Path
+from unittest.mock import Mock, patch
 
 import pytest
 
-from schema import Metric
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from game_constants import Metric
 from src.events.engine import EventEngine
 from src.events.integration import GameEventSystem
 from src.events.models import (

@@ -1,22 +1,18 @@
 """
-이벤트 데이터 모델 모듈
+이벤트 관련 모델과 데이터 클래스들
 
-이 모듈은 Chicken-RNG 게임의 이벤트 시스템에 사용되는 데이터 모델을 정의합니다.
-Event, Trigger, Effect 등의 데이터클래스를 통해 이벤트 구조를 표현합니다.
-
-핵심 철학:
-- 정답 없음: 모든 이벤트는 득과 실을 동시에 가져옵니다
-- 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
-- 불확실성: 이벤트 발생과 효과는 예측 불가능한 요소에 영향을 받습니다
+게임에서 발생하는 다양한 이벤트를 정의하고 관리합니다.
 """
 
+import json
 import random
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
+from pathlib import Path
+from typing import Any
 
-# schema.py에서 필요한 상수와 Enum 가져오기
-from schema import Metric
+from game_constants import Metric
 
 
 class TriggerCondition(Enum):
@@ -247,7 +243,7 @@ class Event:
             if self.schedule is None:
                 return False
             # 스케줄에 따라 특정 턴마다 발생
-            from schema import DEFAULT_GAME_LENGTH
+            from game_constants import DEFAULT_GAME_LENGTH
 
             current_day = DEFAULT_GAME_LENGTH  # 실제 구현에서는 현재 게임 일수를 사용
             return current_day % self.schedule == 0

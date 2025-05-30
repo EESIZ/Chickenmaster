@@ -15,7 +15,7 @@ import pytest
 # 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from schema import Metric, cap_metric_value
+from game_constants import Metric, cap_metric_value
 from src.economy.engine import (
     no_right_answer_compute_profit,
     uncertainty_adjust_inventory,

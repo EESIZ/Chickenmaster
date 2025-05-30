@@ -1,19 +1,19 @@
 """
-경제 엔진 모듈
+경제 엔진
 
-이 모듈은 Chicken-RNG 게임의 경제 시스템 핵심 로직을 구현합니다.
-수익 계산, 트레이드오프 적용, 경제 상태 업데이트 등의 기능을 제공합니다.
-
-핵심 철학:
-- 정답 없음: 모든 경제적 결정은 득과 실을 동시에 가져옵니다
-- 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
-- 불확실성: 경제 상황은 예측 불가능하게 변화할 수 있습니다
+게임의 핵심 경제 로직을 처리하는 엔진입니다.
 """
 
+import json
+import math
+import random
+from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
-# schema.py에서 필요한 상수와 Enum 가져오기
-from schema import (
+from game_constants import (
+    METRIC_RANGES,
+    TRADEOFF_RELATIONSHIPS,
     ActionType,
     Metric,
     cap_metric_value,

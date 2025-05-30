@@ -1,14 +1,65 @@
-# API 문서
+# 🔧 API 사용법 가이드
 
-> 📖 **목적**: Chicken-RNG 게임의 주요 모듈과 클래스의 사용법을 제공합니다.
+Chicken-RNG 프로젝트의 모든 모듈과 함수 사용법을 상세히 설명합니다.
 
 ## 📋 목차
 
-1. [Core Domain API](#core-domain-api)
-2. [Economy API](#economy-api)
-3. [Events API](#events-api)
-4. [Metrics API](#metrics-api)
-5. [사용 예제](#사용-예제)
+1. [게임 상수와 타입](#1-게임-상수와-타입)
+2. [핵심 도메인](#2-핵심-도메인)
+3. [지표 시스템](#3-지표-시스템)
+4. [이벤트 시스템](#4-이벤트-시스템)
+5. [경제 시스템](#5-경제-시스템)
+6. [개발 도구](#6-개발-도구)
+
+---
+
+## 1. 게임 상수와 타입
+
+### `game_constants.py` - 게임 핵심 상수
+
+게임의 모든 지표, 타입, 상수를 중앙에서 관리합니다.
+
+#### 핵심 열거형
+
+```python
+from game_constants import Metric, ActionType, EventType
+
+# 게임 지표
+metric = Metric.MONEY
+print(metric)  # Metric.MONEY
+
+# 플레이어 행동
+action = ActionType.PRICE_CHANGE
+print(action)  # ActionType.PRICE_CHANGE
+```
+
+#### 지표 범위와 트레이드오프
+
+```python
+from game_constants import METRIC_RANGES, TRADEOFF_RELATIONSHIPS
+
+# 지표 범위 확인
+min_val, max_val, initial = METRIC_RANGES[Metric.MONEY]
+print(f"돈: {min_val}~{max_val}, 초기값: {initial}")
+
+# 트레이드오프 관계 확인
+affected_metrics = TRADEOFF_RELATIONSHIPS[Metric.MONEY]
+print(f"돈이 증가하면 감소하는 지표들: {affected_metrics}")
+```
+
+#### 유틸리티 함수
+
+```python
+from game_constants import cap_metric_value, are_happiness_suffering_balanced
+
+# 지표 값 보정
+safe_value = cap_metric_value(Metric.MONEY, -1000)
+print(safe_value)  # 0 (음수 방지)
+
+# 행복-고통 균형 확인
+is_balanced = are_happiness_suffering_balanced(60, 40)
+print(is_balanced)  # True (합이 100)
+```
 
 ---
 
@@ -196,7 +247,7 @@ choice = EventChoice(
 
 ```python
 from src.metrics.tracker import MetricsTracker
-from schema import Metric
+from game_constants import Metric
 
 # 메트릭 추적기 초기화
 tracker = MetricsTracker()

@@ -1,13 +1,7 @@
 """
-경제 모델 모듈
+경제 시스템 모델
 
-이 모듈은 Chicken-RNG 게임의 경제 모델 함수들을 제공합니다.
-수요 계산, 가격 효과, 평판 효과 등의 핵심 경제 함수를 포함합니다.
-
-핵심 철학:
-- 정답 없음: 모든 경제적 결정은 득과 실을 동시에 가져옵니다
-- 트레이드오프: 한 지표를 개선하면 다른 지표는 악화됩니다
-- 불확실성: 경제 상황은 예측 불가능하게 변화할 수 있습니다
+게임의 경제 시스템을 구성하는 핵심 모델들을 정의합니다.
 """
 
 # import math  # 향후 수학 함수 사용을 위해 준비 (현재 미사용)
@@ -16,11 +10,13 @@ import json
 import os
 from typing import Any, cast
 
-# schema.py에서 필요한 상수와 Enum 가져오기
-from schema import (
-    METRIC_RANGES,  # noqa: F401 - 향후 확장을 위해 유지
-    Metric,  # noqa: F401 - 향후 확장을 위해 유지
-    cap_metric_value,  # noqa: F401 - 향후 확장을 위해 유지
+from game_constants import (
+    METRIC_RANGES,
+    TRADEOFF_RELATIONSHIPS,
+    UNCERTAINTY_WEIGHTS,
+    ActionType,
+    Metric,
+    cap_metric_value,
 )
 
 
