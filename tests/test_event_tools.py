@@ -65,8 +65,8 @@ class TestEventConditionFixer(unittest.TestCase):
     def test_process_no_right_answer(self) -> None:
         """정답이 없는 상황 테스트"""
         fixer = EventConditionFixer(self.input_file, self.output_file)
-        fixed_events = fixer.process_no_right_answer()
-
+        _ = fixer.process_no_right_answer()  # 사용하지 않음을 명시
+    
         # 출력 파일 로드
         with open(self.output_file, encoding="utf-8") as f:
             fixed_data = json.load(f)
