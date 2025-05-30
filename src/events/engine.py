@@ -16,9 +16,9 @@ from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
 
-from game_constants import Metric
+from game_constants import Metric as MetricEnum
 from src.events.models import Alert, Event, EventCategory
-from src.events.schema import load_events_from_json, load_events_from_toml
+from src.events.schema import load_events_from_json, load_events_from_toml, Event as PydanticEvent, EventTrigger
 from src.metrics.tracker import MetricsTracker
 
 
@@ -52,7 +52,7 @@ class EventEngine:
         self.events: list[Event] = []
         self.event_queue: deque[Event] = deque()
         self.alert_queue: deque[Alert] = deque()
-        self.cascade_matrix: dict[Metric, list[dict[str, Any]]] = {}
+        self.cascade_matrix: dict[MetricEnum, list[dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
         self.current_turn = 0
 
@@ -98,92 +98,120 @@ class EventEngine:
             if "cascade" in data:
                 for source_metric, targets in data["cascade"].items():
                     try:
-                        metric = Metric[source_metric]
+                        metric = MetricEnum[source_metric]
                         self.cascade_matrix[metric] = targets
                     except KeyError:
                         print(f"알 수 없는 지표: {source_metric}")
         except Exception as e:
             print(f"트레이드오프 매트릭스 로드 실패: {e}")
 
-    def poll(self) -> list[Event]:
+    def poll(self) -> list[PydanticEvent]:
         """
         현재 턴에 발생 가능한 이벤트를 폴링합니다.
-
+        
         Returns:
-            List[Event]: 발생 가능한 이벤트 목록
+            List[PydanticEvent]: 발생 가능한 이벤트 목록
         """
-        # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
+        triggered_events: list[PydanticEvent] = []
+        
+        events_to_iterate = self.events.events if hasattr(self.events, 'events') and isinstance(self.events.events, list) else []
 
-        # 발생 가능한 이벤트 목록
-        triggered_events = []
+        for event_data in events_to_iterate:
+            can_fire_event = True 
+            # TODO: Cooldown 및 last_triggered_turn 로직 구현 필요
+            # if event_data.cooldown > 0 and event_data.id in self.event_last_triggered_turn:
+            #     if self.current_turn - self.event_last_triggered_turn[event_data.id] < event_data.cooldown:
+            #         can_fire_event = False
 
-        # 모든 이벤트 평가
-        for event in self.events:
-            # 쿨다운 확인
-            if not event.can_fire(self.current_turn):
+            if not can_fire_event:
                 continue
 
-            # 트리거 조건 평가
-            if event.evaluate_trigger(current_metrics, self.rng):
-                triggered_events.append(event)
-
-        # 우선순위에 따라 정렬 (높은 우선순위가 먼저)
+            if event_data.type == "THRESHOLD":
+                if event_data.trigger and self._evaluate_pydantic_trigger(event_data.trigger, current_metrics):
+                    triggered_events.append(event_data)
+                    self.metrics_tracker.add_event(f"Polled THRESHOLD: {event_data.id} - {event_data.name_ko}")
+            elif event_data.type == "RANDOM":
+                if self.rng.random() < event_data.probability:
+                    triggered_events.append(event_data)
+                    self.metrics_tracker.add_event(f"Polled RANDOM: {event_data.id} - {event_data.name_ko}")
+            # TODO: SCHEDULED, CASCADE 타입 처리
+            
+        # 우선순위에 따라 정렬 (PydanticEvent에 priority가 있으므로 사용 가능)
         triggered_events.sort(key=lambda e: -e.priority)
+        
+        for event_to_fire in triggered_events:
+            self.event_queue.append(event_to_fire) # 큐에는 PydanticEvent 저장
 
-        # 이벤트 큐에 추가
-        for event in triggered_events:
-            self.event_queue.append(event)
+        return triggered_events # 실제 발생 "가능성이 있는" 이벤트 목록 반환
 
-        return triggered_events
+    def _evaluate_pydantic_trigger(self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]) -> bool:
+        """ Pydantic EventTrigger 모델을 평가합니다. """
+        metric_enum = getattr(MetricEnum, trigger.metric.upper(), None) # trigger.metric이 문자열이므로 upper()로 Enum 멤버 이름과 일치시킴
+        if not metric_enum or metric_enum not in current_metrics:
+            print(f"[Debug] Metric {trigger.metric} not found in current_metrics or MetricEnum")
+            return False
+        current_value = current_metrics[metric_enum]
 
-    def evaluate_triggers(self) -> list[Event]:
+        condition_str = trigger.condition.upper()
+        trigger_value = trigger.value
+
+        if condition_str == "LESS_THAN":
+            return current_value < trigger_value
+        elif condition_str == "GREATER_THAN":
+            return current_value > trigger_value
+        elif condition_str == "EQUAL":
+            return abs(current_value - trigger_value) < 0.001 # 부동소수점 비교
+        elif condition_str == "NOT_EQUAL":
+            return abs(current_value - trigger_value) >= 0.001
+        elif condition_str == "GREATER_THAN_OR_EQUAL":
+            return current_value >= trigger_value
+        elif condition_str == "LESS_THAN_OR_EQUAL":
+            return current_value <= trigger_value
+        # TODO: IN_RANGE, NOT_IN_RANGE 구현 필요 (EventTrigger 모델에 range_min/max 없음)
+        print(f"[Debug] Unknown condition: {trigger.condition}")
+        return False
+
+    def evaluate_triggers(self) -> list[PydanticEvent]: # 반환 타입을 PydanticEvent로 명시
         """
         임계값 기반 트리거를 평가합니다.
 
         Returns:
-            List[Event]: 트리거된 이벤트 목록
+            List[PydanticEvent]: 트리거된 이벤트 목록
         """
-        # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
+        threshold_events: list[PydanticEvent] = [] # 타입 명시
+        
+        events_to_iterate = self.events.events if hasattr(self.events, 'events') and isinstance(self.events.events, list) else []
 
-        # 트리거된 이벤트 목록
-        threshold_events = []
-
-        # THRESHOLD 타입 이벤트만 평가
-        for event in self.events:
-            if event.type != EventCategory.THRESHOLD:
+        for event_data in events_to_iterate:
+            if event_data.type != "THRESHOLD":
+                continue
+            
+            can_fire_event = True # 임시 (cooldown 로직은 poll에서 처리 가정 또는 EventEngine에서 상태 관리 필요)
+            if not can_fire_event:
                 continue
 
-            # 쿨다운 확인
-            if not event.can_fire(self.current_turn):
-                continue
-
-            # 트리거 조건 평가
-            if event.trigger and event.trigger.evaluate(current_metrics):
-                threshold_events.append(event)
-
-                # 알림 생성
+            if event_data.trigger and self._evaluate_pydantic_trigger(event_data.trigger, current_metrics):
+                threshold_events.append(event_data)
+                alert_message = event_data.text_ko or f"임계값 이벤트 발생: {event_data.name_ko}"
                 alert = Alert(
-                    event_id=event.id,
-                    message=event.message or f"임계값 이벤트 발생: {event.id}",
-                    metrics=current_metrics.copy(),
+                    event_id=event_data.id,
+                    message=alert_message, 
+                    metrics=current_metrics.copy(), # 여기서 metrics는 MetricEnum을 키로 가짐
                     turn=self.current_turn,
                     severity="WARNING",
                 )
                 self.alert_queue.append(alert)
-
-                # 이벤트 큐에 추가
-                self.event_queue.append(event)
-
+                self.metrics_tracker.add_event(f"Triggered: {event_data.id} - {event_data.name_ko}") # 이벤트 발생 기록
         return threshold_events
 
-    def apply_effects(self) -> dict[Metric, float]:
+    def apply_effects(self) -> dict[MetricEnum, float]:
         """
         큐에 있는 모든 이벤트의 효과를 적용합니다.
 
         Returns:
-            Dict[Metric, float]: 효과가 적용된 최종 지표 상태
+            Dict[MetricEnum, float]: 효과가 적용된 최종 지표 상태
         """
         # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
@@ -220,7 +248,7 @@ class EventEngine:
 
         return current_metrics
 
-    def _process_cascade_effects(self, changed_metrics: set[Metric], depth: int) -> None:
+    def _process_cascade_effects(self, changed_metrics: set[MetricEnum], depth: int) -> None:
         """
         지표 변화의 연쇄 효과를 처리합니다.
 
@@ -257,7 +285,7 @@ class EventEngine:
 
                 try:
                     # 대상 지표 확인
-                    target_metric = Metric[target_metric_name]
+                    target_metric = MetricEnum[target_metric_name]
 
                     # 현재 대상 지표 값 가져오기 (누적 적용을 위해)
                     target_current_value = current_metrics[target_metric]
@@ -308,12 +336,12 @@ class EventEngine:
             if next_changed_metrics:
                 self._process_cascade_effects(next_changed_metrics, depth + 1)
 
-    def update(self) -> dict[Metric, float]:
+    def update(self) -> dict[MetricEnum, float]:
         """
         이벤트 엔진을 한 턴 업데이트합니다.
 
         Returns:
-            Dict[Metric, float]: 업데이트 후 지표 상태
+            Dict[MetricEnum, float]: 업데이트 후 지표 상태
         """
         # 턴 증가
         self.current_turn += 1
@@ -364,7 +392,7 @@ class EventEngine:
         for source, targets in self.cascade_matrix.items():
             for edge in targets:
                 try:
-                    target = Metric[edge["target"]]
+                    target = MetricEnum[edge["target"]]
                     edges.append((source.name, target.name))
                 except KeyError:
                     continue

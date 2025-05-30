@@ -132,13 +132,15 @@ def game_event_system() -> GameEventSystem:
 
 def test_event_application(event_engine: EventEngine, sample_metrics: dict[Metric, float]) -> None:
     """이벤트 효과가 지표에 정확히 반영되는지 테스트합니다."""
-    # 테스트용 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="-500")
     event = Event(
         id="test_event",
+        name="테스트 이벤트",
+        description="이것은 테스트 이벤트입니다.",
         type=EventCategory.RANDOM,
         effects=[effect],
         probability=1.0,  # 항상 발생
+        category="test_category"
     )
 
     # 이벤트 큐에 추가
@@ -153,7 +155,6 @@ def test_event_application(event_engine: EventEngine, sample_metrics: dict[Metri
 
 def test_threshold_trigger(event_engine: EventEngine, sample_metrics: dict[Metric, float]) -> None:
     """임계값 이벤트가 올바르게 트리거되는지 테스트합니다."""
-    # 테스트용 임계값 이벤트 생성
     trigger = Trigger(
         metric=Metric.REPUTATION,
         condition=TriggerCondition.LESS_THAN,
@@ -162,9 +163,12 @@ def test_threshold_trigger(event_engine: EventEngine, sample_metrics: dict[Metri
     effect = Effect(metric=Metric.MONEY, formula="-1000")
     event = Event(
         id="test_threshold_event",
+        name="테스트 임계값 이벤트",
+        description="이것은 테스트 임계값 이벤트입니다.",
         type=EventCategory.THRESHOLD,
         trigger=trigger,
         effects=[effect],
+        category="test_category"
     )
 
     # 이벤트 목록에 추가
@@ -216,8 +220,11 @@ def test_cascade_chain(
     effect = Effect(metric=Metric.REPUTATION, formula="-20")
     event = Event(
         id="test_cascade_event",
+        name="테스트 연쇄 이벤트",
+        description="이것은 테스트 연쇄 이벤트입니다.",
         type=EventCategory.RANDOM,
         effects=[effect],
+        category="test_category"
     )
 
     # 이벤트 큐에 추가
@@ -299,19 +306,44 @@ def test_perf_1000_events(game_event_system: GameEventSystem) -> None:
 
 def test_event_schema_parsing() -> None:
     """이벤트 스키마 파싱 및 변환을 테스트합니다."""
-    # 테스트용 TOML 문자열
     toml_content = """
-    [[events]]
-    id = "test_event"
-    type = "RANDOM"
-    priority = 10
-    probability = 0.5
-    
-    [[events.effects]]
-    metric = "MONEY"
-    formula = "-500"
-    message = "테스트 효과"
-    """
+[[events]]
+id = "test_event_toml_001"
+type = "RANDOM"
+category = "test_category_001"
+name_ko = "TOML 테스트 이벤트 1"
+name_en = "TOML Test Event 1"
+text_ko = "이것은 TOML에서 로드된 첫 번째 테스트 이벤트입니다. 모든 필수 필드를 포함합니다."
+text_en = "This is the first test event loaded from TOML, including all required fields."
+priority = 10
+effects = [
+    { metric = "MONEY", formula = "-100" },
+    { metric = "REPUTATION", formula = "value + 5" }
+]
+choices = [
+    { text_ko = "선택1", text_en = "Choice1", effects = {"HAPPINESS": 10.0} },
+    { text_ko = "선택2", text_en = "Choice2", effects = {"SUFFERING": 5.0}, cascade_events = ["other_event_id"] }
+]
+tags = ["toml", "test1"]
+probability = 0.6
+cooldown = 3
+
+[[events]]
+id = "test_event_toml_002"
+type = "THRESHOLD"
+category = "test_category_002"
+name_ko = "TOML 임계값 이벤트"
+name_en = "TOML Threshold Event"
+text_ko = "특정 조건 도달 시 발동하는 TOML 이벤트입니다."
+text_en = "This TOML event triggers when a specific condition is met."
+priority = 5
+effects = [{ metric = "FACILITY", formula = "value - 10"}]
+choices = []
+tags = ["threshold_test"]
+probability = 0.0
+cooldown = 5
+trigger = { metric = "REPUTATION", condition = "LESS_THAN", value = 20.0 }
+        """
 
     # 임시 파일 생성
     with tempfile.NamedTemporaryFile(suffix=".toml", delete=False) as temp_toml:
@@ -326,6 +358,7 @@ def test_event_schema_parsing() -> None:
         events = load_events_from_toml(toml_path)
 
         # 검증
+        assert len(events) == 2
         assert len(events) == 1
         assert events[0].id == "test_event"
         assert events[0].type == EventCategory.RANDOM
@@ -371,18 +404,24 @@ def test_random_seed_reproducibility(sample_metrics: dict[Metric, float]) -> Non
     # 테스트용 랜덤 이벤트 생성
     effect = Effect(metric=Metric.MONEY, formula="value * (0.9 + 0.2 * random())")
     event1 = Event(
-        id="test_random_event",
+        id="test_random_event_1",
+        name="테스트 랜덤 이벤트 1",
+        description="이것은 첫 번째 테스트 랜덤 이벤트입니다.",
         type=EventCategory.RANDOM,
         effects=[effect],
         probability=0.5,
+        category="test_category"
     )
 
     effect2 = Effect(metric=Metric.MONEY, formula="value * (0.9 + 0.2 * random())")
     event2 = Event(
-        id="test_random_event",
+        id="test_random_event_2",
+        name="테스트 랜덤 이벤트 2",
+        description="이것은 두 번째 테스트 랜덤 이벤트입니다.",
         type=EventCategory.RANDOM,
         effects=[effect2],
         probability=0.5,
+        category="test_category"
     )
 
     # 이벤트 목록에 추가
@@ -495,7 +534,8 @@ def test_event_file_loading(game_event_system: GameEventSystem) -> None:
     )
 
     # 이벤트 목록 확인
-    assert len(event_engine.events) > 0
+    assert hasattr(event_engine.events, 'events') and isinstance(event_engine.events.events, list), "event_engine.events.events가 리스트가 아님"
+    assert len(event_engine.events.events) > 0 # EventContainer의 events 리스트 길이 확인
 
 
 def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -> None:
@@ -515,7 +555,7 @@ def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -
     }
 
     # 시나리오 시뮬레이션
-    result = game_event_system.noRightAnswer_simulate_scenario(scenario, days=5)
+    result = game_event_system.simulate_scenario_no_right_answer(scenario, days=HISTORY_DAYS)
 
     # 결과 검증
     assert "final_metrics" in result

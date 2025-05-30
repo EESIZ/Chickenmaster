@@ -1,0 +1,18 @@
+{
+  "day": 3,
+  "timestamp": "2025-05-30T13:42:58.359897",
+  "metrics": {
+    "MONEY": 4535.19177793286,
+    "REPUTATION": 26.139833776263522,
+    "HAPPINESS": 38.79576220215983,
+    "SUFFERING": 61.20423779784017,
+    "INVENTORY": 52.83616155297465,
+    "STAFF_FATIGUE": 70.21336970807846,
+    "FACILITY": 32.53087552801265,
+    "DEMAND": 61.64199074547161
+  },
+  "events": [
+    "평판 변동으로 인한 경미한 매출 변화, 자금 -100 변동"
+  ],
+  "modifier": "SimpleSeesawModifier"
+}

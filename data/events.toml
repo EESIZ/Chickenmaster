@@ -1,8 +1,15 @@
 [[events]]
 id = "food_poisoning"
+name_ko = "식중독 발생"
+name_en = "Food Poisoning"
+text_ko = "식중독 사건 발생으로 가게 운영에 차질이 생겼습니다. 고객들의 불만이 폭주하고 있습니다."
+text_en = "A food poisoning incident has occurred, disrupting store operations. Customer complaints are flooding in."
+category = "CRISIS"
 type = "THRESHOLD"
 priority = 90
 cooldown = 7
+probability = 0.0
+choices = []
 
 [events.trigger]
 metric = "REPUTATION"
@@ -12,51 +19,65 @@ value = 30.0
 [[events.effects]]
 metric = "REPUTATION"
 formula = "-20"
-message = "식중독 사건으로 인한 평판 하락"
 
 [[events.effects]]
 metric = "MONEY"
 formula = "-1000"
-message = "식중독 사건으로 인한 의료비 지출"
 
 [[events]]
 id = "viral_marketing"
+name_ko = "바이럴 마케팅 성공"
+name_en = "Viral Marketing Success"
+text_ko = "우리 가게가 온라인에서 갑자기 유명해졌습니다! 손님들이 몰려오고 있습니다."
+text_en = "Our store suddenly became famous online! Customers are flocking in."
+category = "OPPORTUNITY"
 type = "RANDOM"
 priority = 50
 cooldown = 5
 probability = 0.2
+choices = []
 
 [[events.effects]]
 metric = "REPUTATION"
 formula = "value * 1.1"
-message = "바이럴 마케팅 효과로 평판 상승"
 
 [[events.effects]]
 metric = "MONEY"
 formula = "-500"
-message = "마케팅 비용 지출"
 
 [[events]]
 id = "staff_training"
+name_ko = "직원 교육 실시"
+name_en = "Staff Training Conducted"
+text_ko = "직원들의 역량 강화를 위해 전문 교육을 실시합니다. 서비스 품질이 향상될 것으로 기대됩니다."
+text_en = "Professional training is conducted to enhance staff capabilities. Service quality is expected to improve."
+category = "DAILY_ROUTINE"
 type = "SCHEDULED"
 priority = 30
-schedule = 7
+cooldown = 0
+probability = 0.0
+choices = []
 
 [[events.effects]]
 metric = "STAFF_FATIGUE"
 formula = "-10"
-message = "직원 교육으로 피로도 감소"
 
 [[events.effects]]
 metric = "MONEY"
 formula = "-800"
-message = "직원 교육 비용 지출"
 
 [[events]]
 id = "facility_maintenance"
+name_ko = "시설 유지보수"
+name_en = "Facility Maintenance"
+text_ko = "노후된 시설을 점검하고 보수하여 가게 환경을 개선합니다."
+text_en = "Inspect and repair aging facilities to improve the store environment."
+category = "DAILY_ROUTINE"
 type = "THRESHOLD"
 priority = 70
 cooldown = 10
+probability = 0.0
+choices = []
 
 [events.trigger]
 metric = "FACILITY"
@@ -66,18 +87,23 @@ value = 40.0
 [[events.effects]]
 metric = "FACILITY"
 formula = "value + 20"
-message = "시설 유지보수 작업 완료"
 
 [[events.effects]]
 metric = "MONEY"
 formula = "-1500"
-message = "시설 유지보수 비용 지출"
 
 [[events]]
 id = "happy_customers"
+name_ko = "행복한 고객들 증가"
+name_en = "Increase in Happy Customers"
+text_ko = "사장님의 행복한 기운이 고객들에게도 전달되어 가게 전체에 긍정적인 분위기가 가득합니다."
+text_en = "The owner's happy energy is transmitted to the customers, filling the entire store with a positive atmosphere."
+category = "OPPORTUNITY"
 type = "THRESHOLD"
 priority = 40
 cooldown = 5
+probability = 0.0
+choices = []
 
 [events.trigger]
 metric = "HAPPINESS"
@@ -87,21 +113,24 @@ value = 70.0
 [[events.effects]]
 metric = "REPUTATION"
 formula = "value + 5"
-message = "행복한 사장님의 서비스로 고객 만족도 상승"
 
 [[events]]
 id = "random_opportunity"
+name_ko = "뜻밖의 행운 발견"
+name_en = "Unexpected Stroke of Luck"
+text_ko = "예상치 못한 기회가 찾아와 가게에 새로운 활력을 불어넣을 수 있을 것 같습니다."
+text_en = "An unexpected opportunity has arisen that could bring new vitality to the store."
+category = "OPPORTUNITY"
 type = "RANDOM"
 priority = 20
 cooldown = 3
 probability = 0.15
+choices = []
 
 [[events.effects]]
 metric = "MONEY"
 formula = "1000"
-message = "예상치 못한 수익 발생"
 
 [[events.effects]]
 metric = "STAFF_FATIGUE"
 formula = "value + 5"
-message = "갑작스러운 업무 증가로 직원 피로도 상승"

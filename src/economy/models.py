@@ -75,30 +75,23 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
     Returns:
         int: 계산된 수요량
     """
-    base_demand = config["base_demand"]
-    price_sensitivity = config["price_sensitivity"]
-    min_price = config["min_price"]
-    max_price = config["max_price"]
-    optimal_price = config["optimal_price"]
-    _uncertainty_factor = config["uncertainty_factor"]  # 향후 확장을 위해 유지
+    demand_config = config.get("demand", {})
+    base_demand = demand_config.get("base_demand", 50)
+    price_elasticity = demand_config.get("price_elasticity", -0.5)
+    reputation_effect = demand_config.get("reputation_effect", 0.2)
+    optimal_price = demand_config.get("optimal_price", 100)
 
-    # 평판 정규화 (0-100 범위를 0-1로 변환)
+    price_factor = 1.0
+    if optimal_price > 0 and price != optimal_price:
+        price_factor = 1 + price_elasticity * (price - optimal_price) / optimal_price
+    elif price == optimal_price:
+        price_factor = 1.0
+    else: 
+        price_factor = 1.0 
 
-    normalized_reputation = reputation / 100.0
+    reputation_factor = 1.0
+    if reputation != 50:
+         reputation_factor = 1 + reputation_effect * (reputation - 50) / 50
 
-    # 가격 효과 계산 (최적 가격에서 멀어질수록 감소)
-
-    price_effect = 1.0 - (price_sensitivity * abs(price - optimal_price) / (max_price - min_price))
-
-    # 평판 효과 계산 (평판이 높을수록 증가)
-
-    reputation_factor = config["reputation_factor"]
-    reputation_effect = 1.0 + (normalized_reputation * reputation_factor)
-
-    # 최종 수요 계산
-
-    demand = round(base_demand * price_effect * reputation_effect)
-
-    # 음수 수요 방지
-
-    return int(max(0, demand))
+    calculated_demand = int(max(0, base_demand * price_factor * reputation_factor))
+    return calculated_demand
