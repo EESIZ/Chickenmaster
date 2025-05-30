@@ -49,7 +49,7 @@ def test_price_decrease_increases_staff_fatigue() -> None:
     ), "평판(손님 증가)과 직원 피로도는 트레이드오프 관계여야 합니다"
 
 
-def test_noRightAnswer_in_pricing_strategy() -> None:
+def test_no_right_answer_in_pricing_strategy() -> None:
     """
     가격 전략에 '정답 없음' 원칙 검증
 
