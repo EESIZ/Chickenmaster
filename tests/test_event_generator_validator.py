@@ -133,7 +133,7 @@ class TestEventValidator(unittest.TestCase):
         with open(self.trigger_file, "w", encoding="utf-8") as f:
             json.dump(self.trigger_events, f, ensure_ascii=False, indent=2)
 
-    def tearDown(self) -> None:
+    def tear_down(self) -> None:
         """테스트 정리"""
         shutil.rmtree(self.temp_dir)
 
