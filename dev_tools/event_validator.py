@@ -333,18 +333,19 @@ VALID_METRICS = (
 
         return True
 
-    def _validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
-        """포뮬러 문자열 엄격한 검증"""
-        original_formula = formula
-        
-        # 퍼센트 표기법 처리
-        if formula.endswith("%"):
-            try:
-                percent_value = float(formula[:-1])
-                return True
-            except ValueError:
-                self.errors.append(f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})")
-                return False
+    def validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
+    """포뮬러 문자열 엄격한 검증"""
+    original_formula = formula
+    
+    # 퍼센트 표기법 처리
+    if formula.endswith("%"):
+        try:
+            # 퍼센트 부분이 유효한 숫자인지 검증
+            float(formula[:-1])
+            return True
+        except ValueError:
+            self.errors.append(f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})")
+            return False
 
         # 간단한 숫자 리터럴 처리
         try:
