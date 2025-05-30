@@ -238,8 +238,10 @@ class MassEventGenerator:
         total_categories = len(plan)
 
         print("\n[PLAN] 생성 계획:")
+        print(f"총 {total_categories}개 카테고리에서 {total_target}개 이벤트 생성 예정")
+
         for category, info in plan.items():
-            print(f"  - {category}: {info['count']}개")
+        print(f"  - {category}: {info['count']}개")
         print(f"  [TOTAL] 총 목표: {total_target}개")
 
         # 예상 비용 계산
