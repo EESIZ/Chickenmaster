@@ -21,6 +21,7 @@ except ImportError:
     # mypy를 위한 더미 모듈 정의
     class AnthropicDummy:  # type: ignore
         """더미 Anthropic 클래스"""
+
         class Anthropic:
             def __init__(self, api_key: str) -> None:
                 pass
@@ -78,8 +79,9 @@ class EventGenerator:
             생성된 프롬프트 문자열
         """
         import random
+
         random_suffix = random.randint(1000, 9999)
-        
+
         prompt = f"""다음 조건에 맞는 치킨집 운영 게임의 이벤트를 생성해주세요:
 
 카테고리: {category}
@@ -152,25 +154,16 @@ class EventGenerator:
         return prompt
 
     def generate_events(
-        self, category: str, tags: list[str] | None = None, count: int = 1
+        self,
+        category: str,
+        tags: list[str] | None = None,
+        count: int = 1,
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
     ) -> list[dict[str, Any]]:
-        """
-        이벤트 생성
-
-        Args:
-            category: 이벤트 카테고리
-            tags: 이벤트 태그 목록
-            count: 생성할 이벤트 수
-
-        Returns:
-            생성된 이벤트 목록
-        """
-        if not ANTHROPIC_AVAILABLE:
-            print("[ERROR] anthropic 라이브러리가 설치되지 않았습니다.")
-            return []
-
+        """지정된 카테고리와 태그로 이벤트를 생성합니다."""
         events = []
-        for i in range(count):
+        for _ in range(count):
             event = self._generate_single_event(category, tags or [])
             if event:
                 events.append(event)
@@ -183,10 +176,10 @@ class EventGenerator:
         """단일 이벤트 생성"""
         prompt = self.create_prompt(category, tags, {})
         response = self._call_claude_api(prompt)
-        
+
         if not response or "messages" not in response:
             return None
-            
+
         return self._extract_json_from_response(response["messages"])
 
     def _extract_json_from_response(self, response_text: str) -> dict[str, Any] | None:
@@ -194,20 +187,20 @@ class EventGenerator:
         # 디버깅을 위해 응답 일부 출력
         print(f"[DEBUG] API 응답 길이: {len(response_text)}")
         print(f"[DEBUG] API 응답 시작 부분: {response_text[:200]}...")
-        
+
         # JSON 블록을 찾기 위한 여러 패턴 시도
         patterns = [
-            r'```json\s*(.*?)\s*```',  # ```json ... ```
-            r'```\s*(.*?)\s*```',       # ``` ... ```
-            r'\{[\s\S]*\}'              # { ... }
+            r"```json\s*(.*?)\s*```",  # ```json ... ```
+            r"```\s*(.*?)\s*```",  # ``` ... ```
+            r"\{[\s\S]*\}",  # { ... }
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, response_text, re.DOTALL)
             if match:
                 try:
                     # 패턴에 따라 다른 그룹 추출
-                    json_str = match.group(1) if '```' in pattern else match.group(0)
+                    json_str = match.group(1) if "```" in pattern else match.group(0)
                     event_data = json.loads(json_str)
                     print(f"[SUCCESS] 이벤트 생성 완료: {event_data.get('id', '알 수 없음')}")
                     return event_data
@@ -215,7 +208,7 @@ class EventGenerator:
                     print(f"[ERROR] JSON 파싱 오류: {e!s}")
                     print(f"[DEBUG] JSON 문자열: {json_str[:200]}...")
                     continue
-        
+
         print("[ERROR] JSON 데이터를 찾을 수 없습니다.")
         print(f"[DEBUG] 전체 응답: {response_text[:500]}...")
         return None

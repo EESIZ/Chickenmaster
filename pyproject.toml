@@ -12,6 +12,7 @@ license = {text = "MIT"}
 
 [tool.ruff]
 target-version = "py312"
+line-length = 100
 # 기존 설정은 유지하고 E501만 추가
 lint.ignore = ["E501","PLR0912","RUF001","PLR0915","PLR0913","PLR0911"]
 #E501 : 라인 길이 제한

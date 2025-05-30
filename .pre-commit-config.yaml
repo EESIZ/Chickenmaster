@@ -16,7 +16,12 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: ['pydantic>=2.0', 'pydantic<3.0', 'pytest==7.4.3']
+        additional_dependencies: [
+          'pydantic>=2.0,<3.0',
+          'pytest==7.4.3',
+          'types-PyYAML',
+          'types-tqdm',
+        ]
         args: [--strict]
         
   - repo: https://github.com/pycqa/isort

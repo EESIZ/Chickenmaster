@@ -19,6 +19,18 @@ from tqdm import tqdm
 
 from dev_tools.config import EVENT_CATEGORIES
 
+# 프로젝트 루트 경로 설정 (절대 경로 사용)
+# 이 파일의 위치를 기준으로 프로젝트 루트를 추정합니다.
+# dev_tools 디렉토리 안에 있으므로, 두 단계 위로 올라가야 src 등을 찾을 수 있습니다.
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# 이제 src 모듈을 import 할 수 있습니다.
+
+# 매직 넘버 상수 정의
+BALANCE_SCORE_GOOD_THRESHOLD = 0.7
+BALANCE_SCORE_NORMAL_THRESHOLD = 0.5
+
 # 조건부 import 및 스텁 클래스 구현
 try:
     from dev_tools.event_validator import EventValidator
@@ -338,7 +350,13 @@ class EventBankManager:
 
     def _print_metrics(self, category_metrics: dict[str, float]) -> None:
         for name, score in category_metrics.items():
-            status = "✅" if score >= self.SCORE_THRESHOLD_HIGH else "⚠️" if score >= self.SCORE_THRESHOLD_MEDIUM else "❌"
+            status = (
+                "✅"
+                if score >= self.SCORE_THRESHOLD_HIGH
+                else "⚠️"
+                if score >= self.SCORE_THRESHOLD_MEDIUM
+                else "❌"
+            )
             print(f"  {status} {name}: {score:.2f}")
             sys.stdout.flush()
 
@@ -407,7 +425,13 @@ class EventBankManager:
             balance_scores = report["balance_scores"]
             if isinstance(balance_scores, dict):
                 for name, score in balance_scores.items():
-                    status = "✅" if score >= 0.7 else "⚠️" if score >= 0.5 else "❌"
+                    status = (
+                        "✅"
+                        if score >= BALANCE_SCORE_GOOD_THRESHOLD
+                        else "⚠️"
+                        if score >= BALANCE_SCORE_NORMAL_THRESHOLD
+                        else "❌"
+                    )
                     print(f"  {status} {name}: {score:.2f}")
                     sys.stdout.flush()
 
@@ -577,6 +601,32 @@ class EventBankManager:
                 return new_id
             counter += 1
 
+    def print_balance_report(self, balance_metrics: dict[str, Any]) -> None:
+        """밸런스 분석 결과를 보기 좋게 출력합니다."""
+        print("\n--- 이벤트 뱅크 밸런스 분석 결과 ---")
+        sys.stdout.flush()
+
+        for metric_name, scores in balance_metrics.items():
+            print(f"\n指标: {metric_name}")
+            sys.stdout.flush()
+            if isinstance(scores, dict):
+                for name, score_value in scores.items():
+                    status = (
+                        "✅"
+                        if score_value >= BALANCE_SCORE_GOOD_THRESHOLD
+                        else ("⚠️" if score_value >= BALANCE_SCORE_NORMAL_THRESHOLD else "❌")
+                    )
+                    print(f"  {status} {name}: {score_value:.2f}")
+                    sys.stdout.flush()
+            elif isinstance(scores, float | int):
+                status = (
+                    "✅"
+                    if scores >= BALANCE_SCORE_GOOD_THRESHOLD
+                    else ("⚠️" if scores >= BALANCE_SCORE_NORMAL_THRESHOLD else "❌")
+                )
+                print(f"  {status} Overall Score: {scores:.2f}")
+                sys.stdout.flush()
+
 
 def main() -> int:
     print("🚀 이벤트 뱅크 관리 도구 시작...")
@@ -592,9 +642,7 @@ def main() -> int:
     parser.add_argument("--backup", action="store_true", help="이벤트 뱅크 백업")
     parser.add_argument("--stats", action="store_true", help="이벤트 뱅크 통계 출력")
     parser.add_argument("--save-report", type=str, help="검증 결과를 지정된 경로에 저장")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="실제 파일 변경 없이 시뮬레이션만 수행"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="실제 파일 변경 없이 시뮬레이션만 수행")
 
     args = parser.parse_args()
     print(f"📋 명령줄 인자: {args}")

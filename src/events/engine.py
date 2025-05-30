@@ -16,10 +16,14 @@ from pathlib import Path
 from typing import Any
 
 from game_constants import Metric as MetricEnum
-from src.events.models import Alert
-from src.events.schema import Event as PydanticEvent
+from src.events.models import Alert  # models.Event는 더 이상 직접 사용하지 않음
+from src.events.schema import Event as PydanticEvent  # PydanticEvent alias 사용
+from src.events.schema import EventContainer  # EventContainer import 추가
 from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker
+
+# 상수 정의
+FLOAT_COMPARISON_EPSILON = 0.001
 
 
 class EventEngine:
@@ -29,6 +33,11 @@ class EventEngine:
     이 클래스는 게임의 이벤트 시스템을 관리합니다.
     이벤트 평가, 트리거, 효과 적용 및 연쇄 효과 처리를 담당합니다.
     """
+
+    events: EventContainer[
+        PydanticEvent
+    ] | list  # self.events 타입을 EventContainer 또는 비어있을 경우 list로 명시
+    event_queue: deque[PydanticEvent]  # event_queue 타입을 deque[PydanticEvent]로 명시
 
     def __init__(
         self,
@@ -49,8 +58,8 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-        self.events: list[PydanticEvent] = []
-        self.event_queue: deque[PydanticEvent] = deque()
+        self.events = []  # 초기에는 빈 리스트
+        self.event_queue = deque()
         self.alert_queue: deque[Alert] = deque()
         self.cascade_matrix: dict[MetricEnum, list[dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
@@ -75,6 +84,7 @@ class EventEngine:
             filepath: 이벤트 정의 파일 경로 (Path 객체)
         """
         if filepath.suffix == ".toml":
+            # load_events_from_toml은 EventContainer[PydanticEvent]를 반환
             self.events = load_events_from_toml(filepath)
         elif filepath.suffix == ".json":
             self.events = load_events_from_json(filepath)
@@ -175,9 +185,15 @@ class EventEngine:
         elif condition_str == "GREATER_THAN":
             return current_value > trigger_value
         elif condition_str == "EQUAL":
-            return abs(current_value - trigger_value) < 0.001  # 부동소수점 비교
+            return (
+                trigger_value is not None
+                and abs(current_value - trigger_value) < FLOAT_COMPARISON_EPSILON
+            )
         elif condition_str == "NOT_EQUAL":
-            return abs(current_value - trigger_value) >= 0.001
+            return (
+                trigger_value is not None
+                and abs(current_value - trigger_value) >= FLOAT_COMPARISON_EPSILON
+            )
         elif condition_str == "GREATER_THAN_OR_EQUAL":
             return current_value >= trigger_value
         elif condition_str == "LESS_THAN_OR_EQUAL":
