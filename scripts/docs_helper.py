@@ -192,8 +192,8 @@ def update_adr_index():
     print("🔄 ADR 인덱스 업데이트 중...")
     
     # 모든 ADR 파일 찾기
-    adr_files = sorted([f for f in ADR_DIR.glob("*.md") if f.name != "README.md" and f.name != "template.md"])
-    
+    adr_files = sorted([f for f in ADR_DIR.glob("*.md") if f.name not in {"README.md", "template.md"}])
+        
     if not adr_files:
         print("⚠️  ADR 파일이 없습니다.")
         return
