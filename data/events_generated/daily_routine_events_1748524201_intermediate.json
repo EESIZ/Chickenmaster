@@ -1,0 +1,494 @@
+{
+  "metadata": {
+    "category": "daily_routine",
+    "count": 10,
+    "generated_at": "2025-05-29 22:10:01",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "daily_routine_food_critic_4664",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "10만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 촬영 허가를 요청하네요.",
+      "text_en": "A famous food YouTuber with 100k subscribers visited your shop and asks for permission to film.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "무료로 촬영을 허가하고 최고의 서비스를 제공한다",
+          "text_en": "Allow filming for free and provide the best service",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "협찬비를 요구한다",
+          "text_en": "Request sponsorship fee",
+          "effects": {
+            "money": 200000,
+            "reputation": -30,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_food_critic_1483",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "맛집 블로거의 방문",
+      "name_en": "Food Critic's Visit",
+      "text_ko": "유명한 맛집 블로거가 가게를 방문했습니다. 그는 10만 팔로워를 보유한 영향력 있는 인플루언서입니다.",
+      "text_en": "A famous food blogger has visited your restaurant. They have 100,000 followers and significant influence.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별 서비스를 제공하고 무료로 음식을 대접한다",
+          "text_en": "Offer special service and free food",
+          "effects": {
+            "money": -50000,
+            "reputation": 50,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반 손님과 동일하게 대한다",
+          "text_en": "Treat them like regular customers",
+          "effects": {
+            "money": 15000,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_food_critic_8481",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "10만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 그는 치킨을 주문하고 실시간 방송을 시작하려 합니다.",
+      "text_en": "A famous food YouTuber with 100K subscribers has visited your shop. They want to order chicken and start a live stream.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별 서비스를 제공하고 방송을 환영한다",
+          "text_en": "Welcome the broadcast and provide special service",
+          "effects": {
+            "money": -30000,
+            "reputation": 50,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반 손님과 동일하게 대응한다",
+          "text_en": "Treat them like regular customers",
+          "effects": {
+            "money": 15000,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_famous_reviewer_1099",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "10만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 촬영을 허가해달라고 합니다.",
+      "text_en": "A famous food YouTuber with 100k subscribers visited your shop and asks for permission to film.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "촬영을 허가하고 최고의 서비스를 제공한다",
+          "text_en": "Allow filming and provide the best service",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "조용히 식사만 할 수 있도록 촬영을 거절한다",
+          "text_en": "Decline filming request politely",
+          "effects": {
+            "money": 15000,
+            "reputation": -30,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_loyal_customer_3272",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 요청",
+      "name_en": "Loyal Customer's Special Request",
+      "text_ko": "매주 치킨을 시켜 드시는 단골손님이 오늘은 매운맛을 평소보다 2배로 해달라고 요청하셨습니다. 하지만 이렇게 되면 레시피가 바뀌게 됩니다.",
+      "text_en": "A loyal customer who orders chicken weekly asks for double the spiciness today. However, this would change the regular recipe.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "손님의 요청대로 매운맛을 높인다",
+          "text_en": "Increase the spiciness as requested",
+          "effects": {
+            "money": 50,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "기존 레시피를 고수한다",
+          "text_en": "Stick to the original recipe",
+          "effects": {
+            "money": -30,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_special_sauce_2948",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "비밀 양념 레시피",
+      "name_en": "Secret Sauce Recipe",
+      "text_ko": "오랫동안 가게를 운영하신 옆 동네 치킨집 사장님이 은퇴하시며 비밀 양념 레시피를 팔겠다고 제안하셨습니다. 가격은 200만원입니다.",
+      "text_en": "A retiring chicken restaurant owner from the neighborhood offers to sell their secret sauce recipe for 2 million won.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-2000000"
+        },
+        {
+          "metric": "MENU_VARIETY",
+          "formula": "20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "레시피를 구매한다",
+          "text_en": "Buy the recipe",
+          "effects": {
+            "money": -2000000,
+            "reputation": 30,
+            "customer_satisfaction": 25
+          }
+        },
+        {
+          "text_ko": "자체 레시피를 개발한다",
+          "text_en": "Develop own recipe",
+          "effects": {
+            "money": -500000,
+            "reputation": 10,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 3000000
+      }
+    },
+    {
+      "id": "daily_routine_delivery_app_2020",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "배달앱 입점 제안",
+      "name_en": "Delivery App Partnership Offer",
+      "text_ko": "인기 배달앱에서 입점 제안이 왔습니다. 수수료는 있지만 주문이 늘어날 것 같습니다.",
+      "text_en": "A popular delivery app offers partnership. There's a commission fee, but orders may increase.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "입점 수락하기 (수수료 12%)",
+          "text_en": "Accept partnership (12% commission)",
+          "effects": {
+            "money": -500,
+            "reputation": 30,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "거절하고 전화주문만 받기",
+          "text_en": "Decline and stick to phone orders",
+          "effects": {
+            "money": 200,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.4,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_1223",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "20년 단골손님의 방문",
+      "name_en": "Visit from 20-year Regular Customer",
+      "text_ko": "20년 동안 매주 금요일마다 방문하시는 단골손님이 오셨습니다. 오늘은 손자와 함께 오셨네요.",
+      "text_en": "A loyal customer who has been visiting every Friday for 20 years came with his grandson today.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별 서비스로 콜라 한 병을 더 제공한다",
+          "text_en": "Provide an extra cola as special service",
+          "effects": {
+            "money": -2000,
+            "reputation": 15,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "평소처럼 주문받고 서빙한다",
+          "text_en": "Take order and serve as usual",
+          "effects": {
+            "money": 0,
+            "reputation": -5,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_1381",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 요청",
+      "name_en": "Regular Customer's Special Request",
+      "text_ko": "매주 금요일마다 방문하는 단골손님이 오늘은 양념치킨을 '아주 매콤하게' 만들어달라고 요청합니다. 평소보다 양념을 더 넣으면 맵기는 강해지지만 원가가 올라갑니다.",
+      "text_en": "A regular Friday customer requests their seasoned chicken to be 'extra spicy' today. Adding more sauce will make it spicier but increase the cost.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "고객의 요청대로 양념을 넉넉히 넣는다",
+          "text_en": "Add extra sauce as requested",
+          "effects": {
+            "money": -50,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "평소처럼 기본 양념으로 조리한다",
+          "text_en": "Cook with regular amount of sauce",
+          "effects": {
+            "money": 0,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "daily_routine_regular_customer_5674",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "단골손님의 특별 주문",
+      "name_en": "Regular Customer's Special Order",
+      "text_ko": "매주 금요일마다 오시는 단골손님이 오늘은 평소와 다르게 20인분을 주문하셨습니다. 하지만 현재 매장 내 재료가 부족한 상황입니다.",
+      "text_en": "A regular customer who visits every Friday ordered 20 servings today, which is unusual. However, you're currently low on ingredients.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "죄송하다고 말씀드리고 10인분만 받기",
+          "text_en": "Apologize and accept only 10 servings",
+          "effects": {
+            "money": 100000,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "근처 마트에서 재료를 급하게 구매해서 맞추기",
+          "text_en": "Quickly purchase ingredients from nearby market",
+          "effects": {
+            "money": 50000,
+            "reputation": 20,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    }
+  ]
+}

@@ -1,0 +1,528 @@
+{
+  "metadata": {
+    "category": "chain_scenario",
+    "count": 10,
+    "generated_at": "2025-05-29 23:17:58",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "chain_scenario_franchise_offer_4483",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "대형 프랜차이즈의 제안",
+      "name_en": "Franchise Corporation's Offer",
+      "text_ko": "대형 치킨 프랜차이즈에서 당신의 가게를 주목했습니다. 레시피와 브랜드를 매입하겠다는 제안이 들어왔습니다.",
+      "text_en": "A major chicken franchise has noticed your store. They've made an offer to buy your recipe and brand.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "500000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "제안을 수락하고 프랜차이즈에 합류한다",
+          "text_en": "Accept the offer and join the franchise",
+          "effects": {
+            "money": 500000,
+            "reputation": -30,
+            "customer_satisfaction": -15
+          }
+        },
+        {
+          "text_ko": "거절하고 독립 운영을 고수한다",
+          "text_en": "Decline and maintain independence",
+          "effects": {
+            "money": -50000,
+            "reputation": 25,
+            "customer_satisfaction": 10
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_7545",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Offer",
+      "text_ko": "큰 프랜차이즈 업체에서 당신의 치킨 레시피 독점 사용권을 구매하겠다는 제안이 들어왔습니다. 거액의 계약금을 제시하지만, 이후 독립 운영이 제한됩니다.",
+      "text_en": "A large franchise company offers to buy exclusive rights to your chicken recipe. They're offering a substantial contract fee, but this will limit your independent operations.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 제안 수락하기",
+          "text_en": "Accept franchise offer",
+          "effects": {
+            "money": 10000,
+            "reputation": -30,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "독립 운영 유지하기",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": -1000,
+            "reputation": 25,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_5483",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "대형 프랜차이즈의 제안",
+      "name_en": "Franchise Company's Offer",
+      "text_ko": "유명 치킨 프랜차이즈에서 당신의 비법 양념치킨 레시피 사용권을 구매하겠다는 제안이 들어왔습니다. 거액의 제안이지만, 단골손님들은 맛의 변화를 우려하고 있습니다.",
+      "text_en": "A famous chicken franchise offers to buy the rights to your secret sauce recipe. It's a lucrative offer, but regular customers are concerned about potential taste changes.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 제안 수락하기",
+          "text_en": "Accept the franchise offer",
+          "effects": {
+            "money": 10000,
+            "reputation": -30
+          }
+        },
+        {
+          "text_ko": "가게의 정체성 지키기",
+          "text_en": "Maintain store identity",
+          "effects": {
+            "money": -1000,
+            "reputation": 25
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_delivery_competition_6041",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "배달앱 독점 계약 제안",
+      "name_en": "Exclusive Delivery App Contract Offer",
+      "text_ko": "인기 배달앱에서 6개월 독점 계약을 제안했습니다. 수수료를 2% 낮춰주는 대신 다른 배달앱은 사용할 수 없습니다.",
+      "text_en": "A popular delivery app offers an exclusive 6-month contract. They'll reduce commission by 2%, but you can't use other delivery apps.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-100"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "독점 계약 수락하기",
+          "text_en": "Accept exclusive contract",
+          "effects": {
+            "money": 500,
+            "reputation": -15,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "모든 배달앱 유지하기",
+          "text_en": "Keep all delivery apps",
+          "effects": {
+            "money": -200,
+            "reputation": 20,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.4,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 5000
+      }
+    },
+    {
+      "id": "chain_scenario_local_festival_2952",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "동네 축제 참여 제안",
+      "name_en": "Local Festival Participation Offer",
+      "text_ko": "동네에서 열리는 치킨 페스티벌에 참가 요청이 왔습니다. 3일간 진행되는 행사에 참여하면 가게 홍보 효과가 있지만, 인건비와 재료비가 추가로 들 것 같습니다.",
+      "text_en": "You've been invited to participate in a local chicken festival. While it could be good promotion, it requires extra staff and ingredients for 3 days.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "축제에 참가한다 (참가비 50만원)",
+          "text_en": "Participate in the festival (500k won fee)",
+          "effects": {
+            "money": -500000,
+            "reputation": 50,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "가게 운영에만 집중한다",
+          "text_en": "Focus on regular store operation",
+          "effects": {
+            "money": 100000,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.4,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_5589",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Offer",
+      "text_ko": "유명 치킨 프랜차이즈 본사에서 귀하의 가게를 주목했습니다. 프랜차이즈 가맹을 제안하며 초기 가맹비를 50% 할인해준다고 합니다. 단, 기존 레시피와 브랜드를 포기해야 합니다.",
+      "text_en": "A famous chicken franchise has noticed your shop. They offer franchise membership with 50% discount on initial fees. However, you must give up your current recipes and brand.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "20"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-5000"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "제안을 수락한다",
+          "text_en": "Accept the offer",
+          "effects": {
+            "money": 10000,
+            "reputation": -30,
+            "customer_satisfaction": -20
+          }
+        },
+        {
+          "text_ko": "독립점으로 계속 운영한다",
+          "text_en": "Continue as independent",
+          "effects": {
+            "money": -2000,
+            "reputation": 40,
+            "customer_satisfaction": 30
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_2835",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Offer",
+      "text_ko": "당신의 치킨집이 입소문을 타면서 큰 프랜차이즈 업체에서 인수 제안이 들어왔습니다. 프랜차이즈화 하면 안정적인 수입이 보장되지만, 기존 단골들이 실망할 수 있습니다.",
+      "text_en": "A large franchise company offers to acquire your chicken restaurant. Franchising guarantees stable income but might disappoint regular customers.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "500"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 제안 수락하기",
+          "text_en": "Accept franchise offer",
+          "effects": {
+            "money": 5000,
+            "reputation": -30,
+            "customer_satisfaction": -20
+          }
+        },
+        {
+          "text_ko": "개인점포 유지하기",
+          "text_en": "Maintain independent store",
+          "effects": {
+            "money": -1000,
+            "reputation": 40,
+            "customer_satisfaction": 30
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_2596",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 프랜차이즈 본사에서 귀하의 치킨 레시피 독점 사용권을 구매하고 싶다는 제안이 왔습니다. 일시금으로 큰 돈을 주겠다고 합니다.",
+      "text_en": "A large franchise company wants to buy exclusive rights to your chicken recipe. They're offering a substantial lump sum payment.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-30"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "제안을 수락한다",
+          "text_en": "Accept the offer",
+          "effects": {
+            "money": 50000,
+            "reputation": -40,
+            "customer_satisfaction": -20
+          }
+        },
+        {
+          "text_ko": "가업을 지키기로 한다",
+          "text_en": "Keep the family business",
+          "effects": {
+            "money": -1000,
+            "reputation": 30,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_9646",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Offer",
+      "text_ko": "당신의 치킨집이 입소문을 타면서 큰 프랜차이즈 업체에서 인수 제안이 들어왔습니다. 프랜차이즈화 하면 안정적인 수입이 보장되지만, 기존 단골들이 실망할 수 있습니다.",
+      "text_en": "A large franchise company offers to acquire your chicken restaurant. Franchising guarantees stable income, but regular customers might be disappointed.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 제안 수락하기",
+          "text_en": "Accept franchise offer",
+          "effects": {
+            "money": 10000,
+            "reputation": -30,
+            "customer_satisfaction": -15
+          }
+        },
+        {
+          "text_ko": "개인점포 유지하기",
+          "text_en": "Maintain independent store",
+          "effects": {
+            "money": -2000,
+            "reputation": 25,
+            "customer_satisfaction": 20
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "chain_scenario_franchise_offer_6765",
+      "category": "chain_scenario",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Offer",
+      "text_ko": "유명 치킨 프랜차이즈 본사에서 귀하의 가게를 주목했습니다. 프랜차이즈 가맹점이 되어달라는 제안을 받았습니다. 브랜드 파워를 얻을 수 있지만, 로열티를 지불해야 합니다.",
+      "text_en": "A famous chicken franchise headquarters has noticed your store. They propose you join their franchise network. You can gain brand power, but must pay royalties.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "20"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-500"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 가맹점이 되기",
+          "text_en": "Become a franchise",
+          "effects": {
+            "money": -1000,
+            "reputation": 50,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "독립 매장 유지하기",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": 200,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "연쇄",
+        "복합",
+        "시나리오"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    }
+  ]
+}

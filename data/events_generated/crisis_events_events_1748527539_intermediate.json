@@ -1,0 +1,514 @@
+{
+  "metadata": {
+    "category": "crisis_events",
+    "count": 10,
+    "generated_at": "2025-05-29 23:05:39",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "crisis_events_health_inspection_9819",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. The kitchen is not in its best condition.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 감수하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_7103",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "100만 구독자를 보유한 유명 먹방 유튜버가 매장을 방문했습니다. 촬영 허가를 요청하고 있습니다.",
+      "text_en": "A famous food YouTuber with 1 million subscribers has visited your store and is requesting permission to film.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "촬영을 허가하고 특별 서비스를 제공한다",
+          "text_en": "Allow filming and provide special service",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "일반 손님과 동일하게 대응한다",
+          "text_en": "Treat them like regular customers",
+          "effects": {
+            "money": 0,
+            "reputation": -30,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "crisis_events_food_safety_9839",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식약처 불시 점검",
+      "name_en": "Surprise Food Safety Inspection",
+      "text_ko": "식약처에서 불시 점검을 나왔습니다. 주방 위생 상태가 완벽하지 않은 상황입니다.",
+      "text_en": "Food safety inspectors have arrived for a surprise inspection. Your kitchen's hygiene isn't perfect.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하고 점검 받기",
+          "text_en": "Quickly clean up and receive inspection",
+          "effects": {
+            "money": -100000,
+            "reputation": -5
+          }
+        },
+        {
+          "text_ko": "임시 휴업을 내고 완벽하게 청소하기",
+          "text_en": "Close temporarily for thorough cleaning",
+          "effects": {
+            "money": -300000,
+            "reputation": 15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 70
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_3660",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "까다로운 음식 평론가의 방문",
+      "name_en": "Visit from a Demanding Food Critic",
+      "text_ko": "유명 맛집 블로거가 가게를 방문했습니다. 그는 SNS에서 100만 팔로워를 보유한 영향력 있는 인물입니다. 특별한 대접을 요구하는 것 같습니다.",
+      "text_en": "A famous food critic has visited your restaurant. They have 1M followers on social media and seem to expect special treatment.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "최고급 재료로 특별 서비스를 제공한다",
+          "text_en": "Provide special service with premium ingredients",
+          "effects": {
+            "money": -200000,
+            "reputation": 50
+          }
+        },
+        {
+          "text_ko": "일반 손님과 동일하게 대우한다",
+          "text_en": "Treat them like any other customer",
+          "effects": {
+            "money": 0,
+            "reputation": -30
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 70
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_4446",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Administration has arrived for a surprise health inspection. The kitchen is a bit messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -100000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 납부하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -300000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000000
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_8367",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "100만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 그는 실시간 방송 중이며 리뷰를 남길 것 같습니다.",
+      "text_en": "A famous food YouTuber with 1 million subscribers has visited your restaurant. They're live streaming and will likely leave a review.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "최고의 서비스와 특별 서비스를 제공한다 (서비스 치킨 1마리 추가)",
+          "text_en": "Provide the best service with complimentary chicken",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반적인 서비스를 제공한다",
+          "text_en": "Provide normal service as usual",
+          "effects": {
+            "money": 0,
+            "reputation": -20,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_9370",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "까다로운 음식 평론가의 방문",
+      "name_en": "Visit from a Picky Food Critic",
+      "text_ko": "유명 맛집 리뷰 블로거가 가게를 방문했습니다. 그는 특별한 대우를 요구하며 메뉴를 꼼꼼히 살펴보고 있습니다.",
+      "text_en": "A famous food critic has visited your restaurant. They're demanding special treatment while scrutinizing the menu.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-3"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "최고급 재료로 특별 서비스 제공하기",
+          "text_en": "Provide special service with premium ingredients",
+          "effects": {
+            "money": -200000,
+            "reputation": 50,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반 손님과 동일하게 대우하기",
+          "text_en": "Treat them like any other customer",
+          "effects": {
+            "money": 0,
+            "reputation": -30,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 70
+      }
+    },
+    {
+      "id": "crisis_events_delivery_mistake_3652",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "배달 실수 위기",
+      "name_en": "Delivery Mistake Crisis",
+      "text_ko": "배달기사가 주문을 잘못 전달했습니다. 손님이 후라이드를 시켰는데 양념치킨이 배달되었네요. 손님이 매우 화가 난 상태입니다.",
+      "text_en": "The delivery driver delivered the wrong order. The customer ordered original chicken but received spicy chicken instead. The customer is very upset.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "새로운 치킨을 무료로 재배달하고 사과하기",
+          "text_en": "Redeliver new chicken for free and apologize",
+          "effects": {
+            "money": -25000,
+            "reputation": 15,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "50% 할인된 가격으로 새 치킨 제공하기",
+          "text_en": "Offer new chicken at 50% discount",
+          "effects": {
+            "money": -12500,
+            "reputation": 5,
+            "customer_satisfaction": 10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 15,
+      "trigger": {
+        "metric": "DELIVERY_COUNT",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_2408",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "갑작스러운 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방 상태가 완벽하지 않은 상황입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. Your kitchen condition isn't perfect.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -100000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "있는 그대로 점검받고 개선하겠다고 약속하기",
+          "text_en": "Accept inspection as-is and promise improvements",
+          "effects": {
+            "money": -300000,
+            "reputation": 10,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000000
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_9620",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "100만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 그는 리뷰 영상을 찍겠다고 합니다.",
+      "text_en": "A famous food YouTuber with 1 million subscribers has visited your restaurant. They want to film a review.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "특별 서비스를 제공하고 최고의 재료로 요리한다",
+          "text_en": "Provide special service and cook with premium ingredients",
+          "effects": {
+            "money": -200000,
+            "reputation": 50,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반 서비스로 대응한다",
+          "text_en": "Respond with regular service as usual",
+          "effects": {
+            "money": 0,
+            "reputation": -30,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "metadata": {
+    "category": "daily_routine",
+    "count": 4,
+    "generated_at": "2025-05-29 21:51:15",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "daily_routine_001_2994",
+      "category": "daily_routine",
+      "type": "RANDOM",
+      "name_ko": "배달 러시아워",
+      "name_en": "Delivery Rush Hour",
+      "text_ko": "갑자기 배달 주문이 폭주하고 있습니다. 배달 기사는 부족하고 손님들은 기다리고 있습니다.",
+      "text_en": "Delivery orders are suddenly flooding in. There aren't enough riders while customers are waiting.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "배달비를 올려서라도 배달 기사를 더 구하기",
+          "text_en": "Increase delivery fee to hire more riders",
+          "effects": {
+            "money": -200,
+            "reputation": 15,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "현재 인력으로 최선을 다해 배달하기",
+          "text_en": "Do our best with current staff",
+          "effects": {
+            "money": 300,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.3,
+      "cooldown": 20,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000
+      }
+    },
+    {
+      "id": "daily_routine_003_3039",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "배달 러시아워",
+      "name_en": "Delivery Rush Hour",
+      "text_ko": "저녁 피크타임에 배달 주문이 폭주하고 있습니다. 배달 라이더가 부족한 상황입니다.",
+      "text_en": "During evening peak hours, delivery orders are flooding in. There's a shortage of delivery riders.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-50"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "배달비를 올려서라도 더 많은 라이더를 고용한다",
+          "text_en": "Hire more riders by increasing delivery fees",
+          "effects": {
+            "money": -200,
+            "reputation": 15
+          }
+        },
+        {
+          "text_ko": "주문을 제한하고 현재 라이더로 버틴다",
+          "text_en": "Limit orders and manage with current riders",
+          "effects": {
+            "money": 100,
+            "reputation": -20
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.5,
+      "cooldown": 10,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 1000
+      }
+    },
+    {
+      "id": "daily_routine_004_3057",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "배달 러시아워",
+      "name_en": "Delivery Rush Hour",
+      "text_ko": "저녁 시간대에 배달 주문이 폭주하고 있습니다. 배달 기사님들이 추가 수당을 요구합니다.",
+      "text_en": "During dinner time, delivery orders are flooding in. Delivery riders are asking for additional pay.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-200"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "배달 수당을 올려준다",
+          "text_en": "Increase delivery fee",
+          "effects": {
+            "money": -500,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "현재 수준을 유지한다",
+          "text_en": "Maintain current rates",
+          "effects": {
+            "money": 200,
+            "reputation": -10,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.5,
+      "cooldown": 10,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 5000
+      }
+    },
+    {
+      "id": "daily_routine_005_3075",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "회식 단체 주문",
+      "name_en": "Large Company Dinner Order",
+      "text_ko": "근처 회사에서 회식 자리에 치킨 30마리를 주문하겠다고 합니다. 하지만 현재 주방 인력이 부족한 상태입니다.",
+      "text_en": "A nearby company wants to order 30 chickens for their dinner party. However, your kitchen is currently understaffed.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "500"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "무리해서라도 주문을 받는다",
+          "text_en": "Accept the order despite being understaffed",
+          "effects": {
+            "money": 3000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        },
+        {
+          "text_ko": "임시 알바를 고용해서 처리한다",
+          "text_en": "Hire temporary staff to handle the order",
+          "effects": {
+            "money": 2000,
+            "reputation": 15,
+            "customer_satisfaction": 10
+          }
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "일상",
+        "운영"
+      ],
+      "probability": 0.4,
+      "cooldown": 7,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 5000
+      }
+    }
+  ]
+}

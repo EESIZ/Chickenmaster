@@ -1,0 +1,982 @@
+{
+  "metadata": {
+    "category": "crisis_events",
+    "count": 19,
+    "generated_at": "2025-05-29 23:03:45",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "crisis_events_delivery_rush_9876",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "배달대행 파업 위기",
+      "name_en": "Delivery Service Strike Crisis",
+      "text_ko": "배달대행 업체 기사들이 갑자기 파업을 시작했습니다. 주문은 밀려들고 있는데 배달을 나갈 수 있는 기사가 부족합니다.",
+      "text_en": "Delivery riders have suddenly gone on strike. Orders are piling up but there aren't enough riders available.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-15"
+        },
+        {
+          "metric": "ORDERS",
+          "formula": "-30"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "임시로 직원을 고용해 직접 배달",
+          "text_en": "Hire temporary staff for delivery",
+          "effects": {
+            "money": -200000,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "포장 주문만 받기",
+          "text_en": "Accept takeout orders only",
+          "effects": {
+            "money": -150000,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 20,
+      "trigger": {
+        "metric": "ORDERS",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_6266",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "맛평가단의 불시 방문",
+      "name_en": "Surprise Food Critics Visit",
+      "text_ko": "유명 맛집 평가단이 갑자기 가게를 방문했습니다. 그들은 메인 메뉴인 후라이드 치킨을 주문했는데, 오늘따라 숙성된 생닭이 부족한 상황입니다.",
+      "text_en": "Famous food critics have suddenly visited your restaurant. They ordered your signature fried chicken, but you're running low on properly aged chicken.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 마트에서 생닭을 구매해서 제공한다",
+          "text_en": "Buy fresh chicken from the market and serve",
+          "effects": {
+            "money": -50,
+            "reputation": -30,
+            "customer_satisfaction": -20
+          }
+        },
+        {
+          "text_ko": "정중히 품절임을 알리고 다른 메뉴를 추천한다",
+          "text_en": "Politely inform them it's sold out and recommend other menu items",
+          "effects": {
+            "money": -100,
+            "reputation": 10,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_1179",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "100만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 촬영 허가를 요청하네요.",
+      "text_en": "A famous food YouTuber with 1 million subscribers has visited your restaurant and asks for filming permission.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "촬영을 허가하고 특별 서비스를 제공한다",
+          "text_en": "Allow filming and provide special service",
+          "effects": {
+            "money": -50000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "일반 손님과 동일하게 대우한다",
+          "text_en": "Treat them like regular customers",
+          "effects": {
+            "money": 0,
+            "reputation": -30,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_9596",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. The kitchen is not in its best condition.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 개선을 약속하기",
+          "text_en": "Accept inspection as-is and promise improvements",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_2971",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "맛집 평론가의 불시 방문",
+      "name_en": "Surprise Visit from Food Critic",
+      "text_ko": "유명 맛집 평론가가 가게를 방문했습니다. 그의 리뷰는 SNS에서 큰 영향력을 가지고 있습니다.",
+      "text_en": "A famous food critic has visited your restaurant. Their review has significant influence on social media.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-5"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-3"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "최고급 재료로 특별 서비스 제공",
+          "text_en": "Provide special service with premium ingredients",
+          "effects": {
+            "money": -300,
+            "reputation": 30,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "평소처럼 대응",
+          "text_en": "Treat as usual",
+          "effects": {
+            "money": 0,
+            "reputation": -20,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_8359",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "Food and Drug Safety officials arrived for a surprise inspection. The kitchen is somewhat messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 감수하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_food_safety_4133",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식약처 불시 점검",
+      "name_en": "Surprise Food Safety Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방 일부 시설이 기준에 미달된다고 합니다.",
+      "text_en": "Food Safety Authority has come for a surprise inspection. Some kitchen facilities do not meet the standards.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "즉시 시설 개선 공사 진행 (3일 영업 중단)",
+          "text_en": "Immediate facility improvement (3 days closure)",
+          "effects": {
+            "money": -2000000,
+            "reputation": 20,
+            "customer_satisfaction": 15
+          }
+        },
+        {
+          "text_ko": "최소한의 보완만 진행하고 벌금 납부",
+          "text_en": "Minimal improvements and pay the fine",
+          "effects": {
+            "money": -500000,
+            "reputation": -10,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 5000000
+      }
+    },
+    {
+      "id": "crisis_events_delivery_accident_8026",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "배달 사고 발생",
+      "name_en": "Delivery Accident",
+      "text_ko": "배달 기사님이 급하게 오다가 넘어져서 치킨이 망가졌습니다. 손님이 매우 화가 난 상태입니다.",
+      "text_en": "The delivery driver fell and the chicken was damaged. The customer is very angry.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "새로운 치킨을 즉시 무료로 재배달한다",
+          "text_en": "Immediately redeliver new chicken for free",
+          "effects": {
+            "money": -25000,
+            "reputation": 15,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "50% 할인된 가격으로 재배달을 제안한다",
+          "text_en": "Offer redelivery at 50% discount",
+          "effects": {
+            "money": -12500,
+            "reputation": 5,
+            "customer_satisfaction": 5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 15,
+      "trigger": {
+        "metric": "DELIVERY_COUNT",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_delivery_rush_4292",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "배달대행 파업 사태",
+      "name_en": "Delivery Service Strike",
+      "text_ko": "배달대행 업체가 갑자기 파업을 선언했습니다. 저녁 주문이 폭주하는 시간대인데 어떻게 하시겠습니까?",
+      "text_en": "The delivery service company suddenly went on strike. What will you do during peak dinner hours?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "-200"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "직접 배달을 하면서 주문을 받는다",
+          "text_en": "Handle deliveries yourself while taking orders",
+          "effects": {
+            "money": -100,
+            "reputation": 15,
+            "customer_satisfaction": 10
+          }
+        },
+        {
+          "text_ko": "배달 주문은 받지 않고 포장만 진행한다",
+          "text_en": "Only accept takeout orders",
+          "effects": {
+            "money": -300,
+            "reputation": -5,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 20,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_8893",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "갑작스러운 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태인데, 점검관이 들어오고 있습니다.",
+      "text_en": "Health inspector from KFDA has arrived for a surprise inspection. The kitchen is somewhat messy, and the inspector is coming in.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌어본다",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검을 받고 개선을 약속한다",
+          "text_en": "Accept inspection as-is and promise improvements",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_6610",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. The kitchen is somewhat messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": -5
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 납부하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_food_safety_3065",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식약처 불시 점검",
+      "name_en": "Surprise Food Safety Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방 상태가 완벽하지 않은 상황입니다.",
+      "text_en": "Food safety inspectors have arrived for a surprise inspection. The kitchen condition is not perfect.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-200"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하고 검사 받기",
+          "text_en": "Quickly clean up and take the inspection",
+          "effects": {
+            "money": -100,
+            "reputation": -5
+          }
+        },
+        {
+          "text_ko": "뒷문으로 도망가기",
+          "text_en": "Escape through the back door",
+          "effects": {
+            "money": -500,
+            "reputation": -30
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_4292",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. The kitchen is somewhat messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -100000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 감수하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -500000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000000
+      }
+    },
+    {
+      "id": "crisis_events_food_safety_7339",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식약처 불시 점검",
+      "name_en": "Surprise Food Safety Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방 상태가 완벽하지 않은데 어떻게 대응하시겠습니까?",
+      "text_en": "Food safety inspectors have arrived for a surprise inspection. Your kitchen isn't in perfect condition. How will you handle this?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌어본다",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태 그대로 점검을 받고 과태료를 납부한다",
+          "text_en": "Accept the inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_7472",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "갑작스러운 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방이 조금 지저분한 상태인데, 어떻게 대응하시겠습니까?",
+      "text_en": "Health inspectors arrived for a surprise inspection. The kitchen is a bit messy. How will you handle this?",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 개선을 약속하기",
+          "text_en": "Accept inspection as-is and promise improvements",
+          "effects": {
+            "money": -200000,
+            "reputation": -20
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 50
+      }
+    },
+    {
+      "id": "crisis_events_food_safety_3777",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "식약처 불시 점검",
+      "name_en": "Surprise Food Safety Inspection",
+      "text_ko": "식약처에서 불시 위생 점검을 나왔습니다. 주방 상태가 완벽하지 않은 상황인데...",
+      "text_en": "Food safety inspectors have arrived for a surprise inspection. Your kitchen isn't in perfect condition...",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Try to buy time while cleaning quickly",
+          "effects": {
+            "money": -200000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 감수하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -500000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 2000000
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_9099",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "The Food and Drug Safety officials have arrived for a surprise inspection. The kitchen is somewhat messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 감수하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -15
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    },
+    {
+      "id": "crisis_events_food_critic_3030",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "유명 먹방 유튜버의 방문",
+      "name_en": "Famous Food YouTuber Visit",
+      "text_ko": "100만 구독자를 보유한 유명 먹방 유튜버가 가게에 방문했습니다. 그는 치킨을 주문하고 실시간 방송을 시작하려 합니다.",
+      "text_en": "A famous food YouTuber with 1 million subscribers has visited your restaurant. They're about to order chicken and start a live stream.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-5"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "최고의 서비스와 특별 서비스를 제공한다 (서비스 치킨 추가)",
+          "text_en": "Provide the best service with complimentary chicken",
+          "effects": {
+            "money": -150,
+            "reputation": 100,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "평소처럼 일반 서비스를 제공한다",
+          "text_en": "Provide regular service as usual",
+          "effects": {
+            "money": 50,
+            "reputation": -50,
+            "customer_satisfaction": -10
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "crisis_events_health_inspection_9161",
+      "category": "crisis_events",
+      "type": "RANDOM",
+      "name_ko": "불시 위생 점검",
+      "name_en": "Surprise Health Inspection",
+      "text_ko": "식품의약품안전처에서 불시 위생 점검을 나왔습니다. 주방이 약간 지저분한 상태입니다.",
+      "text_en": "Food Safety Authority has arrived for a surprise inspection. The kitchen is somewhat messy.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "-15"
+        },
+        {
+          "metric": "CUSTOMER_SATISFACTION",
+          "formula": "-10"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "급하게 청소하면서 시간을 벌기",
+          "text_en": "Buy time while cleaning quickly",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "customer_satisfaction": 0
+          }
+        },
+        {
+          "text_ko": "현재 상태로 점검받고 과태료 납부하기",
+          "text_en": "Accept inspection as-is and pay the fine",
+          "effects": {
+            "money": -200000,
+            "reputation": -20,
+            "customer_satisfaction": -5
+          }
+        }
+      ],
+      "tags": [
+        "위기",
+        "문제",
+        "해결"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "MONEY",
+        "condition": "greater_than",
+        "value": 500000
+      }
+    }
+  ]
+}

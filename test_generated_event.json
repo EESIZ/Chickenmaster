@@ -1,0 +1,65 @@
+{
+  "events": [
+    {
+      "id": "chicken_shop_event_01",
+      "category": "daily_routine",
+      "type": "THRESHOLD",
+      "name_ko": "단골 손님의 방문",
+      "name_en": "Regular Customer Visit",
+      "text_ko": "단골 손님이 방문하여 평소보다 많은 양의 치킨을 주문했습니다. 단골 손님의 요청에 따라 서비스로 사이드 메뉴를 제공할 지 선택하세요.",
+      "text_en": "A regular customer visits and orders more chicken than usual. Decide whether to provide a side menu as a service according to the regular customer's request.",
+      "conditions": [
+        {
+          "type": "customer_satisfaction",
+          "value": 80
+        }
+      ],
+      "effects": [
+        {
+          "type": "money",
+          "value": 50000
+        },
+        {
+          "type": "customer_satisfaction",
+          "value": 10
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "사이드 메뉴를 서비스로 제공한다",
+          "text_en": "Provide a side menu as a service",
+          "effects": [
+            {
+              "type": "money",
+              "value": -10000
+            },
+            {
+              "type": "customer_satisfaction",
+              "value": 15
+            }
+          ]
+        },
+        {
+          "text_ko": "사이드 메뉴 서비스를 제공하지 않는다",
+          "text_en": "Do not provide a side menu service",
+          "effects": [
+            {
+              "type": "customer_satisfaction",
+              "value": -5
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "치킨집",
+        "운영"
+      ],
+      "probability": 0.5,
+      "cooldown": 7,
+      "trigger": {
+        "type": "daily",
+        "value": 10
+      }
+    }
+  ]
+}

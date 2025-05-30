@@ -1,0 +1,516 @@
+{
+  "metadata": {
+    "category": "opportunity",
+    "count": 10,
+    "generated_at": "2025-05-29 23:13:21",
+    "generator": "Claude Code Mass Generator"
+  },
+  "events": [
+    {
+      "id": "opportunity_franchise_offer_2670",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 프랜차이즈 본사에서 귀하의 치킨 레시피에 관심을 보이며 프랜차이즈 계약을 제안했습니다. 로열티를 받고 레시피를 공유하거나, 독립 운영을 고수할 수 있습니다.",
+      "text_en": "A major franchise company shows interest in your chicken recipe and offers a franchise contract. You can share the recipe for royalties or maintain independence.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "15"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 계약 체결",
+          "text_en": "Sign franchise contract",
+          "effects": {
+            "money": 5000,
+            "reputation": -20,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "독립 운영 유지",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": -1000,
+            "reputation": 30,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_6173",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "유명 치킨 프랜차이즈 본사에서 귀하의 치킨집을 주목했습니다. 프랜차이즈 가맹점이 되면 브랜드 인지도와 안정적인 공급망을 제공받을 수 있지만, 로열티를 지불해야 하고 메뉴와 운영에 제약이 따릅니다.",
+      "text_en": "A famous chicken franchise company has noticed your restaurant. Becoming a franchisee offers brand recognition and stable supply chain, but requires royalty payments and operational restrictions.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "20"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-500"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 가맹점이 되기",
+          "text_en": "Become a franchise",
+          "effects": {
+            "money": -1000,
+            "reputation": 50,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "독립 매장으로 계속 운영하기",
+          "text_en": "Remain independent",
+          "effects": {
+            "money": 200,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_7404",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 프랜차이즈 본사에서 귀하의 치킨 레시피에 관심을 보입니다. 레시피 판매를 제안하며 프랜차이즈 가맹점주가 될 기회를 제시합니다.",
+      "text_en": "A major franchise company shows interest in your chicken recipe. They offer to buy your recipe and give you an opportunity to become a franchise owner.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "레시피를 판매하고 프랜차이즈에 합류한다",
+          "text_en": "Sell the recipe and join the franchise",
+          "effects": {
+            "money": 5000,
+            "reputation": -20,
+            "customer_satisfaction": -10
+          }
+        },
+        {
+          "text_ko": "독립 운영을 고수한다",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": -1000,
+            "reputation": 30,
+            "customer_satisfaction": 15
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_9418",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "당신의 치킨집이 입소문을 타면서 대형 프랜차이즈 본사에서 인수 제안이 들어왔습니다. 프랜차이즈화를 하면 안정적인 수입이 보장되지만, 기존 단골들은 맛이 획일화될 것을 우려하고 있습니다.",
+      "text_en": "A large franchise company offers to acquire your chicken restaurant. While franchising guarantees stable income, regular customers worry about taste standardization.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 제안 수락하기",
+          "text_en": "Accept franchise offer",
+          "effects": {
+            "money": 5000,
+            "reputation": -20
+          }
+        },
+        {
+          "text_ko": "개인점포로 계속 운영하기",
+          "text_en": "Continue as independent restaurant",
+          "effects": {
+            "money": -1000,
+            "reputation": 30
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_9049",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "인근 도시의 사업가가 당신의 치킨집을 프랜차이즈로 확장하자는 제안을 해왔습니다. 프랜차이즈 계약금으로 500만원을 제시했습니다.",
+      "text_en": "A businessman from a nearby city offers to expand your chicken restaurant as a franchise. He suggests 5 million won as a franchise fee.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "500000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 확장을 수락한다",
+          "text_en": "Accept the franchise expansion",
+          "effects": {
+            "money": 500000,
+            "reputation": 20,
+            "stress": 30
+          }
+        },
+        {
+          "text_ko": "현재 규모를 유지하며 거절한다",
+          "text_en": "Maintain current scale and decline",
+          "effects": {
+            "money": -50000,
+            "reputation": -5,
+            "stress": -10
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_1758",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "당신의 치킨집이 입소문을 타면서 큰 프랜차이즈 본사에서 가맹점 제안이 들어왔습니다. 브랜드 파워와 안정적인 공급망을 제공하지만, 로열티를 지불해야 합니다.",
+      "text_en": "A major franchise company offers you to join their brand. They provide brand power and stable supply chain, but require royalty fees.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "50"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-1000"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 가맹점이 되기",
+          "text_en": "Join the franchise",
+          "effects": {
+            "money": -2000,
+            "reputation": 100,
+            "customer_satisfaction": 30
+          }
+        },
+        {
+          "text_ko": "독립 매장 유지하기",
+          "text_en": "Stay independent",
+          "effects": {
+            "money": 500,
+            "reputation": -20,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_8561",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 프랜차이즈 본사에서 귀하의 치킨 레시피에 관심을 보입니다. 레시피 사용권을 구매하고 싶어하며, 프랜차이즈 가맹점 운영권도 제안합니다.",
+      "text_en": "A major franchise company shows interest in your chicken recipe. They want to purchase the rights and offer you franchise opportunities.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "50"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "레시피를 판매하고 프랜차이즈 사업 시작",
+          "text_en": "Sell recipe and start franchise business",
+          "effects": {
+            "money": 10000,
+            "reputation": -20
+          }
+        },
+        {
+          "text_ko": "독립 운영 유지",
+          "text_en": "Maintain independent operation",
+          "effects": {
+            "money": -1000,
+            "reputation": 30
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_5908",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 치킨 프랜차이즈 본사에서 당신의 가게를 주목했습니다. 프랜차이즈 가맹점이 되면 브랜드 인지도와 안정적인 공급망을 제공받을 수 있지만, 로열티를 지불해야 하고 메뉴와 운영에 제약이 생깁니다.",
+      "text_en": "A major chicken franchise company has noticed your store. Becoming a franchisee offers brand recognition and stable supply chain, but requires royalty payments and operational restrictions.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "50"
+        },
+        {
+          "metric": "MONEY",
+          "formula": "-1000"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 가맹점이 되기",
+          "text_en": "Become a franchise",
+          "effects": {
+            "money": -2000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "독립 운영 유지하기",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": 500,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_4884",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "대형 프랜차이즈 본사에서 귀하의 치킨 레시피에 관심을 보입니다. 레시피 사용권을 구매하겠다는 제안이 들어왔습니다.",
+      "text_en": "A major franchise company shows interest in your chicken recipe. They offer to purchase the rights to use your recipe.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "MONEY",
+          "formula": "5000"
+        },
+        {
+          "metric": "REPUTATION",
+          "formula": "-20"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "제안을 수락하고 로열티를 받는다",
+          "text_en": "Accept the offer and receive royalties",
+          "effects": {
+            "money": 5000,
+            "reputation": -20
+          }
+        },
+        {
+          "text_ko": "거절하고 독립 운영을 유지한다",
+          "text_en": "Decline and maintain independence",
+          "effects": {
+            "money": -1000,
+            "reputation": 30
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 80
+      }
+    },
+    {
+      "id": "opportunity_franchise_offer_9647",
+      "category": "opportunity",
+      "type": "THRESHOLD",
+      "name_ko": "프랜차이즈 제안",
+      "name_en": "Franchise Opportunity",
+      "text_ko": "당신의 치킨집이 입소문을 타면서 큰 프랜차이즈 본사에서 가맹점 제안이 들어왔습니다. 브랜드 파워와 체계적인 시스템을 제공받을 수 있지만, 로열티를 지불해야 합니다.",
+      "text_en": "A major franchise company offers you to join their brand. You can benefit from their brand power and systematic support, but you'll need to pay royalties.",
+      "conditions": [],
+      "effects": [
+        {
+          "metric": "REPUTATION",
+          "formula": "50"
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "프랜차이즈 가맹점이 되기",
+          "text_en": "Join the franchise",
+          "effects": {
+            "money": -5000,
+            "reputation": 100,
+            "customer_satisfaction": 20
+          }
+        },
+        {
+          "text_ko": "독립 매장 유지하기",
+          "text_en": "Maintain independence",
+          "effects": {
+            "money": 1000,
+            "reputation": -10,
+            "customer_satisfaction": 0
+          }
+        }
+      ],
+      "tags": [
+        "기회",
+        "성장",
+        "투자"
+      ],
+      "probability": 0.3,
+      "cooldown": 30,
+      "trigger": {
+        "metric": "REPUTATION",
+        "condition": "greater_than",
+        "value": 500
+      }
+    }
+  ]
+}

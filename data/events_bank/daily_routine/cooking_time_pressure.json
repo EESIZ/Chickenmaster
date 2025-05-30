@@ -1,0 +1,64 @@
+{
+  "id": "cooking_time_pressure",
+  "type": "THRESHOLD",
+  "category": "daily_routine",
+  "name_ko": "조리시간 단축 압박",
+  "name_en": "Cooking Time Reduction Pressure",
+  "text_ko": "점심시간 손님이 몰려서 조리시간을 단축해달라는 요청이 들어옵니다. 품질이 걱정됩니다.",
+  "text_en": "Customers are crowding during lunch time and requesting faster cooking. You're worried about quality.",
+  "effects": [
+    {
+      "metric": "TIME_PRESSURE",
+      "formula": "value + 20",
+      "message": "time_pressure이(가) 증가했습니다."
+    },
+    {
+      "metric": "QUALITY_REPUTATION_RISK",
+      "formula": "value + 10",
+      "message": "quality_reputation_risk이(가) 증가했습니다."
+    }
+  ],
+  "choices": [
+    {
+      "text_ko": "온도를 높여 빨리 튀긴다",
+      "text_en": "Raise temperature and fry faster",
+      "effects": {
+        "cooking_speed": 15,
+        "food_quality": -10,
+        "safety_risk": 10
+      }
+    },
+    {
+      "text_ko": "미리 준비된 것들을 최대한 활용한다",
+      "text_en": "Maximize use of pre-prepared items",
+      "effects": {
+        "cooking_speed": 10,
+        "preparation_efficiency": 15,
+        "operational_efficiency": 20
+      }
+    },
+    {
+      "text_ko": "정확한 시간을 안내하고 기다려달라고 한다",
+      "text_en": "Inform exact time and ask customers to wait",
+      "effects": {
+        "honesty_reputation": 15,
+        "customer_satisfaction": -5,
+        "quality_commitment": 20
+      }
+    }
+  ],
+  "conditions": [
+    "rush_hour == true"
+  ],
+  "tags": [
+    "시간압박",
+    "품질유지",
+    "고객기대"
+  ],
+  "probability": 0.17,
+  "trigger": {
+    "metric": "RUSH_HOUR",
+    "condition": "equal",
+    "value": true
+  }
+}

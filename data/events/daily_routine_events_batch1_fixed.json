@@ -1,0 +1,304 @@
+{
+  "events": [
+    {
+      "id": "morning_prep_delay",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "오픈 준비 지연",
+      "name_en": "Opening Preparation Delay",
+      "text_ko": "오늘 아침 직원이 늦게 와서 12시 오픈이 15분 늦어질 것 같습니다. 본사에서 POS 시스템으로 감시하고 있어 경고를 받을 수도 있습니다.",
+      "text_en": "Your staff arrived late this morning, and the 12 PM opening will be delayed by 15 minutes. The franchise headquarters monitors via POS system and may issue a warning.",
+      "effects": [
+        {
+          "metric": "STRESS",
+          "formula": "value + 10",
+          "message": "직원 지각으로 스트레스가 증가했습니다."
+        },
+        {
+          "metric": "FRANCHISE_RELATIONSHIP",
+          "formula": "value - 2",
+          "message": "본사와의 관계가 소폭 악화되었습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "혼자라도 시간 맞춰 오픈한다",
+          "text_en": "Open on time alone",
+          "effects": {
+            "stress": 15,
+            "reputation": 5,
+            "stamina": -10
+          }
+        },
+        {
+          "text_ko": "직원을 기다려 제대로 준비 후 오픈한다",
+          "text_en": "Wait for staff and open properly prepared",
+          "effects": {
+            "reputation": -5,
+            "stress": -5,
+            "staff_loyalty": 10
+          }
+        },
+        {
+          "text_ko": "본사에 미리 연락해 상황을 설명한다",
+          "text_en": "Contact headquarters to explain the situation",
+          "effects": {
+            "stress": 5,
+            "reputation": 2,
+            "franchise_relationship": 3
+          }
+        }
+      ],
+      "conditions": [
+        "time_of_day == 'morning'"
+      ],
+      "tags": [
+        "시간관리",
+        "직원",
+        "본사압박"
+      ],
+      "probability": 0.15,
+      "cooldown": 14
+    },
+    {
+      "id": "ingredient_freshness_check",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "재료 신선도 체크",
+      "name_en": "Ingredient Freshness Check",
+      "text_ko": "어제 남은 양파가 조금 시들어 보입니다. 아직 쓸 수는 있지만 최상의 상태는 아닙니다.",
+      "text_en": "Yesterday's leftover onions look slightly wilted. They're still usable but not in perfect condition.",
+      "effects": [
+        {
+          "metric": "FOOD_QUALITY",
+          "formula": "value - 2",
+          "message": "식재료 상태가 약간 저하되었습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "그냥 사용한다 (비용 절약)",
+          "text_en": "Use them anyway (cost saving)",
+          "effects": {
+            "money": 5000,
+            "food_quality": -3,
+            "reputation": -2
+          }
+        },
+        {
+          "text_ko": "새 양파를 구매한다",
+          "text_en": "Buy fresh onions",
+          "effects": {
+            "money": -8000,
+            "food_quality": 5,
+            "reputation": 3
+          }
+        },
+        {
+          "text_ko": "시든 부분만 제거하고 사용한다",
+          "text_en": "Remove wilted parts and use the rest",
+          "effects": {
+            "money": 2000,
+            "food_quality": 1,
+            "preparation_time": 15
+          }
+        }
+      ],
+      "conditions": [
+        "ingredients_stock > 0"
+      ],
+      "tags": [
+        "품질관리",
+        "비용절약",
+        "시간관리"
+      ],
+      "probability": 0.12,
+      "cooldown": 7
+    },
+    {
+      "id": "morning_cleaning_check",
+      "type": "THRESHOLD",
+      "category": "daily_routine",
+      "name_ko": "청소 점검",
+      "name_en": "Cleaning Inspection",
+      "text_ko": "어젯밤 마감 청소가 완벽하지 않았습니다. 기름때가 남아있고 바닥이 끈적합니다.",
+      "text_en": "Last night's closing cleanup wasn't thorough. Grease stains remain and the floor is sticky.",
+      "effects": [
+        {
+          "metric": "HYGIENE",
+          "formula": "value - 10",
+          "message": "위생 상태가 저하되었습니다."
+        },
+        {
+          "metric": "HEALTH_INSPECTION_RISK",
+          "formula": "value + 5",
+          "message": "위생 점검 위험이 증가했습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "다시 꼼꼼히 청소한다",
+          "text_en": "Clean thoroughly again",
+          "effects": {
+            "hygiene": 15,
+            "stress": 10,
+            "preparation_time": 30
+          }
+        },
+        {
+          "text_ko": "눈에 띄는 부분만 대충 닦는다",
+          "text_en": "Just wipe visible areas quickly",
+          "effects": {
+            "hygiene": 5,
+            "stress": -5,
+            "preparation_time": 10
+          }
+        },
+        {
+          "text_ko": "직원에게 청소 교육을 다시 시킨다",
+          "text_en": "Re-train staff on cleaning procedures",
+          "effects": {
+            "hygiene": 10,
+            "staff_loyalty": -5,
+            "training_investment": 10
+          }
+        }
+      ],
+      "conditions": [
+        "hygiene < 70"
+      ],
+      "tags": [
+        "위생",
+        "시간관리",
+        "직원교육"
+      ],
+      "probability": 0.18,
+      "cooldown": 10,
+      "trigger": {
+        "metric": "HYGIENE",
+        "condition": "less_than",
+        "value": 70
+      }
+    },
+    {
+      "id": "fryer_morning_check",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "튀김기 점검",
+      "name_en": "Fryer Inspection",
+      "text_ko": "튀김기에서 이상한 소리가 납니다. 작동은 되지만 뭔가 평소와 다릅니다.",
+      "text_en": "The fryer is making strange noises. It works but something seems different from usual.",
+      "effects": [
+        {
+          "metric": "EQUIPMENT_CONCERN",
+          "formula": "value + 10",
+          "message": "장비 상태에 대한 우려가 생겼습니다."
+        },
+        {
+          "metric": "BREAKDOWN_RISK",
+          "formula": "value + 15",
+          "message": "장비 고장 위험이 증가했습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "일단 그대로 사용한다",
+          "text_en": "Continue using it for now",
+          "effects": {
+            "equipment_risk": 15,
+            "money": 0,
+            "stress": 10
+          }
+        },
+        {
+          "text_ko": "즉시 A/S를 부른다",
+          "text_en": "Call for immediate repair service",
+          "effects": {
+            "money": -50000,
+            "stress": 20,
+            "equipment_safety": 15
+          }
+        },
+        {
+          "text_ko": "직접 간단히 점검해본다",
+          "text_en": "Inspect it yourself briefly",
+          "effects": {
+            "stress": 5,
+            "preparation_time": 15,
+            "equipment_knowledge": 5
+          }
+        }
+      ],
+      "conditions": [
+        "equipment_age > 2"
+      ],
+      "tags": [
+        "장비관리",
+        "안전",
+        "비용"
+      ],
+      "probability": 0.08,
+      "cooldown": 21
+    },
+    {
+      "id": "staff_condition_morning",
+      "type": "RANDOM",
+      "category": "daily_routine",
+      "name_ko": "직원 컨디션 체크",
+      "name_en": "Staff Condition Check",
+      "text_ko": "알바생이 감기에 걸린 것 같습니다. 기침을 하고 있는데 계속 일을 시켜야 할지 고민됩니다.",
+      "text_en": "Your part-time worker seems to have caught a cold. They're coughing, and you wonder if you should keep them working.",
+      "effects": [
+        {
+          "metric": "HEALTH_CONCERN",
+          "formula": "value + 10",
+          "message": "건강 문제에 대한 우려가 생겼습니다."
+        },
+        {
+          "metric": "HYGIENE_RISK",
+          "formula": "value + 8",
+          "message": "위생 위험이 증가했습니다."
+        }
+      ],
+      "choices": [
+        {
+          "text_ko": "마스크 착용하고 계속 일시킨다",
+          "text_en": "Have them wear a mask and continue working",
+          "effects": {
+            "staff_loyalty": -10,
+            "hygiene": -5,
+            "productivity": -10
+          }
+        },
+        {
+          "text_ko": "집에 보내고 혼자 운영한다",
+          "text_en": "Send them home and work alone",
+          "effects": {
+            "staff_loyalty": 15,
+            "stress": 25,
+            "productivity": -20
+          }
+        },
+        {
+          "text_ko": "약국에서 감기약을 사다준다",
+          "text_en": "Buy cold medicine for them",
+          "effects": {
+            "money": -8000,
+            "staff_loyalty": 20,
+            "hygiene": 5
+          }
+        }
+      ],
+      "conditions": [
+        "staff_count >= 1"
+      ],
+      "tags": [
+        "직원관리",
+        "위생",
+        "인간관계"
+      ],
+      "probability": 0.1,
+      "cooldown": 14
+    }
+  ]
+}
