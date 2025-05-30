@@ -8,7 +8,6 @@ import os
 import re
 import sys
 import ast
-from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,8 +25,8 @@ class ImportInfo:
 class ValidationResult:
     """검증 결과"""
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
+    errors: list[str]
+    warnings: list[str]
 
 
 class HexagonalArchitectureValidator:
@@ -85,12 +84,12 @@ class HexagonalArchitectureValidator:
             warnings=warnings
         )
     
-    def extract_imports(self, file_path: Path) -> List[ImportInfo]:
+    def extract_imports(self, file_path: Path) -> list[ImportInfo]:
         """파일에서 import 문 추출"""
         imports = []
         
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 file_content = f.read()
             
             module_name = str(file_path.relative_to(self.src_dir)).replace('/', '.').replace('\\', '.').replace('.py', '')
@@ -120,7 +119,7 @@ class HexagonalArchitectureValidator:
         
         return imports
     
-    def collect_all_imports(self) -> List[ImportInfo]:
+    def collect_all_imports(self) -> list[ImportInfo]:
         """프로젝트 전체 import 수집"""
         all_imports = []
         
@@ -177,7 +176,7 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
                 
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
                 
                 # 인터페이스 클래스 찾기
@@ -207,7 +206,7 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
                 
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
                 
                 # dataclass 사용 확인
@@ -232,7 +231,7 @@ class HexagonalArchitectureValidator:
             warnings=warnings
         )
     
-    def validate_all(self) -> Dict[str, ValidationResult]:
+    def validate_all(self) -> dict[str, ValidationResult]:
         """모든 검증 실행"""
         return {
             "project_structure": self.validate_project_structure(),
@@ -241,7 +240,7 @@ class HexagonalArchitectureValidator:
             "domain_immutability": self.validate_domain_immutability()
         }
     
-    def _get_layer(self, module_name: str) -> Optional[str]:
+    def _get_layer(self, module_name: str) -> str | None:
         """모듈 이름에서 레이어 추출"""
         if module_name.startswith('core.domain'):
             return "core.domain"
@@ -254,7 +253,7 @@ class HexagonalArchitectureValidator:
         return None
 
 
-def print_validation_results(results: Dict[str, ValidationResult]) -> None:
+def print_validation_results(results: dict[str, ValidationResult]) -> None:
     """검증 결과 출력"""
     all_valid = True
     

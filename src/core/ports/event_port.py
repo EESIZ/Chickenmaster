@@ -6,7 +6,6 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Tuple
 
 from ..domain.events import Event
 from ..domain.game_state import GameState
@@ -19,8 +18,8 @@ class IEventService(ABC):
     def get_applicable_events(
         self, 
         game_state: GameState,
-        category: Optional[str] = None
-    ) -> List[Event]:
+        category: str | None = None
+    ) -> list[Event]:
         """현재 상태에서 발생 가능한 이벤트 목록 반환
         
         Args:

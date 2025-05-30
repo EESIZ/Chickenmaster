@@ -6,7 +6,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Any
+from typing import Any
 
 from ..domain.events import Event
 
@@ -15,7 +15,7 @@ class IEventBank(ABC):
     """이벤트 저장소 포트 인터페이스"""
     
     @abstractmethod
-    def load_events_by_category(self, category: str) -> List[Event]:
+    def load_events_by_category(self, category: str) -> list[Event]:
         """카테고리별 이벤트 로딩
         
         Args:
@@ -27,7 +27,7 @@ class IEventBank(ABC):
         pass
     
     @abstractmethod
-    def get_event_by_id(self, event_id: str) -> Optional[Event]:
+    def get_event_by_id(self, event_id: str) -> Event | None:
         """ID로 특정 이벤트 조회
         
         Args:
@@ -41,8 +41,8 @@ class IEventBank(ABC):
     @abstractmethod
     def filter_events_by_conditions(
         self, 
-        conditions: Dict[str, Any]
-    ) -> List[Event]:
+        conditions: dict[str, Any]
+    ) -> list[Event]:
         """조건에 맞는 이벤트 필터링
         
         Args:
@@ -54,7 +54,7 @@ class IEventBank(ABC):
         pass
     
     @abstractmethod
-    def get_available_categories(self) -> List[str]:
+    def get_available_categories(self) -> list[str]:
         """사용 가능한 이벤트 카테고리 목록
         
         Returns:
@@ -63,7 +63,7 @@ class IEventBank(ABC):
         pass
     
     @abstractmethod
-    def validate_event_data(self) -> Dict[str, List[str]]:
+    def validate_event_data(self) -> dict[str, list[str]]:
         """이벤트 데이터 무결성 검증
         
         Returns:

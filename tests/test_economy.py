@@ -18,11 +18,8 @@ import pytest
 
 from game_constants import Metric, cap_metric_value
 from src.economy.engine import (
-    apply_tradeoff,
     compute_profit_no_right_answer,
-    tradeoff_apply_price_change,
     uncertainty_adjust_inventory,
-    update_economy_state,
 )
 from src.economy.models import tradeoff_compute_demand
 from src.metrics.tracker import MetricsTracker

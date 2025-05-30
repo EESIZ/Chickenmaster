@@ -4,7 +4,6 @@
 """
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
 
 
 @dataclass(frozen=True)
@@ -41,7 +40,7 @@ class TradeoffPair:
     metric2: str
     balance_factor: float = 1.0
     
-    def calculate_effect(self, primary_delta: int, primary_metric: str) -> Dict[str, int]:
+    def calculate_effect(self, primary_delta: int, primary_metric: str) -> dict[str, int]:
         """트레이드오프 효과 계산"""
         if primary_metric != self.metric1 and primary_metric != self.metric2:
             return {}
@@ -58,7 +57,7 @@ class TradeoffPair:
 @dataclass(frozen=True)
 class MetricsSnapshot:
     """지표 스냅샷 - 절대 불변"""
-    metrics: Dict[str, Metric]
+    metrics: dict[str, Metric]
     timestamp: int
     
     def get_metric_value(self, metric_name: str) -> int:
@@ -89,7 +88,7 @@ class MetricsSnapshot:
             timestamp=self.timestamp
         )
     
-    def apply_effects(self, effects: Dict[str, int]) -> 'MetricsSnapshot':
+    def apply_effects(self, effects: dict[str, int]) -> 'MetricsSnapshot':
         """여러 효과를 적용한 새 스냅샷 생성"""
         updated_metrics = dict(self.metrics)
         

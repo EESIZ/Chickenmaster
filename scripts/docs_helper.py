@@ -10,11 +10,9 @@
 """
 
 import argparse
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Optional
 import re
 
 # 프로젝트 루트 찾기
@@ -110,7 +108,7 @@ def validate_doc_links() -> bool:
         return True
 
 
-def generate_doc_stats() -> Dict:
+def generate_doc_stats() -> dict:
     """문서 통계를 생성합니다."""
     
     stats = {
@@ -149,7 +147,7 @@ def generate_doc_stats() -> Dict:
                 ['git', 'log', '-1', '--format=%ci', str(doc_path)],
                 capture_output=True,
                 text=True,
-                cwd=PROJECT_ROOT
+                cwd=PROJECT_ROOT, check=False
             )
             if result.returncode == 0:
                 last_modified = result.stdout.strip()
@@ -173,17 +171,17 @@ def print_doc_stats():
     print("📊 문서 통계 생성 중...")
     stats = generate_doc_stats()
     
-    print(f"\n📚 전체 통계:")
+    print("\n📚 전체 통계:")
     print(f"  📄 총 문서 수: {stats['total_docs']}")
     print(f"  📝 총 라인 수: {stats['total_lines']:,}")
     print(f"  📖 총 단어 수: {stats['total_words']:,}")
     
-    print(f"\n📂 카테고리별 통계:")
+    print("\n📂 카테고리별 통계:")
     for category, data in stats['by_category'].items():
         print(f"  {category}: {data['docs']}개 문서, {data['lines']:,}줄, {data['words']:,}단어")
     
     if stats['recent_updates']:
-        print(f"\n🕒 최근 업데이트된 문서 (상위 10개):")
+        print("\n🕒 최근 업데이트된 문서 (상위 10개):")
         for update in stats['recent_updates']:
             print(f"  📄 {update['file']} - {update['last_modified'][:10]}")
 

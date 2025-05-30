@@ -4,7 +4,6 @@
 """
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
 
 
 @dataclass(frozen=True)
@@ -15,9 +14,9 @@ class GameState:
     happiness: int
     pain: int
     day: int
-    events_history: Tuple[str, ...] = ()
+    events_history: tuple[str, ...] = ()
     
-    def apply_effects(self, effects: Dict[str, int]) -> 'GameState':
+    def apply_effects(self, effects: dict[str, int]) -> 'GameState':
         """효과 적용 시 새 상태 반환"""
         return GameState(
             money=max(0, self.money + effects.get('money', 0)),

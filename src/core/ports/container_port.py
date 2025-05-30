@@ -6,7 +6,8 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Callable, TypeVar, Type, Generic, List
+from typing import TypeVar
+from collections.abc import Callable
 
 T = TypeVar('T')
 
@@ -17,7 +18,7 @@ class IServiceContainer(ABC):
     @abstractmethod
     def register_singleton(
         self, 
-        interface: Type[T], 
+        interface: type[T], 
         implementation: Callable[['IServiceContainer'], T]
     ) -> None:
         """싱글톤 서비스 등록
@@ -31,7 +32,7 @@ class IServiceContainer(ABC):
     @abstractmethod
     def register_transient(
         self, 
-        interface: Type[T], 
+        interface: type[T], 
         implementation: Callable[['IServiceContainer'], T]
     ) -> None:
         """트랜지언트 서비스 등록
@@ -43,7 +44,7 @@ class IServiceContainer(ABC):
         pass
     
     @abstractmethod
-    def get(self, interface: Type[T]) -> T:
+    def get(self, interface: type[T]) -> T:
         """서비스 인스턴스 조회
         
         Args:
@@ -58,7 +59,7 @@ class IServiceContainer(ABC):
         pass
     
     @abstractmethod
-    def has(self, interface: Type[T]) -> bool:
+    def has(self, interface: type[T]) -> bool:
         """서비스 등록 여부 확인
         
         Args:
@@ -75,7 +76,7 @@ class IServiceContainer(ABC):
         pass
     
     @abstractmethod
-    def validate_dependencies(self) -> Dict[str, List[str]]:
+    def validate_dependencies(self) -> dict[str, list[str]]:
         """의존성 순환 참조 검증
         
         Returns:

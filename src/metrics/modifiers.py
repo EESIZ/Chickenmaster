@@ -5,7 +5,6 @@
 """
 
 import random
-from typing import Dict
 
 from game_constants import Metric
 

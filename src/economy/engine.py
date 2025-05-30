@@ -4,16 +4,9 @@
 게임의 핵심 경제 로직을 처리하는 엔진입니다.
 """
 
-import json
-import math
-import random
-from decimal import Decimal
-from pathlib import Path
 from typing import Any
 
 from game_constants import (
-    METRIC_RANGES,
-    TRADEOFF_RELATIONSHIPS,
     ActionType,
     Metric,
     cap_metric_value,

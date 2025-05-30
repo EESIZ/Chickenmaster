@@ -9,7 +9,6 @@ Cascade 모듈의 도메인 모델.
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import List, Dict, Optional, Union, Set, Tuple, FrozenSet
 from datetime import datetime, timedelta
 
 from ..events import Event
@@ -66,7 +65,7 @@ class PendingEvent:
     """지연 처리될 이벤트 정보"""
     event: Event
     trigger_time: datetime
-    conditions: Tuple[TriggerCondition, ...] = field(default_factory=tuple)  # List → Tuple로 변경 (hashable)
+    conditions: tuple[TriggerCondition, ...] = field(default_factory=tuple)  # List → Tuple로 변경 (hashable)
     probability: float = 1.0  # 발생 확률 (0.0 ~ 1.0)
     
     def is_ready(self, current_time: datetime, game_state: GameState) -> bool:
@@ -96,8 +95,8 @@ class CascadeNode:
     """연쇄 체인 내 노드"""
     event_id: str
     cascade_type: CascadeType
-    delay: Optional[timedelta] = None
-    conditions: Tuple[TriggerCondition, ...] = field(default_factory=tuple)  # List → Tuple로 변경 (hashable)
+    delay: timedelta | None = None
+    conditions: tuple[TriggerCondition, ...] = field(default_factory=tuple)  # List → Tuple로 변경 (hashable)
     probability: float = 1.0
     impact_factor: float = 1.0  # 영향도 계수
     
@@ -117,10 +116,10 @@ class CascadeNode:
 class CascadeChain:
     """연쇄 이벤트 체인"""
     trigger_event_id: str
-    nodes: Dict[str, FrozenSet[CascadeNode]]  # Set → FrozenSet으로 변경 (hashable)
+    nodes: dict[str, frozenset[CascadeNode]]  # Set → FrozenSet으로 변경 (hashable)
     max_depth: int = 5
     
-    def get_next_nodes(self, event_id: str) -> FrozenSet[CascadeNode]:
+    def get_next_nodes(self, event_id: str) -> frozenset[CascadeNode]:
         """다음 연쇄 노드 목록
         
         Args:
@@ -162,9 +161,9 @@ class CascadeChain:
 @dataclass(frozen=True)
 class CascadeResult:
     """연쇄 이벤트 처리 결과"""
-    events: Tuple[Event, ...]  # List → Tuple로 변경 (hashable)
-    pending_events: Tuple[PendingEvent, ...]  # List → Tuple로 변경 (hashable)
-    metrics_impact: Dict[str, float]
+    events: tuple[Event, ...]  # List → Tuple로 변경 (hashable)
+    pending_events: tuple[PendingEvent, ...]  # List → Tuple로 변경 (hashable)
+    metrics_impact: dict[str, float]
     max_depth_reached: int
     cycle_detected: bool = False
     

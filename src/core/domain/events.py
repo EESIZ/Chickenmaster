@@ -4,7 +4,6 @@
 """
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
 
 
 @dataclass(frozen=True)
@@ -16,14 +15,14 @@ class Event:
     name_en: str
     text_ko: str
     text_en: str
-    effects: Dict[str, int]
-    conditions: Tuple[str, ...]  # list 아닌 tuple 사용
+    effects: dict[str, int]
+    conditions: tuple[str, ...]  # list 아닌 tuple 사용
     probability: float
     cooldown: int
     category: str
-    tags: Tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
     
-    def with_modified_effects(self, new_effects: Dict[str, int]) -> 'Event':
+    def with_modified_effects(self, new_effects: dict[str, int]) -> 'Event':
         """수정이 필요한 경우 새 객체 생성"""
         return Event(
             id=self.id,
@@ -47,9 +46,9 @@ class EventChoice:
     id: str
     text_ko: str
     text_en: str
-    effects: Dict[str, int]
+    effects: dict[str, int]
     
-    def with_modified_effects(self, new_effects: Dict[str, int]) -> 'EventChoice':
+    def with_modified_effects(self, new_effects: dict[str, int]) -> 'EventChoice':
         """수정이 필요한 경우 새 객체 생성"""
         return EventChoice(
             id=self.id,

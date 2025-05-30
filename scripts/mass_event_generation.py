@@ -13,7 +13,6 @@ import time
 from pathlib import Path
 from typing import Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import os
 
 # 프로젝트 루트를 경로에 추가
 project_root = Path(__file__).parent.parent
