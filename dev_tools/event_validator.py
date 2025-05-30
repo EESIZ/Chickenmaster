@@ -539,23 +539,23 @@ VALID_METRICS = (
         return self.validated_events
 
 
-def main():
-    """명령행 인터페이스"""
-    parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
-    parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
-    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
-    args = parser.parse_args()
+    def main():
+        """명령행 인터페이스"""
+        parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
+        parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
+        parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
+        args = parser.parse_args()
 
-    validator = EventValidator()
-    path = Path(args.path)
+        validator = EventValidator()
+        path = Path(args.path)
 
-    if path.is_file():
-        success = validator.validate_file(path)
-    elif path.is_dir():
-        success = validator.validate_directory(path)
-    else:
-        print(f"오류: 경로를 찾을 수 없음: {path}")
-        return 1
+        if path.is_file():
+            success = validator.validate_file(path)
+        elif path.is_dir():
+            success = validator.validate_directory(path)
+        else:
+            print(f"오류: 경로를 찾을 수 없음: {path}")
+            return 1
 
     # 오류 및 경고 출력
     for error in validator.get_errors():
