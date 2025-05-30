@@ -17,7 +17,7 @@ lint.ignore = ["E501","PLR0912","RUF001"]
 #E501 : 라인 길이 제한
 #PLR0912 : 함수 분기수 제한
 #RUF001 : 유니코드 문자(이모지)제한
-select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
+lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/mass_event_generation.py" = ["E402"]  # sys.path 수정 후 import가 필요한 경우 
