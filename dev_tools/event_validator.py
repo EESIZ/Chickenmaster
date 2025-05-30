@@ -76,7 +76,7 @@ VALID_METRICS = (
     "EQUIPMENT_CONDITION",  # 장비 상태
     "STORE_CLEANLINESS",  # 매장 청결도
     "MENU_DIVERSITY"  # 메뉴 다양성
-)
+    )
 
     def __init__(self):
         """초기화"""
