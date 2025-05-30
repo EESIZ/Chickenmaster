@@ -5,7 +5,8 @@ pre-commit==3.6.0
 pytest==7.4.3
 pytest-cov==4.1.0
 isort==5.13.2
-types-all
+# types-all 패키지는 types-pkg-resources 의존성 문제로 제거
+# 필요한 타입 패키지는 개별적으로 추가
 
 # 기존 의존성
 pydantic>=2.5.0

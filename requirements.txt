@@ -14,4 +14,5 @@ pandas>=2.1.0
 jinja2>=3.1.0
 
 # 타입 지원
-types-all
+# types-all 패키지는 types-pkg-resources 의존성 문제로 제거
+# 필요한 타입 패키지는 개별적으로 추가
