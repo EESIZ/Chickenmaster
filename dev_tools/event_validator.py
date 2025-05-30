@@ -65,18 +65,18 @@ class EventValidator:
     ]
 
     # 허용되는 메트릭
-    VALID_METRICS = [
-        "MONEY",  # 현금
-        "REPUTATION",  # 평판
-        "CUSTOMER_SATISFACTION",  # 고객 만족도
-        "HAPPINESS",  # 행복
-        "PAIN",  # 고통
-        "EMPLOYEE_SATISFACTION",  # 직원 만족도
-        "INGREDIENT_QUALITY",  # 재료 품질
-        "EQUIPMENT_CONDITION",  # 장비 상태
-        "STORE_CLEANLINESS",  # 매장 청결도
-        "MENU_DIVERSITY"  # 메뉴 다양성
-    ]
+VALID_METRICS = (
+    "MONEY",  # 현금
+    "REPUTATION",  # 평판
+    "CUSTOMER_SATISFACTION",  # 고객 만족도
+    "HAPPINESS",  # 행복
+    "PAIN",  # 고통
+    "EMPLOYEE_SATISFACTION",  # 직원 만족도
+    "INGREDIENT_QUALITY",  # 재료 품질
+    "EQUIPMENT_CONDITION",  # 장비 상태
+    "STORE_CLEANLINESS",  # 매장 청결도
+    "MENU_DIVERSITY"  # 메뉴 다양성
+)
 
     def __init__(self):
         """초기화"""
