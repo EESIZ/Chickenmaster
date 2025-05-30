@@ -6,52 +6,6 @@ from typing import ClassVar
 
 from .base import BaseValidator, Event, ValidationResult
 from ..constants import QUALITY_THRESHOLDS, VALIDATION_THRESHOLDS
-from fuzzywuzzy import fuzz
-
-class DuplicateValidator(BaseValidator):
-    """중복 검증기"""
-    
-    def __init__(self):
-        self.validated_events: list[Event] = []
-    
-    def validate(self, event: Event) -> ValidationResult:
-        """중복 여부 검증"""
-        for validated in self.validated_events:
-            name_similarity = fuzz.ratio(event.name_ko, validated.name_ko)
-            text_similarity = fuzz.ratio(event.text_ko, validated.text_ko)
-            
-            if (name_similarity > VALIDATION_THRESHOLDS["NAME_SIMILARITY_THRESHOLD"] or 
-                text_similarity > VALIDATION_THRESHOLDS["TEXT_SIMILARITY_THRESHOLD"]):
-                return ValidationResult(
-                    is_valid=False,
-                    errors=["유사한 이벤트가 이미 존재합니다"]
-                )
-        
-        self.validated_events.append(event)
-        return ValidationResult(is_valid=True)
-
-class TradeoffValidator(BaseValidator):
-    """트레이드오프 균형 검증기"""
-    
-    def validate(self, event: Event) -> ValidationResult:
-        """트레이드오프 균형 검증"""
-        if len(event.choices) < VALIDATION_THRESHOLDS["MIN_CHOICES"]:
-            return ValidationResult(
-                is_valid=False,
-                errors=["선택지가 2개 이상이어야 합니다"]
-            )
-
-        for choice in event.choices:
-            positive_effects = sum(1 for v in choice.effects.values() if v > 0)
-            negative_effects = sum(1 for v in choice.effects.values() if v < 0)
-            
-            if positive_effects == 0 or negative_effects == 0:
-                return ValidationResult(
-                    is_valid=False,
-                    errors=["각 선택지는 긍정적/부정적 효과를 모두 포함해야 합니다"]
-                )
-
-        return ValidationResult(is_valid=True)
 
 class FormulaValidator(BaseValidator):
     """수식 안전성 검증기"""

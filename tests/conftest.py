@@ -11,9 +11,7 @@ from pydantic import BaseModel, Field
 from src.events.schema import Event, EventContainer, EventEffect, EventChoice
 from src.events.validators.base import ValidationResult
 from src.events.validators.specific import (
-    DuplicateValidator,
-    FormulaValidator,
-    TradeoffValidator
+    FormulaValidator
 )
 
 # 테스트 데이터 디렉토리
@@ -56,15 +54,7 @@ def mock_event_container(mock_event: Event) -> EventContainer[Event]:
 
 
 
-@pytest.fixture
-def duplicate_validator() -> DuplicateValidator:
-    """중복 검증기 fixture"""
-    return DuplicateValidator()
 
-@pytest.fixture
-def tradeoff_validator() -> TradeoffValidator:
-    """트레이드오프 균형 검증기 fixture"""
-    return TradeoffValidator()
 
 @pytest.fixture
 def formula_validator() -> FormulaValidator:
