@@ -18,7 +18,7 @@ from src.events.validators.specific import (
 class TestFormulaValidator:
     """수식 안전성 검증기 테스트"""
     
-    def test_valid_formula(self, formula_validator: FormulaValidator, mock_event: Event):
+    def test_valid_formula(self, formula_validator: FormulaValidator, mock_event: Event) -> None:
         """유효한 수식인 경우"""
         mock_event.effects = [
             EventEffect(metric="money", formula="100 * x + 50"),
@@ -28,7 +28,7 @@ class TestFormulaValidator:
         assert result.is_valid
         assert not result.errors
         
-    def test_invalid_syntax(self, formula_validator: FormulaValidator, mock_event: Event):
+    def test_invalid_syntax(self, formula_validator: FormulaValidator, mock_event: Event) -> None:
         """잘못된 구문인 경우"""
         mock_event.effects = [
             EventEffect(metric="money", formula="100 * x +"),
@@ -37,7 +37,7 @@ class TestFormulaValidator:
         assert not result.is_valid
         assert "잘못된 수식 구문" in result.errors[0]
         
-    def test_unsafe_formula(self, formula_validator: FormulaValidator, mock_event: Event):
+    def test_unsafe_formula(self, formula_validator: FormulaValidator, mock_event: Event) -> None:
         """안전하지 않은 수식인 경우"""
         mock_event.effects = [
             EventEffect(metric="money", formula="eval('100')"),

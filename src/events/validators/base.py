@@ -7,14 +7,7 @@ from typing import Protocol
 
 from pydantic import BaseModel
 
-class Event(BaseModel):
-    """이벤트 기본 모델"""
-    id: str
-    type: str
-    name_ko: str
-    name_en: str
-    text_ko: str
-    text_en: str
+from ..schema import Event
 
 class ValidationResult(BaseModel):
     """검증 결과"""

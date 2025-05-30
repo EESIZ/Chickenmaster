@@ -4,7 +4,8 @@
 
 from typing import ClassVar
 
-from .base import BaseValidator, Event, ValidationResult
+from ..schema import Event
+from .base import BaseValidator, ValidationResult
 from ..constants import QUALITY_THRESHOLDS, VALIDATION_THRESHOLDS
 
 class FormulaValidator(BaseValidator):
