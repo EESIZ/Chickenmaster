@@ -5,18 +5,14 @@ Cascade 서비스 어댑터 테스트.
 """
 
 import unittest
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import Mock, MagicMock
 from dataclasses import dataclass, field
 
 from src.adapters.services.cascade_service import CascadeServiceImpl
 from src.core.domain.cascade import (
     CascadeType,
-    TriggerCondition,
-    PendingEvent,
-    CascadeNode,
-    CascadeChain,
-    CascadeResult
+    TriggerCondition
 )
 from src.core.domain.events import Event
 from src.core.domain.game_state import GameState

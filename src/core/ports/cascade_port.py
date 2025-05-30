@@ -6,7 +6,6 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Tuple, Any
 
 from ..domain.events import Event
 from ..domain.game_state import GameState
@@ -20,7 +19,7 @@ class ICascadeService(ABC):
         self, 
         trigger_event: Event, 
         game_state: GameState
-    ) -> List[Event]:
+    ) -> list[Event]:
         """트리거 이벤트로 인한 연쇄 이벤트 목록
         
         Args:
@@ -67,7 +66,7 @@ class ICascadeService(ABC):
         trigger_event: Event, 
         game_state: GameState,
         max_depth: int = 5
-    ) -> Tuple[List[Event], GameState]:
+    ) -> tuple[list[Event], GameState]:
         """전체 연쇄 체인 처리
         
         Args:
@@ -83,7 +82,7 @@ class ICascadeService(ABC):
     @abstractmethod
     def check_cascade_cycle(
         self,
-        event_chain: List[Event]
+        event_chain: list[Event]
     ) -> bool:
         """연쇄 효과 사이클 검사
         

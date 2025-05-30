@@ -2,11 +2,9 @@
 구체적인 이벤트 검증기 구현
 """
 
-from typing import ClassVar
 
 from ..schema import Event
 from .base import BaseValidator, ValidationResult
-from ..constants import QUALITY_THRESHOLDS, VALIDATION_THRESHOLDS
 
 class FormulaValidator(BaseValidator):
     """수식 안전성 검증기"""

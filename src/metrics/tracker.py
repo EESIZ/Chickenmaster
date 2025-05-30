@@ -6,18 +6,12 @@
 
 import json
 import os
-import uuid
-from collections import deque, defaultdict
+from collections import deque
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Callable
 
 from game_constants import (
     METRIC_RANGES,
-    TRADEOFF_RELATIONSHIPS,
-    UNCERTAINTY_WEIGHTS,
     Metric,
-    are_happiness_suffering_balanced,
     cap_metric_value,
 )
 

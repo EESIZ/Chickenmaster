@@ -6,7 +6,6 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
 
 from ..domain.game_state import GameState
 from ..domain.metrics import Metric, MetricsSnapshot
@@ -20,8 +19,8 @@ class IMetricService(ABC):
         self, 
         current_happiness: int, 
         current_pain: int,
-        effects: Dict[str, int]
-    ) -> Tuple[int, int]:
+        effects: dict[str, int]
+    ) -> tuple[int, int]:
         """행복-고통 시소 계산 (합계 = 100 유지)
         
         Args:
@@ -50,7 +49,7 @@ class IMetricService(ABC):
     def calculate_game_over_conditions(
         self, 
         game_state: GameState
-    ) -> Dict[str, bool]:
+    ) -> dict[str, bool]:
         """게임 종료 조건들 검증
         
         Args:
@@ -62,7 +61,7 @@ class IMetricService(ABC):
         pass
     
     @abstractmethod
-    def get_metric_bounds(self) -> Dict[str, Tuple[int, int]]:
+    def get_metric_bounds(self) -> dict[str, tuple[int, int]]:
         """각 지표의 최소/최대값 반환
         
         Returns:
@@ -73,9 +72,9 @@ class IMetricService(ABC):
     @abstractmethod
     def apply_tradeoff_effects(
         self,
-        primary_effect: Dict[str, int],
+        primary_effect: dict[str, int],
         metrics_snapshot: MetricsSnapshot
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """트레이드오프 효과 적용
         
         Args:
@@ -91,7 +90,7 @@ class IMetricService(ABC):
     def get_critical_metrics(
         self,
         game_state: GameState
-    ) -> Dict[str, Metric]:
+    ) -> dict[str, Metric]:
         """위험 수준의 지표 목록 반환
         
         Args:
