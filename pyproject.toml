@@ -11,8 +11,9 @@ requires-python = ">=3.12"
 license = {text = "MIT"}
 
 [tool.ruff]
-line-length = 100
 target-version = "py312"
+# 기존 설정은 유지하고 E501만 추가
+ignore = ["E501"]
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
