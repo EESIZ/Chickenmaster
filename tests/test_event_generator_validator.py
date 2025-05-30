@@ -289,7 +289,7 @@ class TestEventGenerator(unittest.TestCase):
             # 프롬프트에 JSON 형식 지침이 포함되어 있는지 확인
             self.assertIn("JSON", prompt)
 
-    def test_save_events_noRightAnswer(self) -> None:
+    def test_save_events_no_right_answer(self) -> None:
         """이벤트 저장 - 정답 없음 테스트"""
         # 테스트 이벤트 데이터
         test_events = [
