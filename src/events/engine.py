@@ -10,15 +10,15 @@
 - 불확실성: 이벤트 발생과 효과는 예측 불가능한 요소에 영향을 받습니다
 """
 
-import json
 import random
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
 
 from game_constants import Metric as MetricEnum
-from src.events.models import Alert, Event, EventCategory
-from src.events.schema import load_events_from_json, load_events_from_toml, Event as PydanticEvent, EventTrigger
+from src.events.models import Alert
+from src.events.schema import Event as PydanticEvent
+from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker
 
 
@@ -49,8 +49,8 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-        self.events: list[Event] = []
-        self.event_queue: deque[Event] = deque()
+        self.events: list[PydanticEvent] = []
+        self.event_queue: deque[PydanticEvent] = deque()
         self.alert_queue: deque[Alert] = deque()
         self.cascade_matrix: dict[MetricEnum, list[dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
@@ -61,22 +61,22 @@ class EventEngine:
 
         # 이벤트 파일 로드
         if events_file:
-            self.load_events(events_file)
+            self.load_events(Path(events_file))
 
         # 트레이드오프 매트릭스 로드
         if tradeoff_file:
             self.load_tradeoff_matrix(tradeoff_file)
 
-    def load_events(self, filepath: str) -> None:
+    def load_events(self, filepath: Path) -> None:
         """
         이벤트 정의 파일을 로드합니다.
 
         Args:
-            filepath: 이벤트 정의 파일 경로
+            filepath: 이벤트 정의 파일 경로 (Path 객체)
         """
-        if filepath.endswith(".toml"):
+        if filepath.suffix == ".toml":
             self.events = load_events_from_toml(filepath)
-        elif filepath.endswith(".json"):
+        elif filepath.suffix == ".json":
             self.events = load_events_from_json(filepath)
         else:
             raise ValueError(f"지원되지 않는 파일 형식: {filepath}")
@@ -108,17 +108,21 @@ class EventEngine:
     def poll(self) -> list[PydanticEvent]:
         """
         현재 턴에 발생 가능한 이벤트를 폴링합니다.
-        
+
         Returns:
             List[PydanticEvent]: 발생 가능한 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
         triggered_events: list[PydanticEvent] = []
-        
-        events_to_iterate = self.events.events if hasattr(self.events, 'events') and isinstance(self.events.events, list) else []
+
+        events_to_iterate = (
+            self.events.events
+            if hasattr(self.events, "events") and isinstance(self.events.events, list)
+            else []
+        )
 
         for event_data in events_to_iterate:
-            can_fire_event = True 
+            can_fire_event = True
             # TODO: Cooldown 및 last_triggered_turn 로직 구현 필요
             # if event_data.cooldown > 0 and event_data.id in self.event_last_triggered_turn:
             #     if self.current_turn - self.event_last_triggered_turn[event_data.id] < event_data.cooldown:
@@ -128,26 +132,36 @@ class EventEngine:
                 continue
 
             if event_data.type == "THRESHOLD":
-                if event_data.trigger and self._evaluate_pydantic_trigger(event_data.trigger, current_metrics):
+                if event_data.trigger and self._evaluate_pydantic_trigger(
+                    event_data.trigger, current_metrics
+                ):
                     triggered_events.append(event_data)
-                    self.metrics_tracker.add_event(f"Polled THRESHOLD: {event_data.id} - {event_data.name_ko}")
+                    self.metrics_tracker.add_event(
+                        f"Polled THRESHOLD: {event_data.id} - {event_data.name_ko}"
+                    )
             elif event_data.type == "RANDOM":
                 if self.rng.random() < event_data.probability:
                     triggered_events.append(event_data)
-                    self.metrics_tracker.add_event(f"Polled RANDOM: {event_data.id} - {event_data.name_ko}")
+                    self.metrics_tracker.add_event(
+                        f"Polled RANDOM: {event_data.id} - {event_data.name_ko}"
+                    )
             # TODO: SCHEDULED, CASCADE 타입 처리
-            
+
         # 우선순위에 따라 정렬 (PydanticEvent에 priority가 있으므로 사용 가능)
         triggered_events.sort(key=lambda e: -e.priority)
-        
+
         for event_to_fire in triggered_events:
-            self.event_queue.append(event_to_fire) # 큐에는 PydanticEvent 저장
+            self.event_queue.append(event_to_fire)  # 큐에는 PydanticEvent 저장
 
-        return triggered_events # 실제 발생 "가능성이 있는" 이벤트 목록 반환
+        return triggered_events  # 실제 발생 "가능성이 있는" 이벤트 목록 반환
 
-    def _evaluate_pydantic_trigger(self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]) -> bool:
-        """ Pydantic EventTrigger 모델을 평가합니다. """
-        metric_enum = getattr(MetricEnum, trigger.metric.upper(), None) # trigger.metric이 문자열이므로 upper()로 Enum 멤버 이름과 일치시킴
+    def _evaluate_pydantic_trigger(
+        self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]
+    ) -> bool:
+        """Pydantic EventTrigger 모델을 평가합니다."""
+        metric_enum = getattr(
+            MetricEnum, trigger.metric.upper(), None
+        )  # trigger.metric이 문자열이므로 upper()로 Enum 멤버 이름과 일치시킴
         if not metric_enum or metric_enum not in current_metrics:
             print(f"[Debug] Metric {trigger.metric} not found in current_metrics or MetricEnum")
             return False
@@ -161,7 +175,7 @@ class EventEngine:
         elif condition_str == "GREATER_THAN":
             return current_value > trigger_value
         elif condition_str == "EQUAL":
-            return abs(current_value - trigger_value) < 0.001 # 부동소수점 비교
+            return abs(current_value - trigger_value) < 0.001  # 부동소수점 비교
         elif condition_str == "NOT_EQUAL":
             return abs(current_value - trigger_value) >= 0.001
         elif condition_str == "GREATER_THAN_OR_EQUAL":
@@ -172,7 +186,7 @@ class EventEngine:
         print(f"[Debug] Unknown condition: {trigger.condition}")
         return False
 
-    def evaluate_triggers(self) -> list[PydanticEvent]: # 반환 타입을 PydanticEvent로 명시
+    def evaluate_triggers(self) -> list[PydanticEvent]:  # 반환 타입을 PydanticEvent로 명시
         """
         임계값 기반 트리거를 평가합니다.
 
@@ -180,30 +194,38 @@ class EventEngine:
             List[PydanticEvent]: 트리거된 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
-        threshold_events: list[PydanticEvent] = [] # 타입 명시
-        
-        events_to_iterate = self.events.events if hasattr(self.events, 'events') and isinstance(self.events.events, list) else []
+        threshold_events: list[PydanticEvent] = []  # 타입 명시
+
+        events_to_iterate = (
+            self.events.events
+            if hasattr(self.events, "events") and isinstance(self.events.events, list)
+            else []
+        )
 
         for event_data in events_to_iterate:
             if event_data.type != "THRESHOLD":
                 continue
-            
-            can_fire_event = True # 임시 (cooldown 로직은 poll에서 처리 가정 또는 EventEngine에서 상태 관리 필요)
+
+            can_fire_event = True  # 임시 (cooldown 로직은 poll에서 처리 가정 또는 EventEngine에서 상태 관리 필요)
             if not can_fire_event:
                 continue
 
-            if event_data.trigger and self._evaluate_pydantic_trigger(event_data.trigger, current_metrics):
+            if event_data.trigger and self._evaluate_pydantic_trigger(
+                event_data.trigger, current_metrics
+            ):
                 threshold_events.append(event_data)
                 alert_message = event_data.text_ko or f"임계값 이벤트 발생: {event_data.name_ko}"
                 alert = Alert(
                     event_id=event_data.id,
-                    message=alert_message, 
-                    metrics=current_metrics.copy(), # 여기서 metrics는 MetricEnum을 키로 가짐
+                    message=alert_message,
+                    metrics=current_metrics.copy(),  # 여기서 metrics는 MetricEnum을 키로 가짐
                     turn=self.current_turn,
                     severity="WARNING",
                 )
                 self.alert_queue.append(alert)
-                self.metrics_tracker.add_event(f"Triggered: {event_data.id} - {event_data.name_ko}") # 이벤트 발생 기록
+                self.metrics_tracker.add_event(
+                    f"Triggered: {event_data.id} - {event_data.name_ko}"
+                )  # 이벤트 발생 기록
         return threshold_events
 
     def apply_effects(self) -> dict[MetricEnum, float]:
@@ -213,39 +235,68 @@ class EventEngine:
         Returns:
             Dict[MetricEnum, float]: 효과가 적용된 최종 지표 상태
         """
-        # 현재 지표 상태 가져오기
         current_metrics = self.metrics_tracker.get_metrics()
-
-        # 이벤트 큐가 비어있으면 현재 상태 반환
         if not self.event_queue:
             return current_metrics
 
-        # 모든 이벤트 효과 적용
         while self.event_queue:
-            event = self.event_queue.popleft()
+            event: PydanticEvent = self.event_queue.popleft()
 
-            # 이벤트 발생 기록
-            event.last_fired = self.current_turn
+            # Cooldown 및 last_fired 로직 (PydanticEvent의 필드 사용)
+            can_fire_this_event = True
+            if event.cooldown > 0:
+                if event.last_fired is not None and (
+                    self.current_turn - event.last_fired < event.cooldown
+                ):
+                    can_fire_this_event = False
 
-            # 효과 적용
-            updates = {}
-            for effect in event.effects:
-                new_value = effect.apply(current_metrics)
-                updates[effect.metric] = new_value
+            if can_fire_this_event:
+                event.last_fired = self.current_turn
 
-                # 이벤트 메시지 추가
-                if effect.message:
-                    self.metrics_tracker.add_event(effect.message)
+                updates: dict[MetricEnum, float] = {}
+                for effect_data in event.effects:
+                    metric_enum = getattr(MetricEnum, effect_data.metric.upper(), None)
+                    if metric_enum and metric_enum in current_metrics:
+                        current_value = current_metrics[metric_enum]
+                        new_value = current_value
+                        try:
+                            if "%" in effect_data.formula:
+                                formula_val = effect_data.formula.replace("%", "")
+                                percentage = float(formula_val) / 100
+                                new_value = current_value * (1 + percentage)
+                            else:
+                                delta = float(effect_data.formula)
+                                new_value = current_value + delta
+                        except ValueError:
+                            try:
+                                temp_val = current_value
+                                eval_result = eval(
+                                    effect_data.formula, {"__builtins__": {}}, {"value": temp_val}
+                                )
+                                if "value" not in effect_data.formula:
+                                    new_value = current_value + float(eval_result)
+                                else:
+                                    new_value = float(eval_result)
+                            except Exception as e:
+                                print(
+                                    f"Error evaluating formula (PydanticEvent): {effect_data.formula}, Error: {e}"
+                                )
 
-            # 지표 업데이트
-            self.metrics_tracker.tradeoff_update_metrics(updates)
+                        updates[metric_enum] = new_value
+                    else:
+                        print(
+                            f"[Effect Apply Debug] Metric not found or invalid: {effect_data.metric}"
+                        )
 
-            # 연쇄 효과 처리
-            self._process_cascade_effects(set(updates.keys()), 0)
+                if updates:
+                    self.metrics_tracker.tradeoff_update_metrics(updates)
+                self.metrics_tracker.add_event(f"Applied event: {event.id} - {event.name_ko}")
+            else:
+                self.metrics_tracker.add_event(
+                    f"Event {event.id} in cooldown. Turn: {self.current_turn}, Last Fired: {event.last_fired}, Cooldown: {event.cooldown}"
+                )
 
-            # 업데이트된 지표 상태 가져오기
             current_metrics = self.metrics_tracker.get_metrics()
-
         return current_metrics
 
     def _process_cascade_effects(self, changed_metrics: set[MetricEnum], depth: int) -> None:

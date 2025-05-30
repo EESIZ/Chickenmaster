@@ -12,6 +12,10 @@
 
 import os
 import sys
+
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import json
 import tempfile
 import time
@@ -20,19 +24,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-# 프로젝트 루트 디렉토리를 sys.path에 추가
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from game_constants import Metric
 from src.events.engine import EventEngine
 from src.events.integration import GameEventSystem
-from src.events.models import (
-    Effect,
-    Event,
-    EventCategory,
-    Trigger,
-    TriggerCondition,
-)
+from src.events.models import Effect, Event, EventCategory, Trigger, TriggerCondition
 from src.events.schema import (
     load_events_from_json,
     load_events_from_toml,
@@ -50,6 +45,7 @@ HISTORY_DAYS = 5
 EPSILON = 0.001
 MONEY_RANGE = (9000.0, 11000.0)
 REPUTATION_RANGE = (45.0, 55.0)
+
 
 @pytest.fixture
 def sample_metrics() -> dict[Metric, float]:
@@ -140,7 +136,7 @@ def test_event_application(event_engine: EventEngine, sample_metrics: dict[Metri
         type=EventCategory.RANDOM,
         effects=[effect],
         probability=1.0,  # 항상 발생
-        category="test_category"
+        category="test_category",
     )
 
     # 이벤트 큐에 추가
@@ -168,7 +164,7 @@ def test_threshold_trigger(event_engine: EventEngine, sample_metrics: dict[Metri
         type=EventCategory.THRESHOLD,
         trigger=trigger,
         effects=[effect],
-        category="test_category"
+        category="test_category",
     )
 
     # 이벤트 목록에 추가
@@ -224,7 +220,7 @@ def test_cascade_chain(
         description="이것은 테스트 연쇄 이벤트입니다.",
         type=EventCategory.RANDOM,
         effects=[effect],
-        category="test_category"
+        category="test_category",
     )
 
     # 이벤트 큐에 추가
@@ -237,9 +233,7 @@ def test_cascade_chain(
     assert updated_metrics[Metric.REPUTATION] < sample_metrics[Metric.REPUTATION]  # 평판 하락
     assert updated_metrics[Metric.MONEY] < sample_metrics[Metric.MONEY]  # 자금 감소
     assert updated_metrics[Metric.FACILITY] < sample_metrics[Metric.FACILITY]  # 시설 악화
-    assert (
-        updated_metrics[Metric.STAFF_FATIGUE] > sample_metrics[Metric.STAFF_FATIGUE]
-    )  # 직원 피로도 증가
+    assert updated_metrics[Metric.STAFF_FATIGUE] > sample_metrics[Metric.STAFF_FATIGUE]  # 직원 피로도 증가
 
     # 이벤트 메시지 확인
     events = metrics_tracker.get_events()
@@ -410,7 +404,7 @@ def test_random_seed_reproducibility(sample_metrics: dict[Metric, float]) -> Non
         type=EventCategory.RANDOM,
         effects=[effect],
         probability=0.5,
-        category="test_category"
+        category="test_category",
     )
 
     effect2 = Effect(metric=Metric.MONEY, formula="value * (0.9 + 0.2 * random())")
@@ -421,7 +415,7 @@ def test_random_seed_reproducibility(sample_metrics: dict[Metric, float]) -> Non
         type=EventCategory.RANDOM,
         effects=[effect2],
         probability=0.5,
-        category="test_category"
+        category="test_category",
     )
 
     # 이벤트 목록에 추가
@@ -534,8 +528,10 @@ def test_event_file_loading(game_event_system: GameEventSystem) -> None:
     )
 
     # 이벤트 목록 확인
-    assert hasattr(event_engine.events, 'events') and isinstance(event_engine.events.events, list), "event_engine.events.events가 리스트가 아님"
-    assert len(event_engine.events.events) > 0 # EventContainer의 events 리스트 길이 확인
+    assert hasattr(event_engine.events, "events") and isinstance(
+        event_engine.events.events, list
+    ), "event_engine.events.events가 리스트가 아님"
+    assert len(event_engine.events.events) > 0  # EventContainer의 events 리스트 길이 확인
 
 
 def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -> None:

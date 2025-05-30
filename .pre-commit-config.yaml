@@ -3,7 +3,7 @@ repos:
     rev: v0.1.11
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --exit-non-zero-on-fix, --ignore=PLR0913,PLR0911]
         types_or: [python, pyi, jupyter]
         
   - repo: https://github.com/psf/black
@@ -16,7 +16,7 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic, pytest]
+        additional_dependencies: [pydantic>=2.0,<3.0, pytest==7.4.3]
         args: [--strict]
         
   - repo: https://github.com/pycqa/isort

@@ -5,15 +5,16 @@
 수요-공급, 가격 변동, 트레이드오프 등을 검증합니다.
 """
 
-import json
 import os
 import sys
+
+# 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import json
 from typing import Any, cast
 
 import pytest
-
-# 프로젝트 루트 디렉토리를 sys.path에 추가하여 schema.py를 import할 수 있게 함
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from game_constants import Metric, cap_metric_value
 from src.economy.engine import (
@@ -34,6 +35,7 @@ SUFFERING_VALUE = 25
 HAPPINESS_VALUE = 40
 METRIC_SUM = 100
 MONEY_VALUE = 5000
+
 
 @pytest.fixture
 def test_config() -> dict[str, Any]:
@@ -57,6 +59,7 @@ def test_config() -> dict[str, Any]:
         },
     }
 
+
 @pytest.fixture
 def test_metrics() -> dict[Metric, float]:
     """테스트용 초기 지표를 제공하는 fixture"""
@@ -69,6 +72,7 @@ def test_metrics() -> dict[Metric, float]:
         Metric.STAFF_FATIGUE: 30.0,
         Metric.FACILITY: 80.0,
     }
+
 
 def test_tradeoff_compute_demand_optimal_price(test_config: dict[str, Any]) -> None:
     """최적 가격에서의 수요 계산 테스트"""
@@ -84,8 +88,9 @@ def test_tradeoff_compute_demand_optimal_price(test_config: dict[str, Any]) -> N
         config=test_config,
     )
     # 이 경우 price_factor=1, reputation_factor=1 이므로 base_demand와 같아야 함
-    assert demand_at_optimal_price_and_base_reputation == base_demand_val, \
-        f"최적 가격, 기본 평판에서 수요는 base_demand({base_demand_val})여야 합니다. 실제: {demand_at_optimal_price_and_base_reputation}"
+    assert (
+        demand_at_optimal_price_and_base_reputation == base_demand_val
+    ), f"최적 가격, 기본 평판에서 수요는 base_demand({base_demand_val})여야 합니다. 실제: {demand_at_optimal_price_and_base_reputation}"
 
     # 가격 상승 시 수요 감소 확인 (평판 고정)
     higher_price = optimal_price + 20
@@ -94,10 +99,11 @@ def test_tradeoff_compute_demand_optimal_price(test_config: dict[str, Any]) -> N
         reputation=50.0,
         config=test_config,
     )
-    if price_elasticity_val < 0: # 정상적인 경우 (가격 오르면 수요 감소)
-        assert demand_at_higher_price < demand_at_optimal_price_and_base_reputation, \
-            f"가격 상승 시 수요 감소해야 함. 현재 가격: {higher_price}, 이전 수요: {demand_at_optimal_price_and_base_reputation}, 현재 수요: {demand_at_higher_price}"
-    elif price_elasticity_val > 0: # 기펜재 같은 특이 케이스
+    if price_elasticity_val < 0:  # 정상적인 경우 (가격 오르면 수요 감소)
+        assert (
+            demand_at_higher_price < demand_at_optimal_price_and_base_reputation
+        ), f"가격 상승 시 수요 감소해야 함. 현재 가격: {higher_price}, 이전 수요: {demand_at_optimal_price_and_base_reputation}, 현재 수요: {demand_at_higher_price}"
+    elif price_elasticity_val > 0:  # 기펜재 같은 특이 케이스
         assert demand_at_higher_price > demand_at_optimal_price_and_base_reputation
 
     # 가격 하락 시 수요 증가 확인 (평판 고정, price_elasticity < 0 가정)
@@ -108,10 +114,12 @@ def test_tradeoff_compute_demand_optimal_price(test_config: dict[str, Any]) -> N
         config=test_config,
     )
     if price_elasticity_val < 0:
-        assert demand_at_lower_price > demand_at_optimal_price_and_base_reputation, \
-            f"가격 하락 시 수요 증가해야 함. 현재 가격: {lower_price}, 이전 수요: {demand_at_optimal_price_and_base_reputation}, 현재 수요: {demand_at_lower_price}"
+        assert (
+            demand_at_lower_price > demand_at_optimal_price_and_base_reputation
+        ), f"가격 하락 시 수요 증가해야 함. 현재 가격: {lower_price}, 이전 수요: {demand_at_optimal_price_and_base_reputation}, 현재 수요: {demand_at_lower_price}"
     elif price_elasticity_val > 0:
         assert demand_at_lower_price < demand_at_optimal_price_and_base_reputation
+
 
 def test_tradeoff_compute_demand_reputation_effect(test_config: dict[str, Any]) -> None:
     """평판이 수요에 미치는 영향 테스트"""
@@ -120,17 +128,17 @@ def test_tradeoff_compute_demand_reputation_effect(test_config: dict[str, Any]) 
     # 평판이 다른 두 경우의 수요 계산 (가격은 최적으로 고정)
     low_rep_demand = tradeoff_compute_demand(
         price=optimal_price,
-        reputation=30.0, # 낮은 평판
+        reputation=30.0,  # 낮은 평판
         config=test_config,
     )
     base_demand_at_50_rep = tradeoff_compute_demand(
         price=optimal_price,
-        reputation=50.0, # 기준 평판
+        reputation=50.0,  # 기준 평판
         config=test_config,
     )
     high_rep_demand = tradeoff_compute_demand(
         price=optimal_price,
-        reputation=70.0, # 높은 평판
+        reputation=70.0,  # 높은 평판
         config=test_config,
     )
 
@@ -144,43 +152,27 @@ def test_tradeoff_compute_demand_reputation_effect(test_config: dict[str, Any]) 
     elif reputation_effect_config < 0:
         assert high_rep_demand < low_rep_demand, "평판 효과가 음수일 때, 높은 평판이 낮은 평판보다 수요가 적어야 함"
 
+
 def test_no_right_answer_compute_profit_scenarios() -> None:
     """다양한 시나리오에서의 이익 계산 테스트"""
     # 케이스 1: 정상 케이스
     profit1 = compute_profit_no_right_answer(
-        units_sold=50,
-        unit_cost=80.0,
-        price=100.0,
-        fixed_cost=0 
+        units_sold=50, unit_cost=80.0, price=100.0, fixed_cost=0
     )
     assert profit1 > 0
 
-    # 케이스 2: 재고 부족 (판매량은 실제 판매 가능량으로 제한된다고 가정)
-    profit2 = compute_profit_no_right_answer(
-        units_sold=50, 
-        unit_cost=80.0,
-        price=100.0,
-        fixed_cost=0
-    )
-    # 이 경우 profit1과 동일한 조건이므로, 다른 조건을 주어 profit1과 비교 가능하게 하거나, 이 테스트 케이스의 목적을 명확히 해야 함.
-    # 현재는 profit1과 같은 값을 반환할 것이므로 assert profit2 < profit1 등은 실패함.
-    # 여기서는 units_sold가 더 적은 경우로 변경하여 테스트
+    # 케이스 2: 판매량 감소
     profit2_less_sold = compute_profit_no_right_answer(
-        units_sold=30, # 판매량 감소
-        unit_cost=80.0,
-        price=100.0,
-        fixed_cost=0
+        units_sold=30, unit_cost=80.0, price=100.0, fixed_cost=0  # 판매량 감소
     )
     assert profit2_less_sold < profit1
 
     # 케이스 3: 과잉 재고 (판매량은 수요에 의해 결정된다고 가정)
     profit3 = compute_profit_no_right_answer(
-        units_sold=30, 
-        unit_cost=80.0,
-        price=100.0,
-        fixed_cost=0 
+        units_sold=30, unit_cost=80.0, price=100.0, fixed_cost=0
     )
     assert profit3 < profit1
+
 
 def test_uncertainty_adjust_inventory() -> None:
     """재고 조정 테스트"""
@@ -195,6 +187,7 @@ def test_uncertainty_adjust_inventory() -> None:
     # 케이스 3: 예외 케이스 (판매량 > 재고)
     exception_case_result = uncertainty_adjust_inventory(units_sold=120, current_inventory=100)
     assert exception_case_result == 0, "재고보다 많은 판매량이 있는 경우 0이 되어야 합니다"
+
 
 def test_tradeoff_apply_price_change(test_metrics: dict[Metric, float]) -> None:
     """가격 변경에 따른 트레이드오프 효과 테스트"""
@@ -219,6 +212,7 @@ def test_tradeoff_apply_price_change(test_metrics: dict[Metric, float]) -> None:
     assert (
         metrics[Metric.HAPPINESS] + metrics[Metric.SUFFERING] == METRIC_SUM
     ), "행복과 고통의 합은 항상 100이어야 합니다"
+
 
 def test_cap_metric_value() -> None:
     """지표 값 제한 테스트"""

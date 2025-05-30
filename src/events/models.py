@@ -4,13 +4,10 @@
 게임에서 발생하는 다양한 이벤트를 정의하고 관리합니다.
 """
 
-import json
 import random
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from pathlib import Path
-from typing import Any
 
 from game_constants import Metric
 
@@ -81,19 +78,28 @@ class Trigger:
         current_value = current_metrics[self.metric]
 
         if self.condition == TriggerCondition.LESS_THAN:
-            return current_value < self.value
+            return self.value is not None and current_value < self.value
         elif self.condition == TriggerCondition.GREATER_THAN:
-            return current_value > self.value
+            return self.value is not None and current_value > self.value
         elif self.condition == TriggerCondition.EQUAL:
-            # 부동소수점 비교를 위한 작은 오차 허용
-            return abs(current_value - self.value) < 0.001
+            return self.value is not None and abs(current_value - self.value) < 0.001
+        elif self.condition == TriggerCondition.NOT_EQUAL:
+            return self.value is not None and abs(current_value - self.value) >= 0.001
         elif self.condition == TriggerCondition.GREATER_THAN_OR_EQUAL:
-            return current_value >= self.value
+            return self.value is not None and current_value >= self.value
         elif self.condition == TriggerCondition.LESS_THAN_OR_EQUAL:
-            return current_value <= self.value
+            return self.value is not None and current_value <= self.value
         elif self.condition == TriggerCondition.IN_RANGE:
-            return self.range_min <= current_value <= self.range_max
+            return (
+                self.range_min is not None
+                and self.range_max is not None
+                and self.range_min <= current_value <= self.range_max
+            )
         elif self.condition == TriggerCondition.NOT_IN_RANGE:
+            # range_min 또는 range_max가 None이면 NOT_IN_RANGE는 정의되지 않거나 항상 True일 수 있음 (상황에 따라 결정)
+            # 여기서는 두 값 모두 존재해야 NOT_IN_RANGE를 평가할 수 있다고 가정
+            if self.range_min is None or self.range_max is None:
+                return False  # 또는 True, 또는 예외 발생 - 정책 결정 필요
             return not (self.range_min <= current_value <= self.range_max)
 
         return False

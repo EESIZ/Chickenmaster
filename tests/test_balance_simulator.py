@@ -9,13 +9,9 @@
 
 import json
 import os
-import tempfile
 from pathlib import Path
-from unittest import mock
 
-import pandas as pd
 import pytest
-from pydantic import ValidationError
 
 # from dev_tools.balance_simulator import EventSimulator, GameState, SimulationConfig
 
@@ -156,7 +152,7 @@ def test_simulation_config_validation():
     # assert valid_config.iterations == 100
     # assert valid_config.turns_per_sim == 30
     # assert valid_config.seed == 42
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 유효하지 않은 설정 - 반복 횟수 음수
     # with pytest.raises(ValidationError):
@@ -182,7 +178,7 @@ def test_game_state_basic_functionality():
     # assert state.day == 1
     # assert state.actions_left == 3
     # assert len(state.triggered_events) == 0
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 효과 적용
     # state.apply_effect({"metric": "money", "formula": "500"})
@@ -249,7 +245,7 @@ def test_event_simulator_initialization(setup_test_data):
     """이벤트 시뮬레이터 초기화 및 이벤트 로드 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 이벤트 로드 확인
     # assert len(simulator.events) == 2
@@ -272,7 +268,7 @@ def test_condition_evaluation():
     """조건 평가 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 테스트용 게임 상태
     # state = GameState()
@@ -318,7 +314,7 @@ def test_triggerable_events(setup_test_data):
     """트리거 가능한 이벤트 확인 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 기본 상태 - RANDOM 이벤트만 트리거 가능
     # state = GameState()
@@ -344,7 +340,7 @@ def test_choice_selection_and_effect_application(setup_test_data):
     """선택지 선택 및 효과 적용 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 테스트 이벤트 데이터
     # test_event = simulator.events["test_event_1"]["data"]
@@ -360,34 +356,34 @@ def test_choice_selection_and_effect_application(setup_test_data):
     #     choice_idx = simulator._select_random_choice(test_event)
     #     assert choice_idx == 0
 
-        # 효과 적용 전 상태 복제
-        # test_state = state.clone()
+    # 효과 적용 전 상태 복제
+    # test_state = state.clone()
 
-        # 효과 적용
-        # simulator._apply_event_effects(test_event, choice_idx, test_state)
+    # 효과 적용
+    # simulator._apply_event_effects(test_event, choice_idx, test_state)
 
-        # 이벤트 레벨 효과 확인
-        # assert test_state.money == initial_money + 100
+    # 이벤트 레벨 효과 확인
+    # assert test_state.money == initial_money + 100
 
-        # 선택지 효과 확인
-        # assert test_state.happiness == initial_happiness + 10
-        # assert test_state.pain == initial_pain - 10
+    # 선택지 효과 확인
+    # assert test_state.happiness == initial_happiness + 10
+    # assert test_state.pain == initial_pain - 10
 
     # 두 번째 선택지 테스트
     # with mock.patch("random.randint", return_value=1):  # 두 번째 선택지 강제 선택
     #     choice_idx = simulator._select_random_choice(test_event)
     #     assert choice_idx == 1
 
-        # 효과 적용 전 상태 복제
-        # test_state = state.clone()
+    # 효과 적용 전 상태 복제
+    # test_state = state.clone()
 
-        # 효과 적용
-        # simulator._apply_event_effects(test_event, choice_idx, test_state)
+    # 효과 적용
+    # simulator._apply_event_effects(test_event, choice_idx, test_state)
 
-        # 이벤트 레벨 효과 + 선택지 효과 확인 (누적 효과)
-        # assert test_state.money == initial_money + 100 + 200  # 이벤트 + 선택지 효과
-        # assert test_state.happiness == initial_happiness - 5
-        # assert test_state.pain == initial_pain + 5
+    # 이벤트 레벨 효과 + 선택지 효과 확인 (누적 효과)
+    # assert test_state.money == initial_money + 100 + 200  # 이벤트 + 선택지 효과
+    # assert test_state.happiness == initial_happiness - 5
+    # assert test_state.pain == initial_pain + 5
 
 
 # 테스트 7: 이벤트 연쇄 시뮬레이션
@@ -395,7 +391,7 @@ def test_cascade_simulation(setup_test_data):
     """이벤트 연쇄 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42, cascade_depth_limit=3)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 연쇄 조건을 충족하는 게임 상태
     # state = GameState()
@@ -409,16 +405,16 @@ def test_cascade_simulation(setup_test_data):
     # with mock.patch("random.randint", return_value=0):  # 첫 번째 선택지 강제 선택
     #     new_state, cascade_depth = simulator._simulate_cascade("cascade_event_1", state)
 
-        # 연쇄 깊이 확인
-        # assert cascade_depth == 1  # 원래 이벤트(0) + 연쇄 이벤트(1)
+    # 연쇄 깊이 확인
+    # assert cascade_depth == 1  # 원래 이벤트(0) + 연쇄 이벤트(1)
 
-        # 트리거된 이벤트 확인
-        # assert "cascade_event_1" in new_state.triggered_events
-        # assert "test_event_1" in new_state.triggered_events
+    # 트리거된 이벤트 확인
+    # assert "cascade_event_1" in new_state.triggered_events
+    # assert "test_event_1" in new_state.triggered_events
 
-        # 효과 적용 확인 - 원래 상태와 비교
-        # assert new_state.money > initial_state.money
-        # assert new_state.happiness > initial_state.happiness
+    # 효과 적용 확인 - 원래 상태와 비교
+    # assert new_state.money > initial_state.money
+    # assert new_state.happiness > initial_state.happiness
 
 
 # 테스트 8: 턴 및 일일 시뮬레이션
@@ -426,7 +422,7 @@ def test_turn_and_day_simulation(setup_test_data):
     """턴 및 일일 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 게임 상태
     # state = GameState()
@@ -454,7 +450,7 @@ def test_game_simulation(setup_test_data):
     """전체 게임 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42, turns_per_sim=5)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 게임 시뮬레이션
     # result = simulator.simulate_game()
@@ -486,7 +482,7 @@ def test_report_generation(setup_test_data):
     """보고서 생성 및 시각화 테스트"""
     # config = SimulationConfig(seed=42, iterations=2, turns_per_sim=3)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
-    pass # 임시로 pass 처리
+    pass  # 임시로 pass 처리
 
     # 시뮬레이션 실행
     # results_df = simulator.run_simulations()
@@ -496,29 +492,29 @@ def test_report_generation(setup_test_data):
     #     output_path = os.path.join(temp_dir, "balance_report.csv")
     #     report_data = simulator.generate_report(results_df, output_path)
 
-        # 보고서 파일 확인
-        # assert os.path.exists(output_path)
+    # 보고서 파일 확인
+    # assert os.path.exists(output_path)
 
-        # JSON 보고서 확인
-        # json_path = os.path.splitext(output_path)[0] + ".json"
-        # assert os.path.exists(json_path)
+    # JSON 보고서 확인
+    # json_path = os.path.splitext(output_path)[0] + ".json"
+    # assert os.path.exists(json_path)
 
-        # 시각화 디렉토리 확인
-        # vis_dir = os.path.join(temp_dir, "visualizations")
-        # assert os.path.exists(vis_dir)
+    # 시각화 디렉토리 확인
+    # vis_dir = os.path.join(temp_dir, "visualizations")
+    # assert os.path.exists(vis_dir)
 
-        # 보고서 데이터 확인
-        # assert "balance_metrics" in report_data
-        # assert "tradeoff_analysis" in report_data
-        # assert "uncertainty_analysis" in report_data
-        # assert "problematic_events" in report_data
-        # assert "recommendations" in report_data
-        # assert "visualization_files" in report_data
+    # 보고서 데이터 확인
+    # assert "balance_metrics" in report_data
+    # assert "tradeoff_analysis" in report_data
+    # assert "uncertainty_analysis" in report_data
+    # assert "problematic_events" in report_data
+    # assert "recommendations" in report_data
+    # assert "visualization_files" in report_data
 
-        # 시각화 파일 확인
-        # assert len(report_data["visualization_files"]) > 0
-        # for vis_file in report_data["visualization_files"]:
-        #     assert os.path.exists(vis_file)
+    # 시각화 파일 확인
+    # assert len(report_data["visualization_files"]) > 0
+    # for vis_file in report_data["visualization_files"]:
+    #     assert os.path.exists(vis_file)
 
 
 if __name__ == "__main__":

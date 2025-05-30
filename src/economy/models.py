@@ -10,15 +10,6 @@ import json
 import os
 from typing import Any, cast
 
-from game_constants import (
-    METRIC_RANGES,
-    TRADEOFF_RELATIONSHIPS,
-    UNCERTAINTY_WEIGHTS,
-    ActionType,
-    Metric,
-    cap_metric_value,
-)
-
 
 def load_economy_config() -> dict[str, Any]:
     """
@@ -86,12 +77,12 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
         price_factor = 1 + price_elasticity * (price - optimal_price) / optimal_price
     elif price == optimal_price:
         price_factor = 1.0
-    else: 
-        price_factor = 1.0 
+    else:
+        price_factor = 1.0
 
     reputation_factor = 1.0
     if reputation != 50:
-         reputation_factor = 1 + reputation_effect * (reputation - 50) / 50
+        reputation_factor = 1 + reputation_effect * (reputation - 50) / 50
 
     calculated_demand = int(max(0, base_demand * price_factor * reputation_factor))
     return calculated_demand
