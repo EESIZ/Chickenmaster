@@ -9,11 +9,11 @@ def install_package(package: str) -> None:
 if __name__ == "__main__":
     try:
         with open("requirements-dev.txt", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    print(f"Installing {line}...")
-                    install_package(line)
+            for current_line in f:
+                line_content = current_line.strip()
+                if line_content and not line_content.startswith("#"):
+                    print(f"Installing {line_content}...")
+                    install_package(line_content)
         print("All dev packages installed successfully.")
     except FileNotFoundError:
         print("Error: requirements-dev.txt not found.")
