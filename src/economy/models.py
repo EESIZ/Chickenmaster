@@ -10,6 +10,8 @@ import json
 import os
 from typing import Any, cast
 
+from game_constants import REPUTATION_BASELINE
+
 
 def load_economy_config() -> dict[str, Any]:
     """
@@ -81,8 +83,8 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
         price_factor = 1.0
 
     reputation_factor = 1.0
-    if reputation != 50:
-        reputation_factor = 1 + reputation_effect * (reputation - 50) / 50
+    if reputation != REPUTATION_BASELINE:
+        reputation_factor = 1 + reputation_effect * (reputation - REPUTATION_BASELINE) / REPUTATION_BASELINE
 
     calculated_demand = int(max(0, base_demand * price_factor * reputation_factor))
     return calculated_demand

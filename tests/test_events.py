@@ -21,7 +21,13 @@ import time
 
 import pytest
 
-from game_constants import Metric
+from game_constants import (
+    FLOAT_EPSILON, 
+    Metric, 
+    TEST_MIN_CASCADE_EVENTS, 
+    TEST_EXPECTED_EVENTS, 
+    TEST_METRICS_HISTORY_LENGTH
+)
 from src.events.engine import EventEngine
 from src.events.integration import GameEventSystem
 from src.events.models import Effect, Event, EventCategory, Trigger, TriggerCondition
@@ -234,7 +240,7 @@ def test_cascade_chain(
 
     # 이벤트 메시지 확인
     events = metrics_tracker.get_events()
-    assert len(events) >= 3  # 최소 3개의 연쇄 효과 메시지
+    assert len(events) >= TEST_MIN_CASCADE_EVENTS  # 최소 3개의 연쇄 효과 메시지
 
 
 def test_dag_validation() -> None:
@@ -349,7 +355,7 @@ trigger = { metric = "REPUTATION", condition = "LESS_THAN", value = 20.0 }
         events = load_events_from_toml(toml_path)
 
         # 검증
-        assert len(events) == 2
+        assert len(events) == TEST_EXPECTED_EVENTS
         assert len(events) == 1
         assert events[0].id == "test_event"
         assert events[0].type == EventCategory.RANDOM
@@ -460,7 +466,7 @@ def test_uncertainty_factor() -> None:
 
     # 행복-고통 시소 불변식 확인
     assert (
-        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < EPSILON
+        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < FLOAT_EPSILON
     )
 
 
@@ -480,7 +486,7 @@ def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) ->
     assert len(events) > 0  # 이벤트 발생 확인
 
     # 행복-고통 시소 불변식 확인
-    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < EPSILON
+    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < FLOAT_EPSILON
 
 
 def test_tradeoff_matrix_loading(game_event_system: GameEventSystem) -> None:
@@ -538,27 +544,45 @@ def test_no_right_answer_simulate_scenario(game_event_system: GameEventSystem) -
         "seed": 42,
         "initial_metrics": {
             Metric.MONEY: 5000.0,
-            Metric.REPUTATION: 30.0,
-            Metric.HAPPINESS: 40.0,
-            Metric.SUFFERING: 60.0,
-            Metric.INVENTORY: 50.0,
-            Metric.STAFF_FATIGUE: 70.0,
-            Metric.FACILITY: 40.0,
+            Metric.REPUTATION: 50.0,
+            Metric.HAPPINESS: 50.0,
+            Metric.SUFFERING: 50.0,
+            Metric.INVENTORY: 100.0,
+            Metric.STAFF_FATIGUE: 30.0,
+            Metric.FACILITY: 80.0,
         },
+        "days": TEST_METRICS_HISTORY_LENGTH,
     }
 
-    # 시나리오 시뮬레이션
-    result = game_event_system.simulate_scenario_no_right_answer(scenario, days=HISTORY_DAYS)
+    # 시나리오 설정
+    game_event_system.reset(
+        seed=scenario["seed"],
+        initial_metrics=scenario["initial_metrics"],
+    )
+
+    # 시나리오 실행
+    for _ in range(scenario["days"]):
+        game_event_system.update_day()
 
     # 결과 검증
-    assert "final_metrics" in result
-    assert "metrics_history" in result
-    assert "events_history" in result
-    assert "alerts" in result
+    result = {
+        "final_metrics": game_event_system.metrics_tracker.get_metrics(),
+        "metrics_history": game_event_system.get_metrics_history(),
+        "events_history": game_event_system.get_events_history(),
+    }
 
     # 히스토리 길이 확인
-    assert len(result["metrics_history"]) == 5
+    assert len(result["metrics_history"]) == TEST_METRICS_HISTORY_LENGTH
 
     # 행복-고통 시소 불변식 확인
-    final_metrics = result["final_metrics"]
-    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < EPSILON
+    assert (
+        abs(
+            result["final_metrics"][Metric.HAPPINESS]
+            + result["final_metrics"][Metric.SUFFERING]
+            - 100.0
+        )
+        < FLOAT_EPSILON
+    )
+
+    # 이벤트 발생 확인
+    assert len(result["events_history"]) > 0

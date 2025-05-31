@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
 
-from game_constants import Metric
+from game_constants import FLOAT_EPSILON, Metric
 
 
 class TriggerCondition(Enum):
@@ -82,9 +82,9 @@ class Trigger:
         elif self.condition == TriggerCondition.GREATER_THAN:
             return self.value is not None and current_value > self.value
         elif self.condition == TriggerCondition.EQUAL:
-            return self.value is not None and abs(current_value - self.value) < 0.001
+            return self.value is not None and abs(current_value - self.value) < FLOAT_EPSILON
         elif self.condition == TriggerCondition.NOT_EQUAL:
-            return self.value is not None and abs(current_value - self.value) >= 0.001
+            return self.value is not None and abs(current_value - self.value) >= FLOAT_EPSILON
         elif self.condition == TriggerCondition.GREATER_THAN_OR_EQUAL:
             return self.value is not None and current_value >= self.value
         elif self.condition == TriggerCondition.LESS_THAN_OR_EQUAL:

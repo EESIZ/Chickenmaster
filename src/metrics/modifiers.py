@@ -6,7 +6,7 @@
 
 import random
 
-from game_constants import Metric
+from game_constants import FLOAT_EPSILON, Metric, ProbabilityConstants
 
 from abc import ABC, abstractmethod
 from typing import Any
@@ -119,7 +119,7 @@ def uncertainty_apply_random_fluctuation(
             new_metrics[metric] = current_value + fluctuation
 
     # 행복-고통 시소 불변식 유지
-    if random.random() < 0.5:  # 50% 확률로 행복 또는 고통 중 하나를 변경
+    if random.random() < ProbabilityConstants.RANDOM_THRESHOLD:  # 50% 확률로 행복 또는 고통 중 하나를 변경
         happiness = new_metrics[Metric.HAPPINESS]
         fluctuation = random.uniform(-intensity, intensity) * happiness
         new_metrics[Metric.HAPPINESS] = happiness + fluctuation

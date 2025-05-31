@@ -15,7 +15,7 @@ from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
 
-from game_constants import Metric as MetricEnum
+from game_constants import FLOAT_EPSILON, Metric as MetricEnum
 from src.events.models import Alert
 from src.events.schema import Event as PydanticEvent
 from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
@@ -175,9 +175,9 @@ class EventEngine:
         elif condition_str == "GREATER_THAN":
             return current_value > trigger_value
         elif condition_str == "EQUAL":
-            return abs(current_value - trigger_value) < 0.001  # 부동소수점 비교
+            return abs(current_value - trigger_value) < FLOAT_EPSILON  # 부동소수점 비교
         elif condition_str == "NOT_EQUAL":
-            return abs(current_value - trigger_value) >= 0.001
+            return abs(current_value - trigger_value) >= FLOAT_EPSILON
         elif condition_str == "GREATER_THAN_OR_EQUAL":
             return current_value >= trigger_value
         elif condition_str == "LESS_THAN_OR_EQUAL":
@@ -446,55 +446,35 @@ class EventEngine:
                     target = MetricEnum[edge["target"]]
                     edges.append((source.name, target.name))
                 except KeyError:
-                    continue
+                    pass
 
-        # Kahn의 위상 정렬 알고리즘으로 DAG 확인
-        return self._is_dag_kahn(edges)
+        # 그래프 생성
+        graph = defaultdict(list)
+        for source, target in edges:
+            graph[source].append(target)
 
-    def _is_dag_kahn(self, edges: list[tuple[str, str]]) -> bool:
-        """
-        Kahn의 위상 정렬 알고리즘으로 DAG 여부를 확인합니다.
+        # 사이클 검출
+        visited = set()
+        temp = set()
 
-        Args:
-            edges: 간선 목록 (source, target)
+        def is_cyclic(node: str) -> bool:
+            """DFS로 사이클 검출"""
+            visited.add(node)
+            temp.add(node)
 
-        Returns:
-            bool: DAG이면 True, 그렇지 않으면 False
-        """
-        # 진입 차수와 인접 리스트 초기화
-        in_degree: dict[str, int] = defaultdict(int)
-        adj_list = defaultdict(list)
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    if is_cyclic(neighbor):
+                        return True
+                elif neighbor in temp:
+                    return True
 
-        # 그래프 구성
-        for u, v in edges:
-            adj_list[u].append(v)
-            in_degree[v] += 1
+            temp.remove(node)
+            return False
 
-        # 진입 차수가 0인 노드 큐에 추가
-        queue = [node for node in adj_list if in_degree[node] == 0]
+        for node in graph:
+            if node not in visited:
+                if is_cyclic(node):
+                    return False
 
-        # 방문한 노드 수
-        visited = 0
-
-        # 위상 정렬
-        while queue:
-            u = queue.pop(0)
-            visited += 1
-
-            for v in adj_list[u]:
-                in_degree[v] -= 1
-                if in_degree[v] == 0:
-                    queue.append(v)
-
-        # 모든 노드를 방문했으면 DAG
-        all_nodes = set(adj_list.keys()) | set(in_degree.keys())
-        return visited == len(all_nodes)
-
-    def set_seed(self, seed: int | None = None) -> None:
-        """
-        난수 생성 시드를 설정합니다.
-
-        Args:
-            seed: 난수 생성 시드 (기본값: None)
-        """
-        self.rng = random.Random(seed)
+        return True
