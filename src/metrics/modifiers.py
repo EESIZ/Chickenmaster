@@ -32,6 +32,7 @@ class MetricModifier(ABC):
         """수정자 설명을 반환합니다."""
         pass
 
+
 class SimpleSeesawModifier(MetricModifier):
     """행복-고통 시소 관계를 유지하는 단순 수정자"""
 
@@ -61,6 +62,7 @@ class SimpleSeesawModifier(MetricModifier):
     def get_description(self) -> str:
         """수정자 설명을 반환합니다."""
         return "행복과 고통의 합이 100이 되도록 유지하는 단순 수정자"
+
 
 class AdaptiveModifier(MetricModifier):
     """플레이어 성향과 게임 상태에 따라 적응하는 수정자"""
@@ -100,6 +102,7 @@ class AdaptiveModifier(MetricModifier):
             "적응형 수정자 (M-6에서 구현 예정)"
         )
 
+
 def uncertainty_apply_random_fluctuation(
     metrics: dict[Metric, float], intensity: float = 0.1, seed: int | None = None
 ) -> dict[Metric, float]:
@@ -119,7 +122,9 @@ def uncertainty_apply_random_fluctuation(
             new_metrics[metric] = current_value + fluctuation
 
     # 행복-고통 시소 불변식 유지
-    if random.random() < ProbabilityConstants.RANDOM_THRESHOLD:  # 50% 확률로 행복 또는 고통 중 하나를 변경
+    if (
+        random.random() < ProbabilityConstants.RANDOM_THRESHOLD
+    ):  # 50% 확률로 행복 또는 고통 중 하나를 변경
         happiness = new_metrics[Metric.HAPPINESS]
         fluctuation = random.uniform(-intensity, intensity) * happiness
         new_metrics[Metric.HAPPINESS] = happiness + fluctuation

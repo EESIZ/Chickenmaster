@@ -22,11 +22,11 @@ import time
 import pytest
 
 from game_constants import (
-    FLOAT_EPSILON, 
-    Metric, 
-    TEST_MIN_CASCADE_EVENTS, 
-    TEST_EXPECTED_EVENTS, 
-    TEST_METRICS_HISTORY_LENGTH
+    FLOAT_EPSILON,
+    Metric,
+    TEST_MIN_CASCADE_EVENTS,
+    TEST_EXPECTED_EVENTS,
+    TEST_METRICS_HISTORY_LENGTH,
 )
 from src.events.engine import EventEngine
 from src.events.integration import GameEventSystem
@@ -236,7 +236,9 @@ def test_cascade_chain(
     assert updated_metrics[Metric.REPUTATION] < sample_metrics[Metric.REPUTATION]  # 평판 하락
     assert updated_metrics[Metric.MONEY] < sample_metrics[Metric.MONEY]  # 자금 감소
     assert updated_metrics[Metric.FACILITY] < sample_metrics[Metric.FACILITY]  # 시설 악화
-    assert updated_metrics[Metric.STAFF_FATIGUE] > sample_metrics[Metric.STAFF_FATIGUE]  # 직원 피로도 증가
+    assert (
+        updated_metrics[Metric.STAFF_FATIGUE] > sample_metrics[Metric.STAFF_FATIGUE]
+    )  # 직원 피로도 증가
 
     # 이벤트 메시지 확인
     events = metrics_tracker.get_events()
@@ -466,7 +468,8 @@ def test_uncertainty_factor() -> None:
 
     # 행복-고통 시소 불변식 확인
     assert (
-        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0) < FLOAT_EPSILON
+        abs(updated_metrics[Metric.HAPPINESS] + updated_metrics[Metric.SUFFERING] - 100.0)
+        < FLOAT_EPSILON
     )
 
 
@@ -486,7 +489,10 @@ def test_integration_with_metrics_tracker(game_event_system: GameEventSystem) ->
     assert len(events) > 0  # 이벤트 발생 확인
 
     # 행복-고통 시소 불변식 확인
-    assert abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0) < FLOAT_EPSILON
+    assert (
+        abs(final_metrics[Metric.HAPPINESS] + final_metrics[Metric.SUFFERING] - 100.0)
+        < FLOAT_EPSILON
+    )
 
 
 def test_tradeoff_matrix_loading(game_event_system: GameEventSystem) -> None:

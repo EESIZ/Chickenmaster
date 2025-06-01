@@ -24,6 +24,7 @@ TEST_EVENT_COUNT = 2
 TEST_CHOICES_COUNT = 2
 TEST_METADATA_COUNT = 2
 
+
 class TestEventConditionFixer(unittest.TestCase):
     """이벤트 조건 수정 도구 테스트"""
 
@@ -66,7 +67,7 @@ class TestEventConditionFixer(unittest.TestCase):
         """정답이 없는 상황 테스트"""
         fixer = EventConditionFixer(self.input_file, self.output_file)
         _ = fixer.process_no_right_answer()  # 사용하지 않음을 명시
-    
+
         # 출력 파일 로드
         with open(self.output_file, encoding="utf-8") as f:
             fixed_data = json.load(f)
@@ -75,6 +76,7 @@ class TestEventConditionFixer(unittest.TestCase):
         assert len(fixed_data) == TEST_EVENT_COUNT
         assert all("trigger" in event for event in fixed_data.values())
         assert all("effects" in event for event in fixed_data.values())
+
 
 class TestEventBankIndexer(unittest.TestCase):
     """이벤트 뱅크 인덱서 테스트"""

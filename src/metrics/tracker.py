@@ -34,6 +34,7 @@ REPUTATION_IMPACT_FACTOR = 30
 FACILITY_IMPACT_FACTOR = 40
 MONEY_IMPACT_FACTOR = 1000
 
+
 class MetricsTracker:
     """
     게임 지표를 추적하고 관리하는 클래스
@@ -136,9 +137,7 @@ class MetricsTracker:
             value: 새 지표 값
         """
         # 지표 업데이트
-        self.metrics = self.modifier.apply(
-            self.metrics, {metric: cap_metric_value(metric, value)}
-        )
+        self.metrics = self.modifier.apply(self.metrics, {metric: cap_metric_value(metric, value)})
 
         # 연쇄 효과 적용
         self.apply_cascade_effects({metric})
@@ -192,7 +191,9 @@ class MetricsTracker:
             fatigue = self.metrics[Metric.STAFF_FATIGUE]
             # 피로도가 STAFF_FATIGUE_THRESHOLD_HIGH 이상이면 시설 상태에 영향
             if fatigue >= STAFF_FATIGUE_THRESHOLD_HIGH:
-                facility_impact = -5 * (fatigue - STAFF_FATIGUE_THRESHOLD_HIGH) / FATIGUE_IMPACT_FACTOR
+                facility_impact = (
+                    -5 * (fatigue - STAFF_FATIGUE_THRESHOLD_HIGH) / FATIGUE_IMPACT_FACTOR
+                )
                 cascade_updates[Metric.FACILITY] = self.metrics[Metric.FACILITY] + facility_impact
                 self.add_event(
                     f"직원 피로도 증가로 인한 시설 관리 소홀, 시설 상태 {facility_impact:.1f} 변동"

@@ -6,6 +6,4 @@
 
 from .cascade_service import CascadeServiceImpl
 
-__all__ = [
-    'CascadeServiceImpl'
-]
+__all__ = ["CascadeServiceImpl"]

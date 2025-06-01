@@ -337,7 +337,11 @@ class EventBankManager:
 
     def _print_metrics(self, category_metrics: dict[str, float]) -> None:
         for name, score in category_metrics.items():
-            status = "✅" if score >= SCORE_THRESHOLD_HIGH else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+            status = (
+                "✅"
+                if score >= SCORE_THRESHOLD_HIGH
+                else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+            )
             print(f"  {status} {name}: {score:.2f}")
             sys.stdout.flush()
 
@@ -406,7 +410,11 @@ class EventBankManager:
             balance_scores = report["balance_scores"]
             if isinstance(balance_scores, dict):
                 for name, score in balance_scores.items():
-                    status = "✅" if score >= SCORE_THRESHOLD_HIGH else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+                    status = (
+                        "✅"
+                        if score >= SCORE_THRESHOLD_HIGH
+                        else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+                    )
                     print(f"  {status} {name}: {score:.2f}")
                     sys.stdout.flush()
 
@@ -648,33 +656,15 @@ class EventBankManager:
 def main() -> int:
     """메인 함수"""
     parser = argparse.ArgumentParser(description="이벤트 뱅크 관리 도구")
-    parser.add_argument(
-        "--load", action="store_true", help="모든 이벤트 로드 및 통계 출력"
-    )
-    parser.add_argument(
-        "--validate", action="store_true", help="모든 이벤트 검증 및 리포트 생성"
-    )
-    parser.add_argument(
-        "--quality", action="store_true", help="품질 메트릭 계산"
-    )
-    parser.add_argument(
-        "--simulate", action="store_true", help="밸런스 시뮬레이션 실행"
-    )
-    parser.add_argument(
-        "--export", action="store_true", help="이벤트 뱅크 내보내기"
-    )
-    parser.add_argument(
-        "--backup", action="store_true", help="이벤트 뱅크 백업"
-    )
-    parser.add_argument(
-        "--merge", type=str, help="다른 이벤트 뱅크 병합 (디렉토리 경로)"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="실제 파일 변경 없이 실행"
-    )
-    parser.add_argument(
-        "--output", type=str, default="out", help="출력 디렉토리 (기본값: out)"
-    )
+    parser.add_argument("--load", action="store_true", help="모든 이벤트 로드 및 통계 출력")
+    parser.add_argument("--validate", action="store_true", help="모든 이벤트 검증 및 리포트 생성")
+    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
+    parser.add_argument("--simulate", action="store_true", help="밸런스 시뮬레이션 실행")
+    parser.add_argument("--export", action="store_true", help="이벤트 뱅크 내보내기")
+    parser.add_argument("--backup", action="store_true", help="이벤트 뱅크 백업")
+    parser.add_argument("--merge", type=str, help="다른 이벤트 뱅크 병합 (디렉토리 경로)")
+    parser.add_argument("--dry-run", action="store_true", help="실제 파일 변경 없이 실행")
+    parser.add_argument("--output", type=str, default="out", help="출력 디렉토리 (기본값: out)")
 
     args = parser.parse_args()
 
@@ -728,7 +718,11 @@ def main() -> int:
             print(f"  • {category}:")
             sys.stdout.flush()
             for name, score in category_metrics.items():
-                status = "✅" if score >= SCORE_THRESHOLD_HIGH else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+                status = (
+                    "✅"
+                    if score >= SCORE_THRESHOLD_HIGH
+                    else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+                )
                 print(f"    - {status} {name}: {score:.2f}")
                 sys.stdout.flush()
 

@@ -185,29 +185,23 @@ class EventGenerator:
         examples_str = ", ".join(examples)
 
         USER_PROMPT_TEMPLATE.format(
-            count=count,
-            category=category,
-            description=description,
-            examples=examples_str
+            count=count, category=category, description=description, examples=examples_str
         )
 
         print(f"\n[생성 시작] 카테고리: {category}, 수량: {count}개")
-        
+
         all_events = []
         remaining = count
         batch_size = min(GENERATION_CONFIG["BATCH_SIZE"], remaining)
-        
+
         while remaining > 0:
             batch_size = min(GENERATION_CONFIG["BATCH_SIZE"], remaining)
             batch_prompt = USER_PROMPT_TEMPLATE.format(
-                count=batch_size,
-                category=category,
-                description=description,
-                examples=examples_str
+                count=batch_size, category=category, description=description, examples=examples_str
             )
-            
+
             print(f"  배치 생성 중... ({batch_size}개)")
-            
+
             for attempt in range(GENERATION_CONFIG["RETRY_ATTEMPTS"]):
                 try:
                     response = self.client.chat_completion(
@@ -215,16 +209,16 @@ class EventGenerator:
                         system_prompt=SYSTEM_PROMPT,
                         user_prompt=batch_prompt,
                         temperature=GENERATION_CONFIG["TEMPERATURE"],
-                        max_tokens=GENERATION_CONFIG["MAX_TOKENS"]
+                        max_tokens=GENERATION_CONFIG["MAX_TOKENS"],
                     )
-                    
+
                     # 비용 추적
                     self.total_cost += response.get("cost", 0)
-                    
+
                     # JSON 파싱
                     content = response.get("content", "")
                     events = self._extract_json(content)
-                    
+
                     if events:
                         # 유효성 검사
                         valid_events = []
@@ -237,72 +231,82 @@ class EventGenerator:
                                 print(f"    ❌ 유효하지 않은 이벤트: {event.get('id', 'unknown')}")
                                 for error in self.validator.errors:
                                     print(f"       - {error}")
-                        
+
                         all_events.extend(valid_events)
                         self.generated_count += len(valid_events)
-                        
+
                         print(f"    ✅ 배치 완료: {len(valid_events)}/{batch_size}개 유효")
                         break
                     else:
-                        print(f"    ⚠️ JSON 파싱 실패 (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})")
-                
+                        print(
+                            f"    ⚠️ JSON 파싱 실패 (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})"
+                        )
+
                 except Exception as e:
-                    print(f"    ⚠️ 오류 발생: {e} (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})")
-                
+                    print(
+                        f"    ⚠️ 오류 발생: {e} (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})"
+                    )
+
                 # 마지막 시도가 아니면 잠시 대기
                 if attempt < GENERATION_CONFIG["RETRY_ATTEMPTS"] - 1:
                     time.sleep(2)
-            
+
             remaining -= batch_size
-            
+
             # 배치 간 지연
             if remaining > 0:
                 time.sleep(GENERATION_CONFIG["DELAY_BETWEEN_BATCHES"])
-        
+
         return all_events
 
-    def generate_events_by_plan(self, plan: dict[str, dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    def generate_events_by_plan(
+        self, plan: dict[str, dict[str, Any]]
+    ) -> dict[str, list[dict[str, Any]]]:
         """계획에 따라 여러 카테고리의 이벤트 생성"""
         all_events_by_category: dict[str, list[dict[str, Any]]] = {}
-        
+
         for category, info in plan.items():
             count = info.get("count", 0)
             if count <= 0:
                 continue
-                
+
             events = self.generate_events(category, count)
             all_events_by_category[category] = events
-            
+
             # 진행 상황 출력
-            print(f"\n[진행 상황] 총 {self.generated_count}개 생성 완료 (유효: {self.valid_count}, 무효: {self.invalid_count})")
+            print(
+                f"\n[진행 상황] 총 {self.generated_count}개 생성 완료 (유효: {self.valid_count}, 무효: {self.invalid_count})"
+            )
             print(f"[비용] 현재까지: ${self.total_cost:.2f}")
-        
+
         return all_events_by_category
 
-    def save_events(self, events_by_category: dict[str, list[dict[str, Any]]]) -> tuple[int, list[Path]]:
+    def save_events(
+        self, events_by_category: dict[str, list[dict[str, Any]]]
+    ) -> tuple[int, list[Path]]:
         """생성된 이벤트를 파일로 저장"""
         os.makedirs(self.output_dir, exist_ok=True)
-        
+
         total_saved = 0
         saved_files = []
-        
+
         # 카테고리별로 저장
         for category, events in events_by_category.items():
             if not events:
                 continue
-                
+
             # 파일명 생성 (타임스탬프 포함)
             timestamp = int(time.time())
             file_path = self.output_dir / f"events_{category}_{timestamp}.json"
-            
+
             # JSON 형식으로 저장
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump({"events": events}, f, ensure_ascii=False, indent=2)
-            
+
             total_saved += len(events)
             saved_files.append(file_path)
             print(f"✅ 저장 완료: {file_path} ({len(events)}개)")
-        
+
         return total_saved, saved_files
 
     def _extract_json(self, content: str) -> list[dict[str, Any]]:
@@ -315,63 +319,66 @@ class EventGenerator:
                 json_str = content[start:end].strip()
                 data = json.loads(json_str)
                 return data if isinstance(data, list) else []
-            
+
             # 전체 텍스트를 JSON으로 파싱 시도
             data = json.loads(content)
             return data if isinstance(data, list) else []
-            
+
         except json.JSONDecodeError:
             return []
 
     def _check_cost_warning(self, estimated_cost: float) -> bool:
         """비용 경고 확인"""
         if estimated_cost > GENERATION_CONFIG["COST_WARNING_THRESHOLD"]:
-            print(f"\n⚠️ 경고: 예상 비용(${estimated_cost:.2f})이 임계값(${GENERATION_CONFIG['COST_WARNING_THRESHOLD']:.2f})을 초과합니다.")
+            print(
+                f"\n⚠️ 경고: 예상 비용(${estimated_cost:.2f})이 임계값(${GENERATION_CONFIG['COST_WARNING_THRESHOLD']:.2f})을 초과합니다."
+            )
             confirm = input("계속 진행하시겠습니까? (y/n): ").lower()
             return confirm == "y"
         return True
 
-    def create_generation_plan(self, total_count: int, category_weights: dict[str, float] | None = None) -> dict[str, dict[str, Any]]:
+    def create_generation_plan(
+        self, total_count: int, category_weights: dict[str, float] | None = None
+    ) -> dict[str, dict[str, Any]]:
         """카테고리별 생성 계획 수립"""
         if category_weights is None:
             # 기본 가중치 사용
             category_weights = {
-                category: info.get("weight", 1)
-                for category, info in EVENT_CATEGORIES.items()
+                category: info.get("weight", 1) for category, info in EVENT_CATEGORIES.items()
             }
-        
+
         # 가중치 합계 계산
         total_weight = sum(category_weights.values())
-        
+
         # 카테고리별 이벤트 수 계산
         plan = {}
         remaining = total_count
-        
+
         for category, weight in category_weights.items():
             if category not in EVENT_CATEGORIES:
                 continue
-                
+
             # 가중치에 비례하여 이벤트 수 할당
             count = int(total_count * (weight / total_weight))
             plan[category] = {
                 "count": count,
-                "description": EVENT_CATEGORIES[category].get("description", "")
+                "description": EVENT_CATEGORIES[category].get("description", ""),
             }
             remaining -= count
-        
+
         # 남은 이벤트 분배 (반올림 오차 처리)
         if remaining > 0:
             # 가중치가 가장 높은 카테고리에 할당
             max_category = max(category_weights.items(), key=lambda x: x[1])[0]
             plan[max_category]["count"] += remaining
-        
+
         return plan
 
     def print_plan_summary(self, plan: dict[str, dict[str, Any]]) -> None:
         """생성 계획 요약 출력"""
         total_categories = len(plan)
         total_target = sum(info["count"] for info in plan.values())
-        
+
         print(f"총 {total_categories}개 카테고리에서 {total_target}개 이벤트 생성 예정")
 
         for category, info in plan.items():
@@ -398,7 +405,9 @@ def main() -> int:
     # API 키 확인
     api_key = args.api_key or os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        print("오류: OpenAI API 키가 필요합니다. --api-key 옵션이나 OPENAI_API_KEY 환경 변수를 설정하세요.")
+        print(
+            "오류: OpenAI API 키가 필요합니다. --api-key 옵션이나 OPENAI_API_KEY 환경 변수를 설정하세요."
+        )
         return 1
 
     # 출력 디렉토리 설정
@@ -413,9 +422,14 @@ def main() -> int:
             print(f"오류: 알 수 없는 카테고리 '{args.category}'")
             print(f"사용 가능한 카테고리: {', '.join(EVENT_CATEGORIES.keys())}")
             return 1
-            
+
         # 단일 카테고리 생성
-        plan = {args.category: {"count": args.count, "description": EVENT_CATEGORIES[args.category].get("description", "")}}
+        plan = {
+            args.category: {
+                "count": args.count,
+                "description": EVENT_CATEGORIES[args.category].get("description", ""),
+            }
+        }
     else:
         # 모든 카테고리 가중치 기반 생성
         plan = generator.create_generation_plan(args.count)
@@ -432,7 +446,9 @@ def main() -> int:
 
     # 결과 요약
     print("\n[생성 완료]")
-    print(f"총 생성: {generator.generated_count}개 (유효: {generator.valid_count}, 무효: {generator.invalid_count})")
+    print(
+        f"총 생성: {generator.generated_count}개 (유효: {generator.valid_count}, 무효: {generator.invalid_count})"
+    )
     print(f"저장된 파일: {len(saved_files)}개")
     print(f"총 비용: ${generator.total_cost:.2f}")
 

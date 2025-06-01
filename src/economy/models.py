@@ -84,7 +84,9 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
 
     reputation_factor = 1.0
     if reputation != REPUTATION_BASELINE:
-        reputation_factor = 1 + reputation_effect * (reputation - REPUTATION_BASELINE) / REPUTATION_BASELINE
+        reputation_factor = (
+            1 + reputation_effect * (reputation - REPUTATION_BASELINE) / REPUTATION_BASELINE
+        )
 
     calculated_demand = int(max(0, base_demand * price_factor * reputation_factor))
     return calculated_demand

@@ -138,6 +138,7 @@ TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
 @dataclass(frozen=True)
 class ProbabilityConstants:
     """확률 관련 상수"""
+
     RANDOM_THRESHOLD: float = 0.5  # 50% 확률 기준점
 
 

@@ -104,7 +104,9 @@ def load_events_from_toml(file_path: Path) -> EventContainer[Event]:
         if all(isinstance(item, dict) for item in potential_events_list):
             return EventContainer[Event].model_validate({"events": potential_events_list})
 
-    raise ValueError("TOML 파일의 이벤트 데이터 형식이 올바르지 않습니다. 최상위에 'events' 키가 있거나 이벤트 객체의 리스트여야 합니다.")
+    raise ValueError(
+        "TOML 파일의 이벤트 데이터 형식이 올바르지 않습니다. 최상위에 'events' 키가 있거나 이벤트 객체의 리스트여야 합니다."
+    )
 
 
 def save_events_to_json(

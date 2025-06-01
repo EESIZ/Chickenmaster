@@ -22,7 +22,7 @@ QUALITY_THRESHOLDS = {
     "DIVERSITY": 0.8,  # 카테고리 분포의 균등성
     "TRADEOFF": 0.9,  # 선택지의 트레이드오프 명확성
     "CULTURAL": 0.7,  # 한국 치킨집 문화 반영도
-    "COVERAGE": 80.0  # 테스트 커버리지
+    "COVERAGE": 80.0,  # 테스트 커버리지
 }
 
 # 검증 임계값
@@ -32,38 +32,83 @@ VALIDATION_THRESHOLDS = {
     "TEXT_SIMILARITY_THRESHOLD": 70,  # 텍스트 유사도 임계값
     "MIN_CHOICES": 2,  # 최소 선택지 수
     "MIN_METRICS_DIFFERENCE": 2,  # 최소 메트릭 차이 수
-    "FORMULA_EPSILON": 0.001  # 수식 계산 오차 허용 범위
+    "FORMULA_EPSILON": 0.001,  # 수식 계산 오차 허용 범위
 }
+
 
 # 이벤트 타입 열거형
 class EventType(Enum):
     """이벤트 타입"""
+
     RANDOM = "RANDOM"
     THRESHOLD = "THRESHOLD"
     SCHEDULED = "SCHEDULED"
     CASCADE = "CASCADE"
 
+
 # 트리거 조건 열거형
 class TriggerCondition(Enum):
     """트리거 조건"""
+
     LESS_THAN = "less_than"
     GREATER_THAN = "greater_than"
     EQUAL = "equal"
+
 
 class EventValidator:
     """이벤트 검증기"""
 
     # 한국 치킨집 문화 관련 키워드
     CULTURAL_KEYWORDS: ClassVar[list[str]] = [
-        "치킨", "후라이드", "양념", "간장", "마늘", "닭강정",
-        "배달", "포장", "회식", "단골", "성수기", "할인",
-        "치맥", "맥주", "소주", "안주", "야식", "주문",
+        "치킨",
+        "후라이드",
+        "양념",
+        "간장",
+        "마늘",
+        "닭강정",
+        "배달",
+        "포장",
+        "회식",
+        "단골",
+        "성수기",
+        "할인",
+        "치맥",
+        "맥주",
+        "소주",
+        "안주",
+        "야식",
+        "주문",
         # 추가 키워드
-        "신메뉴", "단체주문", "리뷰", "별점", "재료", "원가",
-        "매출", "인건비", "마진", "경쟁", "프랜차이즈", "독립점",
-        "위생", "점검", "식약처", "알바", "직원", "사장",
-        "홀", "주방", "카운터", "배달대행", "배달팁", "콜",
-        "성수기", "비수기", "대학가", "상권", "임대료", "월세"
+        "신메뉴",
+        "단체주문",
+        "리뷰",
+        "별점",
+        "재료",
+        "원가",
+        "매출",
+        "인건비",
+        "마진",
+        "경쟁",
+        "프랜차이즈",
+        "독립점",
+        "위생",
+        "점검",
+        "식약처",
+        "알바",
+        "직원",
+        "사장",
+        "홀",
+        "주방",
+        "카운터",
+        "배달대행",
+        "배달팁",
+        "콜",
+        "성수기",
+        "비수기",
+        "대학가",
+        "상권",
+        "임대료",
+        "월세",
     ]
 
     # 허용되는 메트릭
@@ -77,7 +122,7 @@ class EventValidator:
         "INGREDIENT_QUALITY",  # 재료 품질
         "EQUIPMENT_CONDITION",  # 장비 상태
         "STORE_CLEANLINESS",  # 매장 청결도
-        "MENU_DIVERSITY"  # 메뉴 다양성
+        "MENU_DIVERSITY",  # 메뉴 다양성
     )
 
     def __init__(self):
@@ -157,12 +202,22 @@ class EventValidator:
         """단일 이벤트 검증"""
         # 필수 필드 검증 강화
         required_fields = [
-            "id", "type", "category", "name_ko", "name_en", 
-            "text_ko", "text_en", "effects", "choices", "tags"
+            "id",
+            "type",
+            "category",
+            "name_ko",
+            "name_en",
+            "text_ko",
+            "text_en",
+            "effects",
+            "choices",
+            "tags",
         ]
         for field in required_fields:
             if field not in event:
-                self.errors.append(f"필수 필드 누락: {field} (이벤트: {event.get('id', 'unknown')})")
+                self.errors.append(
+                    f"필수 필드 누락: {field} (이벤트: {event.get('id', 'unknown')})"
+                )
                 return False
 
         # 필드 타입 검증
@@ -196,7 +251,9 @@ class EventValidator:
                 self.errors.append(f"RANDOM 이벤트에 probability 필드 누락: {event_id}")
                 return False
             if not (0.0 <= event["probability"] <= 1.0):
-                self.errors.append(f"확률 범위 오류 (0.0-1.0): {event['probability']} (이벤트: {event_id})")
+                self.errors.append(
+                    f"확률 범위 오류 (0.0-1.0): {event['probability']} (이벤트: {event_id})"
+                )
                 return False
 
         elif event_type in [EventType.THRESHOLD, EventType.CASCADE]:
@@ -211,14 +268,18 @@ class EventValidator:
                 self.errors.append(f"SCHEDULED 이벤트에 schedule 필드 누락: {event_id}")
                 return False
             if not isinstance(event["schedule"], int) or event["schedule"] <= 0:
-                self.errors.append(f"schedule은 양의 정수여야 함: {event['schedule']} (이벤트: {event_id})")
+                self.errors.append(
+                    f"schedule은 양의 정수여야 함: {event['schedule']} (이벤트: {event_id})"
+                )
                 return False
 
         # 쿨다운 검증
         if "cooldown" in event and (
             not isinstance(event["cooldown"], int) or event["cooldown"] < 0
         ):
-            self.errors.append(f"cooldown은 0 이상의 정수여야 함: {event['cooldown']} (이벤트: {event_id})")
+            self.errors.append(
+                f"cooldown은 0 이상의 정수여야 함: {event['cooldown']} (이벤트: {event_id})"
+            )
             return False
 
         # 효과 검증
@@ -234,9 +295,11 @@ class EventValidator:
         if not event["choices"]:
             self.errors.append(f"choices가 비어 있음: {event_id}")
             return False
-        
+
         if len(event["choices"]) < VALIDATION_THRESHOLDS["MIN_CHOICES"]:
-            self.errors.append(f"선택지는 최소 {VALIDATION_THRESHOLDS['MIN_CHOICES']}개 이상이어야 함: {event_id}")
+            self.errors.append(
+                f"선택지는 최소 {VALIDATION_THRESHOLDS['MIN_CHOICES']}개 이상이어야 함: {event_id}"
+            )
             return False
 
         for idx, choice in enumerate(event["choices"]):
@@ -253,7 +316,7 @@ class EventValidator:
 
         # 검증 통과한 이벤트 저장
         self.validated_events.append(event)
-        
+
         return True
 
     def _validate_trigger(self, trigger: dict[str, Any], event_id: str) -> bool:
@@ -268,17 +331,23 @@ class EventValidator:
         try:
             TriggerCondition(trigger["condition"])
         except ValueError:
-            self.errors.append(f"유효하지 않은 트리거 조건: {trigger['condition']} (이벤트: {event_id})")
+            self.errors.append(
+                f"유효하지 않은 트리거 조건: {trigger['condition']} (이벤트: {event_id})"
+            )
             return False
 
         # value 타입 검증
         if not isinstance(trigger["value"], int | float):
-            self.errors.append(f"트리거 value는 숫자여야 함: {trigger['value']} (이벤트: {event_id})")
+            self.errors.append(
+                f"트리거 value는 숫자여야 함: {trigger['value']} (이벤트: {event_id})"
+            )
             return False
 
         # metric 검증
         if trigger["metric"] not in self.VALID_METRICS:
-            self.warnings.append(f"알 수 없는 트리거 metric: {trigger['metric']} (이벤트: {event_id})")
+            self.warnings.append(
+                f"알 수 없는 트리거 metric: {trigger['metric']} (이벤트: {event_id})"
+            )
 
         return True
 
@@ -287,12 +356,16 @@ class EventValidator:
         required_fields = ["metric", "formula"]
         for field in required_fields:
             if field not in effect:
-                self.errors.append(f"효과 필수 필드 누락: {field} (이벤트: {event_id}, 효과 {index+1})")
+                self.errors.append(
+                    f"효과 필수 필드 누락: {field} (이벤트: {event_id}, 효과 {index+1})"
+                )
                 return False
 
         # metric 검증
         if effect["metric"] not in self.VALID_METRICS:
-            self.warnings.append(f"알 수 없는 metric: {effect['metric']} (이벤트: {event_id}, 효과 {index+1})")
+            self.warnings.append(
+                f"알 수 없는 metric: {effect['metric']} (이벤트: {event_id}, 효과 {index+1})"
+            )
 
         # 포뮬러 검증 강화
         if not self._validate_formula_strict(effect["formula"], event_id, index):
@@ -305,12 +378,16 @@ class EventValidator:
         required_fields = ["text_ko", "text_en", "effects"]
         for field in required_fields:
             if field not in choice:
-                self.errors.append(f"선택지 필수 필드 누락: {field} (이벤트: {event_id}, 선택지 {index+1})")
+                self.errors.append(
+                    f"선택지 필수 필드 누락: {field} (이벤트: {event_id}, 선택지 {index+1})"
+                )
                 return False
 
         # effects 타입 및 트레이드오프 검증
         if not isinstance(choice["effects"], dict):
-            self.errors.append(f"선택지 effects는 딕셔너리여야 함 (이벤트: {event_id}, 선택지 {index+1})")
+            self.errors.append(
+                f"선택지 effects는 딕셔너리여야 함 (이벤트: {event_id}, 선택지 {index+1})"
+            )
             return False
 
         # 트레이드오프 검증
@@ -318,7 +395,9 @@ class EventValidator:
         negative_effects = 0
         for metric, value in choice["effects"].items():
             if not isinstance(value, int | float):
-                self.errors.append(f"effect 값은 숫자여야 함: {metric}={value} (이벤트: {event_id}, 선택지 {index+1})")
+                self.errors.append(
+                    f"effect 값은 숫자여야 함: {metric}={value} (이벤트: {event_id}, 선택지 {index+1})"
+                )
                 return False
             if value > 0:
                 positive_effects += 1
@@ -326,19 +405,23 @@ class EventValidator:
                 negative_effects += 1
 
         if positive_effects == 0 or negative_effects == 0:
-            self.warnings.append(f"선택지는 긍정적/부정적 효과를 모두 포함해야 함 (이벤트: {event_id}, 선택지 {index+1})")
+            self.warnings.append(
+                f"선택지는 긍정적/부정적 효과를 모두 포함해야 함 (이벤트: {event_id}, 선택지 {index+1})"
+            )
 
         # metric 검증
         for metric in choice["effects"].keys():
             if metric not in self.VALID_METRICS:
-                self.warnings.append(f"알 수 없는 metric: {metric} (이벤트: {event_id}, 선택지 {index+1})")
+                self.warnings.append(
+                    f"알 수 없는 metric: {metric} (이벤트: {event_id}, 선택지 {index+1})"
+                )
 
         return True
 
     def _validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
         """포뮬러 문자열 엄격한 검증"""
         original_formula = formula
-    
+
         # 퍼센트 표기법 처리
         if formula.endswith("%"):
             try:
@@ -346,7 +429,9 @@ class EventValidator:
                 float(formula[:-1])
                 return True
             except ValueError:
-                self.errors.append(f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})")
+                self.errors.append(
+                    f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})"
+                )
                 return False
 
         # 간단한 숫자 리터럴 처리
@@ -359,65 +444,81 @@ class EventValidator:
         # 복잡한 수식 검증
         try:
             tree = ast.parse(formula, mode="eval")
-            
+
             # 허용된 노드 타입
             allowed_nodes = (
-                ast.Expression, ast.BinOp, ast.UnaryOp, ast.Num, ast.Constant,
-                ast.Name, ast.Load, ast.Add, ast.Sub, ast.Mult, ast.Div,
-                ast.USub, ast.UAdd
+                ast.Expression,
+                ast.BinOp,
+                ast.UnaryOp,
+                ast.Num,
+                ast.Constant,
+                ast.Name,
+                ast.Load,
+                ast.Add,
+                ast.Sub,
+                ast.Mult,
+                ast.Div,
+                ast.USub,
+                ast.UAdd,
             )
-            
+
             # 허용된 이름들
             allowed_names = {"value", "random", "min", "max"}
-            
+
             for node in ast.walk(tree):
                 if not isinstance(node, allowed_nodes):
                     if isinstance(node, ast.Call):
                         # random 함수만 허용
-                        if (isinstance(node.func, ast.Name) and 
-                            node.func.id in ["random", "min", "max"]):
+                        if isinstance(node.func, ast.Name) and node.func.id in [
+                            "random",
+                            "min",
+                            "max",
+                        ]:
                             continue
                     self.errors.append(
                         f"허용되지 않은 수식 구조: {type(node).__name__} "
                         f"(이벤트: {event_id}, 효과 {index+1}, 수식: {original_formula})"
                     )
                     return False
-                    
+
                 if isinstance(node, ast.Name) and node.id not in allowed_names:
                     self.errors.append(
                         f"허용되지 않은 변수명: {node.id} "
                         f"(이벤트: {event_id}, 효과 {index+1}, 수식: {original_formula})"
                     )
                     return False
-                    
+
             return True
-            
+
         except SyntaxError as e:
             self.errors.append(
-            f"포뮬러 구문 오류: {original_formula} "
-            f"(이벤트: {event_id}, 효과 {index+1}, 오류: {e})")
+                f"포뮬러 구문 오류: {original_formula} "
+                f"(이벤트: {event_id}, 효과 {index+1}, 오류: {e})"
+            )
             return False
 
     def _validate_cultural_relevance_raw(self, event: dict[str, Any]) -> bool:
         """문화적 연관성 검증"""
         text = f"{event['name_ko']} {event['text_ko']}"
         matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
-        
+
         if matched_keywords < VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"]:
             return False
-            
+
         return True
 
     def _check_duplicate_raw(self, event: dict[str, Any]) -> bool:
         """중복 검사"""
         for validated in self.validated_events:
-            name_similarity = fuzz.ratio(event['name_ko'], validated['name_ko'])
-            text_similarity = fuzz.ratio(event['text_ko'], validated['text_ko'])
-            
-            if (name_similarity > VALIDATION_THRESHOLDS["NAME_SIMILARITY_THRESHOLD"] or 
-                text_similarity > VALIDATION_THRESHOLDS["TEXT_SIMILARITY_THRESHOLD"]):
+            name_similarity = fuzz.ratio(event["name_ko"], validated["name_ko"])
+            text_similarity = fuzz.ratio(event["text_ko"], validated["text_ko"])
+
+            if (
+                name_similarity > VALIDATION_THRESHOLDS["NAME_SIMILARITY_THRESHOLD"]
+                or text_similarity > VALIDATION_THRESHOLDS["TEXT_SIMILARITY_THRESHOLD"]
+            ):
                 return False
-                
+
         return True
 
     def calculate_quality_metrics(self, events: list[dict[str, Any]]) -> dict[str, float]:
@@ -501,7 +602,7 @@ class EventValidator:
         for event in events:
             text = f"{event.get('name_ko', '')} {event.get('text_ko', '')}"
             matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
-            
+
             # 키워드 매칭 점수 (0.0 ~ 1.0)
             event_score = min(matched_keywords / VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"], 1.0)
             cultural_score += event_score
@@ -540,7 +641,7 @@ def main() -> int:
 
     path = Path(args.path)
     validator = EventValidator()
-    
+
     if path.is_file():
         success = validator.validate_file(path)
     elif path.is_dir():

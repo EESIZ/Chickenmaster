@@ -144,11 +144,11 @@ class GameEventSystem:
     ) -> dict[str, Any]:
         """
         시나리오를 시뮬레이션합니다. 정답이 없는 문제에서 사용됩니다.
-        
+
         Args:
             scenario: 시뮬레이션할 시나리오
             days: 시뮬레이션 일수
-            
+
         Returns:
             dict[str, Any]: 시뮬레이션 결과
         """

@@ -4,8 +4,6 @@
 이 파일은 게임의 핵심 철학인 트레이드오프 관계가 올바르게 구현되어 있는지 검증합니다.
 """
 
-
-
 from game_constants import TRADEOFF_RELATIONSHIPS, Metric
 
 

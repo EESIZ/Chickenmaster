@@ -9,6 +9,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Event:
     """이벤트 도메인 객체 - 절대 불변"""
+
     id: str
     type: str
     name_ko: str
@@ -21,8 +22,8 @@ class Event:
     cooldown: int
     category: str
     tags: tuple[str, ...] = ()
-    
-    def with_modified_effects(self, new_effects: dict[str, int]) -> 'Event':
+
+    def with_modified_effects(self, new_effects: dict[str, int]) -> "Event":
         """수정이 필요한 경우 새 객체 생성"""
         return Event(
             id=self.id,
@@ -36,35 +37,34 @@ class Event:
             probability=self.probability,
             cooldown=self.cooldown,
             category=self.category,
-            tags=self.tags
+            tags=self.tags,
         )
 
 
 @dataclass(frozen=True)
 class EventChoice:
     """이벤트 선택지 - 절대 불변"""
+
     id: str
     text_ko: str
     text_en: str
     effects: dict[str, int]
-    
-    def with_modified_effects(self, new_effects: dict[str, int]) -> 'EventChoice':
+
+    def with_modified_effects(self, new_effects: dict[str, int]) -> "EventChoice":
         """수정이 필요한 경우 새 객체 생성"""
         return EventChoice(
-            id=self.id,
-            text_ko=self.text_ko,
-            text_en=self.text_en,
-            effects=new_effects
+            id=self.id, text_ko=self.text_ko, text_en=self.text_en, effects=new_effects
         )
 
 
 @dataclass(frozen=True)
 class EventTrigger:
     """이벤트 트리거 조건 - 절대 불변"""
+
     metric: str
     operator: str
     value: int
-    
+
     def evaluate(self, current_value: int) -> bool:
         """트리거 조건 평가"""
         if self.operator == ">":

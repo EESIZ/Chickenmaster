@@ -145,9 +145,13 @@ def test_tradeoff_compute_demand_reputation_effect(test_config: dict[str, Any]) 
     # reputation_effect가 양수일 때, 평판이 높을수록 수요 증가, 낮을수록 수요 감소
     reputation_effect_config = test_config.get("demand", {}).get("reputation_effect", 0.2)
     if reputation_effect_config > 0:
-        assert high_rep_demand > low_rep_demand, "평판 효과가 양수일 때, 높은 평판이 낮은 평판보다 수요가 많아야 함"
+        assert (
+            high_rep_demand > low_rep_demand
+        ), "평판 효과가 양수일 때, 높은 평판이 낮은 평판보다 수요가 많아야 함"
     elif reputation_effect_config < 0:
-        assert high_rep_demand < low_rep_demand, "평판 효과가 음수일 때, 높은 평판이 낮은 평판보다 수요가 적어야 함"
+        assert (
+            high_rep_demand < low_rep_demand
+        ), "평판 효과가 음수일 때, 높은 평판이 낮은 평판보다 수요가 적어야 함"
 
 
 def test_no_right_answer_compute_profit_scenarios() -> None:
@@ -175,7 +179,9 @@ def test_uncertainty_adjust_inventory() -> None:
     """재고 조정 테스트"""
     # 케이스 1: 정상 케이스 (판매량 < 재고)
     normal_case_result = uncertainty_adjust_inventory(units_sold=30, current_inventory=100)
-    assert normal_case_result == INVENTORY_ADJUSTMENT, "정상 케이스에서 재고가 올바르게 계산되어야 합니다"
+    assert (
+        normal_case_result == INVENTORY_ADJUSTMENT
+    ), "정상 케이스에서 재고가 올바르게 계산되어야 합니다"
 
     # 케이스 2: 엣지 케이스 (판매량 = 재고)
     edge_case_result = uncertainty_adjust_inventory(units_sold=100, current_inventory=100)
@@ -196,14 +202,18 @@ def test_tradeoff_apply_price_change(test_metrics: dict[Metric, float]) -> None:
 
     # 검증: 고통 지표가 자동으로 조정되어야 함
     metrics = tracker.get_metrics()
-    assert metrics[Metric.SUFFERING] == SUFFERING_VALUE, "행복이 75로 설정되면 고통은 25가 되어야 합니다"
+    assert (
+        metrics[Metric.SUFFERING] == SUFFERING_VALUE
+    ), "행복이 75로 설정되면 고통은 25가 되어야 합니다"
 
     # 고통 지표 업데이트
     tracker.update_metric(Metric.SUFFERING, 60.0)
 
     # 검증: 행복 지표가 자동으로 조정되어야 함
     metrics = tracker.get_metrics()
-    assert metrics[Metric.HAPPINESS] == HAPPINESS_VALUE, "고통이 60으로 설정되면 행복은 40이 되어야 합니다"
+    assert (
+        metrics[Metric.HAPPINESS] == HAPPINESS_VALUE
+    ), "고통이 60으로 설정되면 행복은 40이 되어야 합니다"
 
     # 합계가 항상 100인지 확인
     assert (

@@ -10,14 +10,14 @@ from .models import (
     PendingEvent,
     CascadeNode,
     CascadeChain,
-    CascadeResult
+    CascadeResult,
 )
 
 __all__ = [
-    'CascadeChain',
-    'CascadeNode',
-    'CascadeResult',
-    'CascadeType',
-    'PendingEvent',
-    'TriggerCondition'
+    "CascadeChain",
+    "CascadeNode",
+    "CascadeResult",
+    "CascadeType",
+    "PendingEvent",
+    "TriggerCondition",
 ]
