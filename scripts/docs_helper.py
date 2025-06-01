@@ -78,7 +78,7 @@ def validate_doc_links() -> bool:
         
         # 상대 링크 찾기 (markdown 링크와 HTML 링크)
         markdown_links = re.findall(r'\[([^\]]+)\]\(([^)]+)\)', content)
-        html_links = re.findall(r'<a[^>]+href=[\'"]([^\'"]+)[\'"][^>]*>', content)
+        re.findall(r'<a[^>]+href=[\'"]([^\'"]+)[\'"][^>]*>', content)
         
         for text, link in markdown_links:
             if link.startswith(('http', 'https', 'mailto:')):
@@ -155,7 +155,7 @@ def generate_doc_stats() -> dict:
                     'file': doc_path.relative_to(PROJECT_ROOT),
                     'last_modified': last_modified
                 })
-        except:
+        except Exception:
             pass  # Git 정보 없음
     
     # 최근 업데이트 정렬

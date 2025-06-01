@@ -182,7 +182,7 @@ class TestEventValidator(unittest.TestCase):
             modified_trigger_dict["condition"],
         )
 
-    def test_calculate_metrics_noRightAnswer(self) -> None:
+    def test_calculate_metrics_no_right_answer(self) -> None:
         """메트릭 계산 - 정답 없음 테스트"""
         validator = EventValidator()
 
