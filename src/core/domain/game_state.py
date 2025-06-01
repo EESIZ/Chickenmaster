@@ -35,7 +35,7 @@ class GameState:
             happiness=self.happiness,
             pain=self.pain,
             day=self.day,
-            events_history=self.events_history + (event_id,)
+            events_history=(*self.events_history, event_id)
         )
 
 

@@ -15,6 +15,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar
 from fuzzywuzzy import fuzz
+import sys
 
 # 품질 메트릭 임계값
 QUALITY_THRESHOLDS = {
@@ -578,4 +579,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

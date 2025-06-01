@@ -12,7 +12,7 @@ Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈
 
 from enum import Enum, auto
 from typing import Final
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # 무한대 값을 위한 타입 힌트 호환 상수
 INF: Final = float("inf")

@@ -260,7 +260,7 @@ class CascadeServiceImpl(ICascadeService):
                 pending_events.append(pending)
         
         # 결과 생성 - 튜플로 변환하여 불변성 보장
-        result = CascadeResult(
+        CascadeResult(
             events=tuple(processed_events),  # List → Tuple
             pending_events=tuple(pending_events),  # List → Tuple
             metrics_impact=metrics_impact,

@@ -184,7 +184,7 @@ class EventGenerator:
         examples = category_info.get("examples", [])
         examples_str = ", ".join(examples)
 
-        user_prompt = USER_PROMPT_TEMPLATE.format(
+        USER_PROMPT_TEMPLATE.format(
             count=count,
             category=category,
             description=description,
@@ -440,4 +440,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

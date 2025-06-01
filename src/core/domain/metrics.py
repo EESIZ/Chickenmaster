@@ -42,7 +42,7 @@ class TradeoffPair:
     
     def calculate_effect(self, primary_delta: int, primary_metric: str) -> dict[str, int]:
         """트레이드오프 효과 계산"""
-        if primary_metric != self.metric1 and primary_metric != self.metric2:
+        if primary_metric not in (self.metric1, self.metric2):
             return {}
             
         secondary_metric = self.metric2 if primary_metric == self.metric1 else self.metric1

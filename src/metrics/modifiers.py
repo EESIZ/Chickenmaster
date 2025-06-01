@@ -6,7 +6,7 @@
 
 import random
 
-from game_constants import FLOAT_EPSILON, Metric, ProbabilityConstants
+from game_constants import Metric, ProbabilityConstants
 
 from abc import ABC, abstractmethod
 from typing import Any
