@@ -1,372 +1,443 @@
 #!/usr/bin/env python3
 """
 파일: scripts/mass_event_generation.py
-목적: Claude Code를 통한 치킨집 이벤트 대량 생성
-작성자: Claude Code Assistant
-날짜: 2025-05-29
+목적: 대량의 이벤트 데이터 생성 도구
 """
 
+import argparse
 import json
-import multiprocessing as mp
+import os
 import sys
 import time
 from pathlib import Path
 from typing import Any
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# 프로젝트 루트를 경로에 추가
-project_root = Path(__file__).parent.parent
+# 프로젝트 루트 디렉토리 찾기
+current_file = Path(__file__).resolve()
+project_root = current_file.parent.parent
+
+# 프로젝트 모듈 import를 위한 경로 설정
 sys.path.insert(0, str(project_root))
 
-from dev_tools.config import Config
-from dev_tools.event_generator import EventGenerator
 from dev_tools.event_validator import EventValidator
+from dev_tools.openai_client import OpenAIClient
 
-# 생성 설정 상수
+# 생성 설정
 GENERATION_CONFIG = {
-    "BATCH_SIZE": 10,
-    "MAX_RETRIES": 3,
-    "RETRY_DELAY": 2,
-    "SAVE_INTERVAL": 10,
-    "COST_PER_EVENT": 0.05,
-    "HIGH_COST_WARNING": 100.0,
-    "TARGET_EVENT_COUNT": 500  # 500개로 확장
+    "MODEL": "gpt-4-turbo",
+    "TEMPERATURE": 0.8,
+    "MAX_TOKENS": 2000,
+    "COST_PER_EVENT": 0.05,  # 예상 비용 (USD)
+    "COST_WARNING_THRESHOLD": 5.0,  # 비용 경고 임계값 (USD)
+    "BATCH_SIZE": 5,  # 한 번에 생성할 이벤트 수
+    "RETRY_ATTEMPTS": 3,  # 실패 시 재시도 횟수
+    "DELAY_BETWEEN_BATCHES": 2,  # 배치 간 지연 시간 (초)
 }
 
-# 카테고리별 목표 수
-# 500개 목표로 확장
-CATEGORY_TARGETS = {
-    "daily_routine": {
-        "count": 200,  # 원래 목표
-        "tags": ["치킨집", "일상", "운영"],
-        "description": "일상적인 치킨집 운영 이벤트"
+# 이벤트 카테고리 및 설명
+EVENT_CATEGORIES = {
+    "customer": {
+        "description": "고객 관련 이벤트 (주문, 불만, 리뷰 등)",
+        "examples": ["단골 손님의 특별 요청", "악성 리뷰 대응", "대량 주문 요청"],
+        "weight": 3,  # 가중치 (높을수록 더 많이 생성)
     },
-    "crisis_events": {
-        "count": 100,  # 원래 목표
-        "tags": ["위기", "문제", "해결"],
-        "description": "위기 상황 및 문제 해결 이벤트"
+    "employee": {
+        "description": "직원 관련 이벤트 (채용, 교육, 갈등 등)",
+        "examples": ["알바생 지각", "주방장 퇴사 위기", "직원 간 갈등"],
+        "weight": 2,
     },
-    "opportunity": {
-        "count": 100,  # 원래 목표
-        "tags": ["기회", "성장", "투자"],
-        "description": "성장 기회 및 투자 관련 이벤트"
+    "business": {
+        "description": "사업 관련 이벤트 (재정, 마케팅, 경쟁 등)",
+        "examples": ["경쟁 업체 오픈", "프랜차이즈 제안", "세무조사"],
+        "weight": 2,
     },
-    "human_drama": {
-        "count": 50,  # 원래 목표
-        "tags": ["인간관계", "감정", "드라마"],
-        "description": "인간관계 및 감정적 상황 이벤트"
+    "supply": {
+        "description": "공급망 관련 이벤트 (재료, 장비, 배달 등)",
+        "examples": ["닭 가격 폭등", "냉장고 고장", "식자재 유통기한 문제"],
+        "weight": 2,
     },
-    "chain_scenario": {
-        "count": 50,  # 원래 목표
-        "tags": ["연쇄", "복합", "시나리오"],
-        "description": "연쇄 반응 및 복합 시나리오 이벤트"
+    "random": {
+        "description": "예측 불가능한 이벤트 (날씨, 사고, 행운 등)",
+        "examples": ["갑작스러운 폭우", "유명인 방문", "건물 누수"],
+        "weight": 1,
+    },
+}
+
+# 프롬프트 템플릿
+SYSTEM_PROMPT = """당신은 치킨집 경영 시뮬레이션 게임 '치킨마스터'의 이벤트 생성 AI입니다.
+한국 치킨집 문화와 경영 현실을 반영한 게임 이벤트를 생성해주세요.
+
+게임의 핵심 철학:
+1. 정답 없음(noRightAnswer): 모든 선택은 득과 실을 동시에 가져옵니다.
+2. 트레이드오프(tradeoff): 한 지표를 올리면 다른 지표는 내려갑니다.
+3. 불확실성(uncertainty): 세상은 예측 불가능하며, 완벽한 대비는 불가능합니다.
+
+게임의 주요 지표:
+- MONEY: 현금 (사업 운영 자금)
+- REPUTATION: 평판 (가게의 사회적 평가)
+- HAPPINESS: 행복 (사장의 정신적 만족도)
+- PAIN: 고통 (사장의 정신적 스트레스)
+- EMPLOYEE_SATISFACTION: 직원 만족도
+- CUSTOMER_SATISFACTION: 고객 만족도
+- INGREDIENT_QUALITY: 재료 품질
+- EQUIPMENT_CONDITION: 장비 상태
+- STORE_CLEANLINESS: 매장 청결도
+- MENU_DIVERSITY: 메뉴 다양성
+
+이벤트 타입:
+- RANDOM: 무작위로 발생하는 이벤트 (probability 필요)
+- THRESHOLD: 특정 조건 충족 시 발생하는 이벤트 (trigger 필요)
+- SCHEDULED: 특정 게임 일차에 발생하는 이벤트 (schedule 필요)
+- CASCADE: 다른 이벤트의 결과로 발생하는 이벤트 (trigger 필요)
+
+출력 형식은 JSON 배열로, 각 이벤트는 다음 구조를 따라야 합니다:
+```
+{
+  "id": "unique_event_id",
+  "type": "RANDOM|THRESHOLD|SCHEDULED|CASCADE",
+  "category": "customer|employee|business|supply|random",
+  "name_ko": "이벤트 제목 (한국어)",
+  "name_en": "Event Title (English)",
+  "text_ko": "이벤트 설명 텍스트 (한국어)",
+  "text_en": "Event description text (English)",
+  "effects": [
+    {
+      "metric": "METRIC_NAME",
+      "formula": "value * 0.1"  // 수식 또는 고정값
     }
+  ],
+  "choices": [
+    {
+      "text_ko": "선택지 1 (한국어)",
+      "text_en": "Choice 1 (English)",
+      "effects": {
+        "MONEY": 100,
+        "REPUTATION": -20
+        // 트레이드오프 필수 (긍정+부정 효과 혼합)
+      }
+    },
+    {
+      "text_ko": "선택지 2 (한국어)",
+      "text_en": "Choice 2 (English)",
+      "effects": {
+        "MONEY": -50,
+        "REPUTATION": 30
+      }
+    }
+  ],
+  "tags": ["태그1", "태그2"],
+  
+  // 이벤트 타입별 추가 필드
+  "probability": 0.3,  // RANDOM 타입일 경우
+  "schedule": 5,       // SCHEDULED 타입일 경우
+  "trigger": {         // THRESHOLD 또는 CASCADE 타입일 경우
+    "metric": "METRIC_NAME",
+    "condition": "less_than|greater_than|equal",
+    "value": 50
+  },
+  "cooldown": 10       // 선택사항: 이벤트 재발생 전 대기 일수
 }
+```
 
-class MassEventGenerator:
-    """대량 이벤트 생성기"""
+중요 지침:
+1. 한국 치킨집 문화와 현실을 반영한 이벤트를 생성하세요.
+2. 모든 선택지는 트레이드오프를 가져야 합니다 (긍정적 효과와 부정적 효과 모두 포함).
+3. 이벤트 ID는 고유하고 의미있는 영문 문자열이어야 합니다.
+4. 이벤트 설명과 선택지는 한국어와 영어 모두 제공해야 합니다.
+5. 각 이벤트는 최소 2개 이상의 선택지를 가져야 합니다.
+6. 현실적이고 흥미로운 시나리오를 만들되, 너무 극단적이거나 비현실적인 상황은 피하세요.
+7. 게임의 핵심 철학(정답 없음, 트레이드오프, 불확실성)을 반영하세요.
+"""
 
-    def __init__(self, num_workers: int | None = None):
-        """
-        초기화
-        
-        Args:
-            num_workers: 동시 작업자 수 (기본값: CPU 코어 수)
-        """
-        self.api_key = Config.get_api_key()
-        if not self.api_key:
-            print("[ERROR] ANTHROPIC_API_KEY가 설정되지 않았습니다.")
-            print("set ANTHROPIC_API_KEY=your_api_key 명령으로 설정하세요.")
-            sys.exit(1)
+USER_PROMPT_TEMPLATE = """다음 카테고리의 이벤트 {count}개를 생성해주세요: {category}
 
-        self.num_workers = num_workers or mp.cpu_count()
-        self.generator = EventGenerator(self.api_key)
+카테고리 설명: {description}
+예시: {examples}
+
+이벤트 타입은 다양하게 섞어서 생성해주세요.
+각 이벤트는 고유한 ID를 가져야 하며, 한국 치킨집 문화를 잘 반영해야 합니다.
+모든 선택지는 트레이드오프(긍정+부정 효과 혼합)를 가져야 합니다.
+"""
+
+
+class EventGenerator:
+    """이벤트 생성기"""
+
+    def __init__(self, api_key: str, output_dir: Path):
+        """초기화"""
+        self.client = OpenAIClient(api_key)
         self.validator = EventValidator()
+        self.output_dir = output_dir
+        self.generated_count = 0
+        self.valid_count = 0
+        self.invalid_count = 0
+        self.total_cost = 0.0
 
-        # 출력 디렉토리 설정
-        self.output_dir = project_root / "data" / "events_generated"
-        self.output_dir.mkdir(exist_ok=True)
+    def generate_events(self, category: str, count: int) -> list[dict[str, Any]]:
+        """특정 카테고리의 이벤트 생성"""
+        category_info = EVENT_CATEGORIES.get(category, {})
+        if not category_info:
+            print(f"오류: 알 수 없는 카테고리 '{category}'")
+            return []
 
-    def get_generation_plan(self) -> dict[str, dict[str, Any]]:
-        """이벤트 생성 계획 반환"""
-        return CATEGORY_TARGETS
+        description = category_info.get("description", "")
+        examples = category_info.get("examples", [])
+        examples_str = ", ".join(examples)
 
-    def generate_single_event(
-        self, category: str, tags: list[str], attempt: int = 1
-    ) -> dict[str, Any] | None:
-        """단일 이벤트 생성 (재시도 로직 포함)"""
-        for attempt_num in range(GENERATION_CONFIG["MAX_RETRIES"]):
-            try:
-                print(
-                    f"[PROCESSING] {category} 이벤트 생성 중... (시도 {attempt_num + 1}/{GENERATION_CONFIG['MAX_RETRIES']})"
-                )
+        user_prompt = USER_PROMPT_TEMPLATE.format(
+            count=count,
+            category=category,
+            description=description,
+            examples=examples_str
+        )
 
-                events = self.generator.generate_events(category, tags, count=1)
-
-                if not events:
-                    print(f"[WARNING] 이벤트 생성 실패 (시도 {attempt_num + 1})")
-                    continue
-
-                event = events[0]
-
-                # 필수 필드 확인 (effects는 선택적)
-                if not all(key in event for key in ["id", "name_ko"]):
-                    print(f"[WARNING] 필수 필드 누락 (시도 {attempt_num + 1})")
-                    continue
-
-                # effects가 없거나 비어있으면 기본값 추가
-                if not event.get("effects") or len(event["effects"]) == 0:
-                    event["effects"] = [
-                        {"metric": "MONEY", "formula": "random(50, 200)"},
-                        {"metric": "REPUTATION", "formula": "random(5, 20)"}
-                    ]
-                    print("[INFO] 기본 effects 추가됨")
-
-                # 검증
-                if self.validator.validate_event(event):
-                    print(f"[SUCCESS] 이벤트 생성 성공: {event['id']}")
-                    return event
-                else:
-                    print(
-                        f"[ERROR] 검증 실패 (시도 {attempt_num + 1}): {', '.join(self.validator.errors)}"
+        print(f"\n[생성 시작] 카테고리: {category}, 수량: {count}개")
+        
+        all_events = []
+        remaining = count
+        batch_size = min(GENERATION_CONFIG["BATCH_SIZE"], remaining)
+        
+        while remaining > 0:
+            batch_size = min(GENERATION_CONFIG["BATCH_SIZE"], remaining)
+            batch_prompt = USER_PROMPT_TEMPLATE.format(
+                count=batch_size,
+                category=category,
+                description=description,
+                examples=examples_str
+            )
+            
+            print(f"  배치 생성 중... ({batch_size}개)")
+            
+            for attempt in range(GENERATION_CONFIG["RETRY_ATTEMPTS"]):
+                try:
+                    response = self.client.chat_completion(
+                        model=GENERATION_CONFIG["MODEL"],
+                        system_prompt=SYSTEM_PROMPT,
+                        user_prompt=batch_prompt,
+                        temperature=GENERATION_CONFIG["TEMPERATURE"],
+                        max_tokens=GENERATION_CONFIG["MAX_TOKENS"]
                     )
-                    self.validator.errors = []
+                    
+                    # 비용 추적
+                    self.total_cost += response.get("cost", 0)
+                    
+                    # JSON 파싱
+                    content = response.get("content", "")
+                    events = self._extract_json(content)
+                    
+                    if events:
+                        # 유효성 검사
+                        valid_events = []
+                        for event in events:
+                            if self.validator.validate_event(event):
+                                valid_events.append(event)
+                                self.valid_count += 1
+                            else:
+                                self.invalid_count += 1
+                                print(f"    ❌ 유효하지 않은 이벤트: {event.get('id', 'unknown')}")
+                                for error in self.validator.errors:
+                                    print(f"       - {error}")
+                        
+                        all_events.extend(valid_events)
+                        self.generated_count += len(valid_events)
+                        
+                        print(f"    ✅ 배치 완료: {len(valid_events)}/{batch_size}개 유효")
+                        break
+                    else:
+                        print(f"    ⚠️ JSON 파싱 실패 (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})")
+                
+                except Exception as e:
+                    print(f"    ⚠️ 오류 발생: {e} (시도 {attempt+1}/{GENERATION_CONFIG['RETRY_ATTEMPTS']})")
+                
+                # 마지막 시도가 아니면 잠시 대기
+                if attempt < GENERATION_CONFIG["RETRY_ATTEMPTS"] - 1:
+                    time.sleep(2)
+            
+            remaining -= batch_size
+            
+            # 배치 간 지연
+            if remaining > 0:
+                time.sleep(GENERATION_CONFIG["DELAY_BETWEEN_BATCHES"])
+        
+        return all_events
 
-            except Exception as e:
-                print(f"[ERROR] 생성 중 오류 (시도 {attempt_num + 1}): {e!s}")
+    def generate_events_by_plan(self, plan: dict[str, dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        """계획에 따라 여러 카테고리의 이벤트 생성"""
+        all_events_by_category: dict[str, list[dict[str, Any]]] = {}
+        
+        for category, info in plan.items():
+            count = info.get("count", 0)
+            if count <= 0:
+                continue
+                
+            events = self.generate_events(category, count)
+            all_events_by_category[category] = events
+            
+            # 진행 상황 출력
+            print(f"\n[진행 상황] 총 {self.generated_count}개 생성 완료 (유효: {self.valid_count}, 무효: {self.invalid_count})")
+            print(f"[비용] 현재까지: ${self.total_cost:.2f}")
+        
+        return all_events_by_category
 
-            if attempt_num < GENERATION_CONFIG["MAX_RETRIES"] - 1:
-                time.sleep(GENERATION_CONFIG["RETRY_DELAY"])
+    def save_events(self, events_by_category: dict[str, list[dict[str, Any]]]) -> tuple[int, list[Path]]:
+        """생성된 이벤트를 파일로 저장"""
+        os.makedirs(self.output_dir, exist_ok=True)
+        
+        total_saved = 0
+        saved_files = []
+        
+        # 카테고리별로 저장
+        for category, events in events_by_category.items():
+            if not events:
+                continue
+                
+            # 파일명 생성 (타임스탬프 포함)
+            timestamp = int(time.time())
+            file_path = self.output_dir / f"events_{category}_{timestamp}.json"
+            
+            # JSON 형식으로 저장
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump({"events": events}, f, ensure_ascii=False, indent=2)
+            
+            total_saved += len(events)
+            saved_files.append(file_path)
+            print(f"✅ 저장 완료: {file_path} ({len(events)}개)")
+        
+        return total_saved, saved_files
 
-        print(f"[ERROR] {category} 이벤트 생성 실패 (모든 시도 소진)")
-        return None
+    def _extract_json(self, content: str) -> list[dict[str, Any]]:
+        """텍스트에서 JSON 추출"""
+        try:
+            # 코드 블록 내 JSON 추출 시도
+            if "```json" in content and "```" in content:
+                start = content.find("```json") + 7
+                end = content.find("```", start)
+                json_str = content[start:end].strip()
+                data = json.loads(json_str)
+                return data if isinstance(data, list) else []
+            
+            # 전체 텍스트를 JSON으로 파싱 시도
+            data = json.loads(content)
+            return data if isinstance(data, list) else []
+            
+        except json.JSONDecodeError:
+            return []
 
-    def generate_batch(
-        self, category: str, tags: list[str], batch_size: int
-    ) -> list[dict[str, Any]]:
-        """배치 단위로 이벤트 생성"""
-        events = []
-        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            futures = [
-                executor.submit(self.generate_single_event, category, tags)
-                for _ in range(batch_size)
-            ]
-            for future in as_completed(futures):
-                if event := future.result():
-                    events.append(event)
-        return events
+    def _check_cost_warning(self, estimated_cost: float) -> bool:
+        """비용 경고 확인"""
+        if estimated_cost > GENERATION_CONFIG["COST_WARNING_THRESHOLD"]:
+            print(f"\n⚠️ 경고: 예상 비용(${estimated_cost:.2f})이 임계값(${GENERATION_CONFIG['COST_WARNING_THRESHOLD']:.2f})을 초과합니다.")
+            confirm = input("계속 진행하시겠습니까? (y/n): ").lower()
+            return confirm == "y"
+        return True
 
-    def generate_category_events(
-        self, category: str, target_count: int, tags: list[str]
-    ) -> list[dict[str, Any]]:
-        """카테고리별 이벤트 대량 생성"""
-        print(f"\n🏭 {category} 카테고리 이벤트 생성 시작 (목표: {target_count}개)")
+    def create_generation_plan(self, total_count: int, category_weights: dict[str, float] | None = None) -> dict[str, dict[str, Any]]:
+        """카테고리별 생성 계획 수립"""
+        if category_weights is None:
+            # 기본 가중치 사용
+            category_weights = {
+                category: info.get("weight", 1)
+                for category, info in EVENT_CATEGORIES.items()
+            }
+        
+        # 가중치 합계 계산
+        total_weight = sum(category_weights.values())
+        
+        # 카테고리별 이벤트 수 계산
+        plan = {}
+        remaining = total_count
+        
+        for category, weight in category_weights.items():
+            if category not in EVENT_CATEGORIES:
+                continue
+                
+            # 가중치에 비례하여 이벤트 수 할당
+            count = int(total_count * (weight / total_weight))
+            plan[category] = {
+                "count": count,
+                "description": EVENT_CATEGORIES[category].get("description", "")
+            }
+            remaining -= count
+        
+        # 남은 이벤트 분배 (반올림 오차 처리)
+        if remaining > 0:
+            # 가중치가 가장 높은 카테고리에 할당
+            max_category = max(category_weights.items(), key=lambda x: x[1])[0]
+            plan[max_category]["count"] += remaining
+        
+        return plan
 
-        events = []
-        success_count = 0
-        failure_count = 0
-
-        for i in range(target_count):
-            print(f"\n--- {category} {i+1}/{target_count} ---")
-
-            event = self.generate_single_event(category, tags)
-
-            if event:
-                # ID 중복 방지
-                event["id"] = f"{category}_{i+1:03d}_{int(time.time() % 10000)}"
-                events.append(event)
-                success_count += 1
-            else:
-                failure_count += 1
-
-            # 중간 저장 (10개마다)
-            if (i + 1) % 10 == 0:
-                self.save_events(events, category, intermediate=True)
-                print(f"[SAVE] 중간 저장 완료: {len(events)}개")
-
-        # 최종 저장
-        self.save_events(events, category)
-
-        # 통계 출력
-        failure_count = target_count - success_count
-        print(f"\n[STATS] {category} 결과:")
-        print(f"  [SUCCESS] 성공: {success_count}개")
-        print(f"  [FAIL] 실패: {failure_count}개")
-        print(f"  [RATE] 성공률: {success_count/target_count*100:.1f}%")
-
-        return events
-
-    def save_events(
-        self, events: list[dict[str, Any]], category: str, intermediate: bool = False
-    ) -> str:
-        """이벤트 저장"""
-        if not events:
-            return ""
-
-        timestamp = int(time.time())
-        suffix = "_intermediate" if intermediate else ""
-        filename = f"{category}_events_{timestamp}{suffix}.json"
-        filepath = self.output_dir / filename
-
-        data = {
-            "metadata": {
-                "category": category,
-                "count": len(events),
-                "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "generator": "Claude Code Mass Generator",
-            },
-            "events": events,
-        }
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-        print(f"[SAVE] 저장 완료: {filepath}")
-        return str(filepath)
-
-    def run_mass_generation(self) -> dict[str, int]:
-        """대량 생성 실행"""
-        print(f"[START] Claude Code 이벤트 대량 생성 시작! (작업자 수: {self.num_workers})")
-        print(f"[INFO] 출력 디렉토리: {self.output_dir}")
-
-        plan = self.get_generation_plan()
-        results = {}
-        total_target = sum(plan[cat]["count"] for cat in plan)
-
-        # 생성 계획 출력
-        total_target = sum(plan[cat]["count"] for cat in plan)
+    def print_plan_summary(self, plan: dict[str, dict[str, Any]]) -> None:
+        """생성 계획 요약 출력"""
         total_categories = len(plan)
-
-        print("\n[PLAN] 생성 계획:")
+        total_target = sum(info["count"] for info in plan.values())
+        
         print(f"총 {total_categories}개 카테고리에서 {total_target}개 이벤트 생성 예정")
 
         for category, info in plan.items():
-        print(f"  - {category}: {info['count']}개")
+            print(f"  - {category}: {info['count']}개")
         print(f"  [TOTAL] 총 목표: {total_target}개")
 
         # 예상 비용 계산
         estimated_cost = total_target * GENERATION_CONFIG["COST_PER_EVENT"]
         print(f"\n[COST] 예상 비용: ~${estimated_cost:.2f} (이벤트당 약 $0.05)")
         if not self._check_cost_warning(estimated_cost):
-            return {}
-
-        # 카테고리별 생성
-        start_time = time.time()
-        try:
-            for category, info in plan.items():
-                target_count = info["count"]
-                generated = 0
-                batch_results = []
-
-                while generated < target_count:
-                    batch_size = min(GENERATION_CONFIG["BATCH_SIZE"], target_count - generated)
-                    print(
-                        f"\n[BATCH] {category} 배치 생성 중... ({generated + 1}-{generated + batch_size}/{target_count})"
-                    )
-                    
-                    events = self.generate_batch(category, info["tags"], batch_size)
-                    batch_results.extend(events)
-                    generated += len(events)
-
-                    # 중간 저장
-                    if len(batch_results) >= GENERATION_CONFIG["SAVE_INTERVAL"]:
-                        self.save_events(batch_results, category, intermediate=True)
-                        print(f"[SAVE] 중간 저장 완료: {len(batch_results)}개")
-                        batch_results = []
-
-                # 남은 결과 저장
-                if batch_results:
-                    self.save_events(batch_results, category)
-
-                results[category] = generated
-
-        except KeyboardInterrupt:
-            print("\n[INTERRUPT] 사용자에 의해 중단되었습니다.")
-        except Exception as e:
-            print(f"[ERROR] 생성 중 치명적 오류: {e!s}")
-
-        # 결과 요약
-        self._print_summary(results, plan, start_time)
-        return results
-
-    def _check_cost_warning(self, estimated_cost: float) -> bool:
-        """고비용 경고 확인"""
-        if estimated_cost > GENERATION_CONFIG["HIGH_COST_WARNING"]:
-            print("[WARNING] 경고: 예상 비용이 $100를 초과합니다!")
-            response = input("계속하시겠습니까? (y/N): ")
-            return response.lower() == "y"
-        return True
-
-    def _print_summary(
-        self, results: dict[str, int], plan: dict[str, dict[str, Any]], start_time: float
-    ) -> None:
-        """결과 요약 출력"""
-        end_time = time.time()
-        total_generated = sum(results.values())
-        total_target = sum(plan[cat]["count"] for cat in plan)
-
-        print("\n[COMPLETE] 대량 생성 완료!")
-        print(f"[TIME] 소요 시간: {end_time - start_time:.1f}초")
-        print("[STATS] 생성 결과:")
-
-        for category, count in results.items():
-            target = plan[category]["count"]
-            success_rate = count / target * 100 if target > 0 else 0
-            print(f"  - {category}: {count}/{target} ({success_rate:.1f}%)")
-
-        total_success_rate = total_generated / total_target * 100
-        print(
-            "[RATE] 전체 성공률: "
-            f"{total_generated}/{total_target} "
-            f"({total_success_rate:.1f}%)"
-        )
-        print(f"[PATH] 저장 위치: {self.output_dir}")
-
-        # 최종 파일 저장
-        self._save_final_results(results, end_time - start_time)
-
-        # Mission Order M-4 달성 여부 확인
-        total = sum(results.values())
-        if total >= GENERATION_CONFIG["TARGET_EVENT_COUNT"]:
-            print("\n[MISSION] Mission Order M-4 목표 달성:")
-            print(f"[SUCCESS] 이벤트 뱅크 {GENERATION_CONFIG['TARGET_EVENT_COUNT']}개 목표 달성: {total}개!")
-        else:
-            print(f"[WARNING] 목표 미달성: {total}/{GENERATION_CONFIG['TARGET_EVENT_COUNT']}개 ({total/GENERATION_CONFIG['TARGET_EVENT_COUNT']*100:.1f}%)")
-
-    def _save_final_results(self, results: dict[str, int], duration: float) -> None:
-        """최종 결과 저장"""
-        timestamp = int(time.time())
-        filename = f"events_generated_{timestamp}.json"
-        filepath = self.output_dir / filename
-
-        all_events = {
-            "metadata": {
-                "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "generator": "Claude Code Mass Generator",
-                "duration": duration,
-            },
-            "results": results,
-        }
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(all_events, f, ensure_ascii=False, indent=2)
-
-        print(f"[SAVE] 저장 완료: {filepath}")
+            print("생성 취소됨")
+            sys.exit(0)
 
 
-def main():
+def main() -> int:
     """메인 함수"""
-    generator = MassEventGenerator()
-    results = generator.run_mass_generation()
+    parser = argparse.ArgumentParser(description="대량 이벤트 생성 도구")
+    parser.add_argument("--count", type=int, default=10, help="생성할 이벤트 수 (기본값: 10)")
+    parser.add_argument("--category", help="특정 카테고리만 생성 (기본값: 모든 카테고리)")
+    parser.add_argument("--output", help="출력 디렉토리 (기본값: data/generated_events)")
+    parser.add_argument("--api-key", help="OpenAI API 키")
+    args = parser.parse_args()
 
-    if results:
-        print("\n[MISSION] Mission Order M-4 목표 달성:")
-        total = sum(results.values())
-        if total >= GENERATION_CONFIG["TARGET_EVENT_COUNT"]:
-            print(f"[SUCCESS] 이벤트 뱅크 {GENERATION_CONFIG['TARGET_EVENT_COUNT']}개 목표 달성: {total}개!")
-        else:
-            print(f"[WARNING] 목표 미달성: {total}/{GENERATION_CONFIG['TARGET_EVENT_COUNT']}개 ({total/GENERATION_CONFIG['TARGET_EVENT_COUNT']*100:.1f}%)")
+    # API 키 확인
+    api_key = args.api_key or os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("오류: OpenAI API 키가 필요합니다. --api-key 옵션이나 OPENAI_API_KEY 환경 변수를 설정하세요.")
+        return 1
+
+    # 출력 디렉토리 설정
+    output_dir = Path(args.output) if args.output else project_root / "data" / "generated_events"
+
+    # 이벤트 생성기 초기화
+    generator = EventGenerator(api_key, output_dir)
+
+    # 생성 계획 수립
+    if args.category:
+        if args.category not in EVENT_CATEGORIES:
+            print(f"오류: 알 수 없는 카테고리 '{args.category}'")
+            print(f"사용 가능한 카테고리: {', '.join(EVENT_CATEGORIES.keys())}")
+            return 1
+            
+        # 단일 카테고리 생성
+        plan = {args.category: {"count": args.count, "description": EVENT_CATEGORIES[args.category].get("description", "")}}
+    else:
+        # 모든 카테고리 가중치 기반 생성
+        plan = generator.create_generation_plan(args.count)
+
+    # 계획 요약 출력
+    generator.print_plan_summary(plan)
+
+    # 이벤트 생성
+    print("\n[생성 시작]")
+    events_by_category = generator.generate_events_by_plan(plan)
+
+    # 결과 저장
+    total_saved, saved_files = generator.save_events(events_by_category)
+
+    # 결과 요약
+    print("\n[생성 완료]")
+    print(f"총 생성: {generator.generated_count}개 (유효: {generator.valid_count}, 무효: {generator.invalid_count})")
+    print(f"저장된 파일: {len(saved_files)}개")
+    print(f"총 비용: ${generator.total_cost:.2f}")
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

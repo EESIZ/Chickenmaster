@@ -30,6 +30,7 @@ VALIDATION_THRESHOLDS = {
     "NAME_SIMILARITY_THRESHOLD": 80,  # 이름 유사도 임계값
     "TEXT_SIMILARITY_THRESHOLD": 70,  # 텍스트 유사도 임계값
     "MIN_CHOICES": 2,  # 최소 선택지 수
+    "MIN_METRICS_DIFFERENCE": 2,  # 최소 메트릭 차이 수
     "FORMULA_EPSILON": 0.001  # 수식 계산 오차 허용 범위
 }
 
@@ -65,17 +66,17 @@ class EventValidator:
     ]
 
     # 허용되는 메트릭
-VALID_METRICS = (
-    "MONEY",  # 현금
-    "REPUTATION",  # 평판
-    "CUSTOMER_SATISFACTION",  # 고객 만족도
-    "HAPPINESS",  # 행복
-    "PAIN",  # 고통
-    "EMPLOYEE_SATISFACTION",  # 직원 만족도
-    "INGREDIENT_QUALITY",  # 재료 품질
-    "EQUIPMENT_CONDITION",  # 장비 상태
-    "STORE_CLEANLINESS",  # 매장 청결도
-    "MENU_DIVERSITY"  # 메뉴 다양성
+    VALID_METRICS = (
+        "MONEY",  # 현금
+        "REPUTATION",  # 평판
+        "CUSTOMER_SATISFACTION",  # 고객 만족도
+        "HAPPINESS",  # 행복
+        "PAIN",  # 고통
+        "EMPLOYEE_SATISFACTION",  # 직원 만족도
+        "INGREDIENT_QUALITY",  # 재료 품질
+        "EQUIPMENT_CONDITION",  # 장비 상태
+        "STORE_CLEANLINESS",  # 매장 청결도
+        "MENU_DIVERSITY"  # 메뉴 다양성
     )
 
     def __init__(self):
@@ -333,19 +334,19 @@ VALID_METRICS = (
 
         return True
 
-    def validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
-        """포뮬러 문자열 엄격한 검증"""  # ✅ 4칸 들여쓰기
+    def _validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
+        """포뮬러 문자열 엄격한 검증"""
         original_formula = formula
     
-    # 퍼센트 표기법 처리
-    if formula.endswith("%"):
-        try:
-            # 퍼센트 부분이 유효한 숫자인지 검증
-            float(formula[:-1])
-            return True
-        except ValueError:
-            self.errors.append(f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})")
-            return False
+        # 퍼센트 표기법 처리
+        if formula.endswith("%"):
+            try:
+                # 퍼센트 부분이 유효한 숫자인지 검증
+                float(formula[:-1])
+                return True
+            except ValueError:
+                self.errors.append(f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})")
+                return False
 
         # 간단한 숫자 리터럴 처리
         try:
@@ -464,109 +465,110 @@ VALID_METRICS = (
 
         return events_with_tradeoffs / len(events)
 
-        def has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
-            """선택지들이 명확한 트레이드오프를 가지는지"""
-            MIN_CHOICES = 2
-            SIGNIFICANT_EFFECT_THRESHOLD = 0.1  # 무시할 수 있는 미미한 효과 기준
-    
-            if len(choices) < MIN_CHOICES:
+    def _has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
+        """선택지들이 명확한 트레이드오프를 가지는지"""
+        if len(choices) < VALIDATION_THRESHOLDS["MIN_CHOICES"]:
+            return False
+
+        # 각 선택지의 효과 분석
+        effects_by_choice: list[dict[str, float]] = []
+        for choice in choices:
+            effects = choice.get("effects", {})
+            if not effects:
                 return False
-    
-    choice_metrics = []
-    for choice in choices:
-        effects = choice.get("effects", {})
-        metrics = {metric for metric, value in effects.items() if abs(value) > SIGNIFICANT_EFFECT_THRESHOLD}
-        choice_metrics.append(metrics)
+            effects_by_choice.append(effects)
 
-        # 선택지 간 메트릭 차이 확인
-        for i in range(len(choice_metrics)):
-            for j in range(i + 1, len(choice_metrics)):
-                # 두 선택지가 영향을 주는 메트릭이 다르면 트레이드오프 존재
-                if choice_metrics[i] != choice_metrics[j]:
-                    return True
+        # 선택지 간 차이 분석
+        metrics_with_differences = set()
+        for i in range(len(effects_by_choice)):
+            for j in range(i + 1, len(effects_by_choice)):
+                for metric in set(effects_by_choice[i]) | set(effects_by_choice[j]):
+                    val_i = effects_by_choice[i].get(metric, 0)
+                    val_j = effects_by_choice[j].get(metric, 0)
+                    if abs(val_i - val_j) > VALIDATION_THRESHOLDS["FORMULA_EPSILON"]:
+                        metrics_with_differences.add(metric)
 
-                # 같은 메트릭에 영향을 주지만 방향이 다른지 확인
-                for metric in choice_metrics[i]:
-                    val_i = choices[i]["effects"].get(metric, 0)
-                    val_j = choices[j]["effects"].get(metric, 0)
-                    if val_i * val_j < 0:  # 부호가 다르면
-                        return True
-
-        return False
+        # 최소 2개 이상의 메트릭에서 차이가 있어야 함
+        return len(metrics_with_differences) >= VALIDATION_THRESHOLDS["MIN_METRICS_DIFFERENCE"]
 
     def _calculate_cultural_authenticity(self, events: list[dict[str, Any]]) -> float:
         """한국 치킨집 문화 반영도"""
         if not events:
             return 0.0
 
-        total_score = 0.0
+        cultural_score = 0.0
         for event in events:
             text = f"{event.get('name_ko', '')} {event.get('text_ko', '')}"
             matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
             
             # 키워드 매칭 점수 (0.0 ~ 1.0)
-            keyword_score = min(1.0, matched_keywords / VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"])
-            total_score += keyword_score
+            event_score = min(matched_keywords / VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"], 1.0)
+            cultural_score += event_score
 
-        return total_score / len(events)
+        return cultural_score / len(events)
 
     def _calculate_replayability(self, events: list[dict[str, Any]]) -> float:
-        """재플레이 가능성 (이벤트 다양성 + 선택지 다양성)"""
+        """재플레이 가치 (이벤트 다양성 + 선택지 다양성)"""
         if not events:
             return 0.0
 
         # 이벤트 타입 다양성
-        event_types = {event.get("type", "") for event in events}
-        type_diversity = len(event_types) / 4.0  # 4가지 이벤트 타입 기준
+        event_types = {}
+        for event in events:
+            event_type = event.get("type", "unknown")
+            event_types[event_type] = event_types.get(event_type, 0) + 1
+
+        type_diversity = 0.0
+        if event_types:
+            type_diversity = len(event_types) / 4.0  # 4가지 이벤트 타입 기준
 
         # 선택지 다양성
         avg_choices = sum(len(event.get("choices", [])) for event in events) / len(events)
-        choice_diversity = min(1.0, avg_choices / 3.0)  # 평균 3개 이상 선택지면 만점
+        choice_diversity = min(avg_choices / 3.0, 1.0)  # 평균 3개 선택지 기준
 
         # 가중 평균
-        return 0.7 * type_diversity + 0.3 * choice_diversity
-
-    def get_errors(self) -> list[str]:
-        """오류 목록 반환"""
-        return self.errors
-
-    def get_warnings(self) -> list[str]:
-        """경고 목록 반환"""
-        return self.warnings
-
-    def get_validated_events(self) -> list[dict[str, Any]]:
-        """검증된 이벤트 목록 반환"""
-        return self.validated_events
+        return 0.6 * type_diversity + 0.4 * choice_diversity
 
 
-    def main():
-        """명령행 인터페이스"""
-        parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
-        parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
-        parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
-        args = parser.parse_args()
+def main() -> int:
+    """메인 함수"""
+    parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
+    parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
+    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
+    args = parser.parse_args()
 
-        validator = EventValidator()
-        path = Path(args.path)
-
-        if path.is_file():
-            success = validator.validate_file(path)
-        elif path.is_dir():
-            success = validator.validate_directory(path)
-        else:
-            print(f"오류: 경로를 찾을 수 없음: {path}")
-            return 1
+    path = Path(args.path)
+    validator = EventValidator()
+    
+    if path.is_file():
+        success = validator.validate_file(path)
+    elif path.is_dir():
+        success = validator.validate_directory(path)
+    else:
+        print(f"오류: 경로가 존재하지 않습니다: {path}")
+        return 1
 
     # 오류 및 경고 출력
-    for error in validator.get_errors():
-        print(f"오류: {error}")
-    for warning in validator.get_warnings():
-        print(f"경고: {warning}")
+    if validator.errors:
+        print("\n🚫 오류:")
+        for error in validator.errors:
+            print(f"  - {error}")
 
-    # 품질 메트릭 계산 및 출력
-    if args.quality and validator.get_validated_events():
-        metrics = validator.calculate_quality_metrics(validator.get_validated_events())
-        print("\n품질 메트릭:")
+    if validator.warnings:
+        print("\n⚠️ 경고:")
+        for warning in validator.warnings:
+            print(f"  - {warning}")
+
+    # 결과 출력
+    if success:
+        print(f"\n✅ 검증 성공: {len(validator.validated_events)}개 이벤트")
+    else:
+        print(f"\n❌ 검증 실패: {len(validator.errors)}개 오류")
+
+    # 품질 메트릭 계산 (요청 시)
+    if args.quality and validator.validated_events:
+        print("\n📊 품질 메트릭:")
+        metrics = validator.calculate_quality_metrics(validator.validated_events)
         for name, value in metrics.items():
             threshold = QUALITY_THRESHOLDS.get(name.upper(), 0.0)
             status = "✓" if value >= threshold else "✗"
