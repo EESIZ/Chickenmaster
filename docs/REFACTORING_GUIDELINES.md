@@ -6,6 +6,7 @@
 - 모든 매직 넘버는 상수로 정의
 - 상수 이름은 대문자와 언더스코어 사용
 - 관련 상수는 그룹화하여 클래스 레벨 또는 모듈 레벨에 정의
+- 연관된 상수는 Frozen Dataclass 패턴을 사용하여 그룹화
 
 ### 예시
 ```python
@@ -23,6 +24,34 @@ SCORE_THRESHOLD = {
 if score >= SCORE_THRESHOLD["GOOD"]:
     status = "good"
 ```
+
+### Frozen Dataclass 패턴 적용
+```python
+from dataclasses import dataclass
+
+# ✅ 권장 패턴: Frozen Dataclass로 관련 상수 그룹화
+@dataclass(frozen=True)
+class ProbabilityConstants:
+    """확률 관련 상수를 그룹화한 Frozen Dataclass"""
+    RANDOM_THRESHOLD: float = 0.5
+    EVENT_CHANCE_HIGH: float = 0.7
+    EVENT_CHANCE_MEDIUM: float = 0.5
+    EVENT_CHANCE_LOW: float = 0.3
+
+# 사용 예시
+if random.random() < ProbabilityConstants.EVENT_CHANCE_HIGH:
+    trigger_special_event()
+```
+
+### 프로젝트 적용 사례
+Chicken-RNG 프로젝트에서는 PLR2004 매직 넘버 문제를 해결하기 위해 다음과 같은 방식을 적용했습니다:
+
+1. `game_constants.py`에 모든 매직 넘버를 중앙 관리되는 상수로 정의
+2. 의미 있는 상수명 사용: `FLOAT_EPSILON`, `SCORE_THRESHOLD_HIGH` 등
+3. 관련 상수는 `ProbabilityConstants`, `TestConstants` 등의 Frozen Dataclass로 그룹화
+4. 테스트 코드의 매직 넘버도 `TEST_MIN_CASCADE_EVENTS`, `TEST_EXPECTED_EVENTS` 등으로 상수화
+
+이를 통해 코드 가독성, 유지보수성, 일관성이 크게 향상되었습니다.
 
 ## 2. 타입 힌트 현대화 (UP006, UP007, UP038)
 
@@ -151,4 +180,4 @@ QUALITY_THRESHOLDS = {
     "CULTURAL_AUTHENTICITY": 0.7,
     "CODE_COVERAGE": 80.0
 }
-``` 
+```
