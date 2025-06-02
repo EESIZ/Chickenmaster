@@ -13,12 +13,12 @@
 import random
 from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from game_constants import FLOAT_EPSILON, Metric as MetricEnum
 from src.events.models import Alert
 from src.events.schema import Event as PydanticEvent
-from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
+from src.events.schema import EventContainer, EventTrigger, load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker
 
 
@@ -33,9 +33,9 @@ class EventEngine:
     def __init__(
         self,
         metrics_tracker: MetricsTracker,
-        events_file: str | None = None,
-        tradeoff_file: str | None = None,
-        seed: int | None = None,
+        events_file: Optional[str] = None,
+        tradeoff_file: Optional[str] = None,
+        seed: Optional[int] = None,
         max_cascade_depth: int = 10,
     ):
         """
@@ -49,10 +49,11 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-        self.events: list[PydanticEvent] = []
+        self.events_container: Optional[EventContainer[PydanticEvent]] = None
+        self.events: List[PydanticEvent] = []
         self.event_queue: deque[PydanticEvent] = deque()
         self.alert_queue: deque[Alert] = deque()
-        self.cascade_matrix: dict[MetricEnum, list[dict[str, Any]]] = {}
+        self.cascade_matrix: Dict[MetricEnum, List[Dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
         self.current_turn = 0
 
@@ -67,6 +68,15 @@ class EventEngine:
         if tradeoff_file:
             self.load_tradeoff_matrix(tradeoff_file)
 
+    def set_seed(self, seed: Optional[int] = None) -> None:
+        """
+        난수 생성 시드를 설정합니다.
+
+        Args:
+            seed: 난수 생성 시드 (기본값: None)
+        """
+        self.rng = random.Random(seed)
+
     def load_events(self, filepath: Path) -> None:
         """
         이벤트 정의 파일을 로드합니다.
@@ -75,11 +85,15 @@ class EventEngine:
             filepath: 이벤트 정의 파일 경로 (Path 객체)
         """
         if filepath.suffix == ".toml":
-            self.events = load_events_from_toml(filepath)
+            self.events_container = load_events_from_toml(filepath)
         elif filepath.suffix == ".json":
-            self.events = load_events_from_json(filepath)
+            self.events_container = load_events_from_json(filepath)
         else:
             raise ValueError(f"지원되지 않는 파일 형식: {filepath}")
+            
+        # EventContainer에서 events 리스트로 변환
+        if self.events_container and hasattr(self.events_container, "events"):
+            self.events = list(self.events_container.events)
 
     def load_tradeoff_matrix(self, filepath: str) -> None:
         """
@@ -98,14 +112,17 @@ class EventEngine:
             if "cascade" in data:
                 for source_metric, targets in data["cascade"].items():
                     try:
-                        metric = MetricEnum[source_metric]
-                        self.cascade_matrix[metric] = targets
+                        metric = getattr(MetricEnum, source_metric.upper(), None)
+                        if metric is not None:
+                            self.cascade_matrix[metric] = targets
+                        else:
+                            print(f"알 수 없는 지표: {source_metric}")
                     except KeyError:
                         print(f"알 수 없는 지표: {source_metric}")
         except Exception as e:
             print(f"트레이드오프 매트릭스 로드 실패: {e}")
 
-    def poll(self) -> list[PydanticEvent]:
+    def poll(self) -> List[PydanticEvent]:
         """
         현재 턴에 발생 가능한 이벤트를 폴링합니다.
 
@@ -113,13 +130,13 @@ class EventEngine:
             List[PydanticEvent]: 발생 가능한 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
-        triggered_events: list[PydanticEvent] = []
+        triggered_events: List[PydanticEvent] = []
 
-        events_to_iterate = (
-            self.events.events
-            if hasattr(self.events, "events") and isinstance(self.events.events, list)
-            else []
-        )
+        events_to_iterate = []
+        if self.events_container and hasattr(self.events_container, "events"):
+            events_to_iterate = self.events_container.events
+        elif self.events:
+            events_to_iterate = self.events
 
         for event_data in events_to_iterate:
             can_fire_event = True
@@ -156,7 +173,7 @@ class EventEngine:
         return triggered_events  # 실제 발생 "가능성이 있는" 이벤트 목록 반환
 
     def _evaluate_pydantic_trigger(
-        self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]
+        self, trigger: EventTrigger, current_metrics: Dict[MetricEnum, float]
     ) -> bool:
         """Pydantic EventTrigger 모델을 평가합니다."""
         metric_enum = getattr(
@@ -186,7 +203,7 @@ class EventEngine:
         print(f"[Debug] Unknown condition: {trigger.condition}")
         return False
 
-    def evaluate_triggers(self) -> list[PydanticEvent]:  # 반환 타입을 PydanticEvent로 명시
+    def evaluate_triggers(self) -> List[PydanticEvent]:  # 반환 타입을 PydanticEvent로 명시
         """
         임계값 기반 트리거를 평가합니다.
 
@@ -194,13 +211,13 @@ class EventEngine:
             List[PydanticEvent]: 트리거된 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
-        threshold_events: list[PydanticEvent] = []  # 타입 명시
+        threshold_events: List[PydanticEvent] = []  # 타입 명시
 
-        events_to_iterate = (
-            self.events.events
-            if hasattr(self.events, "events") and isinstance(self.events.events, list)
-            else []
-        )
+        events_to_iterate = []
+        if self.events_container and hasattr(self.events_container, "events"):
+            events_to_iterate = self.events_container.events
+        elif self.events:
+            events_to_iterate = self.events
 
         for event_data in events_to_iterate:
             if event_data.type != "THRESHOLD":
@@ -228,7 +245,7 @@ class EventEngine:
                 )  # 이벤트 발생 기록
         return threshold_events
 
-    def apply_effects(self) -> dict[MetricEnum, float]:
+    def apply_effects(self) -> Dict[MetricEnum, float]:
         """
         큐에 있는 모든 이벤트의 효과를 적용합니다.
 
@@ -253,9 +270,10 @@ class EventEngine:
             if can_fire_this_event:
                 event.last_fired = self.current_turn
 
-                updates: dict[MetricEnum, float] = {}
+                updates: Dict[MetricEnum, float] = {}
                 for effect_data in event.effects:
-                    metric_enum = getattr(MetricEnum, effect_data.metric.upper(), None)
+                    metric_name = effect_data.metric.upper()
+                    metric_enum = getattr(MetricEnum, metric_name, None)
                     if metric_enum and metric_enum in current_metrics:
                         current_value = current_metrics[metric_enum]
                         new_value = current_value
@@ -299,7 +317,7 @@ class EventEngine:
             current_metrics = self.metrics_tracker.get_metrics()
         return current_metrics
 
-    def _process_cascade_effects(self, changed_metrics: set[MetricEnum], depth: int) -> None:
+    def _process_cascade_effects(self, changed_metrics: Set[MetricEnum], depth: int) -> None:
         """
         지표 변화의 연쇄 효과를 처리합니다.
 
@@ -320,7 +338,7 @@ class EventEngine:
 
         # 연쇄 효과 적용
         cascade_updates = {}
-        next_changed_metrics = set()
+        next_changed_metrics: Set[MetricEnum] = set()
 
         for metric in changed_metrics:
             if metric not in self.cascade_matrix:
@@ -336,10 +354,13 @@ class EventEngine:
 
                 try:
                     # 대상 지표 확인
-                    target_metric = MetricEnum[target_metric_name]
+                    target_metric_enum = getattr(MetricEnum, target_metric_name.upper(), None)
+                    if target_metric_enum is None:
+                        print(f"Unknown target metric: {target_metric_name}")
+                        continue
 
                     # 현재 대상 지표 값 가져오기 (누적 적용을 위해)
-                    target_current_value = current_metrics[target_metric]
+                    target_current_value = current_metrics[target_metric_enum]
 
                     # 수식 평가 방식 결정
                     if "%" in formula:
@@ -369,8 +390,8 @@ class EventEngine:
                                 result = target_current_value + float(delta)
 
                     # 결과 저장
-                    cascade_updates[target_metric] = result
-                    next_changed_metrics.add(target_metric)
+                    cascade_updates[target_metric_enum] = result
+                    next_changed_metrics.add(target_metric_enum)
 
                     # 이벤트 메시지 추가
                     if "message" in edge:
@@ -387,7 +408,7 @@ class EventEngine:
             if next_changed_metrics:
                 self._process_cascade_effects(next_changed_metrics, depth + 1)
 
-    def update(self) -> dict[MetricEnum, float]:
+    def update(self) -> Dict[MetricEnum, float]:
         """
         이벤트 엔진을 한 턴 업데이트합니다.
 
@@ -406,7 +427,7 @@ class EventEngine:
         # 효과 적용
         return self.apply_effects()
 
-    def get_alerts(self, count: int | None = None) -> list[Alert]:
+    def get_alerts(self, count: Optional[int] = None) -> List[Alert]:
         """
         알림 큐에서 알림을 가져옵니다.
 
@@ -439,42 +460,45 @@ class EventEngine:
             return True
 
         # 간선 목록 생성
-        edges = []
+        edges: List[Tuple[str, str]] = []
         for source, targets in self.cascade_matrix.items():
             for edge in targets:
                 try:
-                    target = MetricEnum[edge["target"]]
-                    edges.append((source.name, target.name))
-                except KeyError:
-                    pass
+                    target_name = edge["target"]
+                    target_enum = getattr(MetricEnum, target_name.upper(), None)
+                    if target_enum is not None:
+                        edges.append((source.name, target_enum.name))
+                except (KeyError, AttributeError):
+                    print(f"Invalid edge: {edge}")
 
         # 그래프 생성
-        graph = defaultdict(list)
-        for source, target in edges:
-            graph[source].append(target)
+        graph: Dict[str, List[str]] = defaultdict(list)
+        for source_str, target_str in edges:
+            graph[source_str].append(target_str)
 
-        # 사이클 검출
-        visited = set()
-        temp = set()
-
-        def is_cyclic(node: str) -> bool:
-            """DFS로 사이클 검출"""
+        # 사이클 검사
+        def is_cyclic(node: str, visited: Set[str], rec_stack: Set[str]) -> bool:
+            """DFS를 사용하여 사이클 검사"""
             visited.add(node)
-            temp.add(node)
+            rec_stack.add(node)
 
             for neighbor in graph[node]:
                 if neighbor not in visited:
-                    if is_cyclic(neighbor):
+                    if is_cyclic(neighbor, visited, rec_stack):
                         return True
-                elif neighbor in temp:
+                elif neighbor in rec_stack:
                     return True
 
-            temp.remove(node)
+            rec_stack.remove(node)
             return False
+
+        # 모든 노드에 대해 사이클 검사
+        visited: Set[str] = set()
+        rec_stack: Set[str] = set()
 
         for node in graph:
             if node not in visited:
-                if is_cyclic(node):
+                if is_cyclic(node, visited, rec_stack):
                     return False
 
         return True

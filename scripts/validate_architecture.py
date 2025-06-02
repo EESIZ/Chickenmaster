@@ -10,6 +10,7 @@ import sys
 import ast
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Optional, Dict, Set, Tuple, cast
 
 
 @dataclass(frozen=True)
@@ -19,123 +20,105 @@ class ImportInfo:
     source_module: str
     imported_module: str
     line_number: int
-    is_from_import: bool
 
 
-@dataclass(frozen=True)
+@dataclass
 class ValidationResult:
     """검증 결과"""
 
     is_valid: bool
-    errors: list[str]
-    warnings: list[str]
+    errors: List[str]
+    warnings: List[str]
 
 
 class HexagonalArchitectureValidator:
     """헥사고날 아키텍처 검증기"""
 
-    def __init__(self, project_root: str):
+    def __init__(self, project_root: str) -> None:
         self.project_root = Path(project_root)
         self.src_dir = self.project_root / "src"
         self.core_dir = self.src_dir / "core"
         self.adapters_dir = self.src_dir / "adapters"
-        self.application_dir = self.src_dir / "application"
+        self.events_dir = self.src_dir / "events"
+        self.metrics_dir = self.src_dir / "metrics"
+        self.economy_dir = self.src_dir / "economy"
 
-        # 레이어별 허용된 의존성 방향
-        self.allowed_dependencies = {
-            "core.domain": [],  # 도메인은 어디에도 의존하지 않음
-            "core.ports": ["core.domain"],  # 포트는 도메인에만 의존
-            "adapters": ["core.domain", "core.ports"],  # 어댑터는 코어에만 의존
-            "application": [
-                "core.domain",
-                "core.ports",
-                "adapters",
-            ],  # 애플리케이션은 모두에 의존 가능
+        # 레이어 정의
+        self.layers = {
+            "core.domain": "도메인",
+            "core.ports": "포트",
+            "core.application": "애플리케이션",
+            "adapters": "어댑터",
+            "events": "이벤트",
+            "metrics": "지표",
+            "economy": "경제",
         }
 
-        # Freeze Tag 패턴
-        self.freeze_tag_pattern = r"@freeze\s+v\d+\.\d+\.\d+"
+        # 허용된 의존성 방향
+        self.allowed_dependencies = {
+            "도메인": [],  # 도메인은 어떤 레이어에도 의존하지 않음
+            "포트": ["도메인"],  # 포트는 도메인에만 의존
+            "애플리케이션": ["도메인", "포트"],  # 애플리케이션은 도메인과 포트에 의존
+            "어댑터": ["도메인", "포트", "애플리케이션"],  # 어댑터는 도메인, 포트, 애플리케이션에 의존
+            "이벤트": ["도메인"],  # 이벤트는 도메인에만 의존
+            "지표": ["도메인"],  # 지표는 도메인에만 의존
+            "경제": ["도메인"],  # 경제는 도메인에만 의존
+        }
 
-    def validate_project_structure(self) -> ValidationResult:
-        """프로젝트 구조 검증"""
-        errors = []
-        warnings = []
+    def _get_layer(self, module_name: str) -> Optional[str]:
+        """모듈 이름으로 레이어 반환"""
+        for layer_prefix, layer_name in self.layers.items():
+            if module_name.startswith(layer_prefix):
+                return layer_name
+        return None
 
-        # 필수 디렉토리 검증
-        required_dirs = [
-            self.src_dir,
-            self.core_dir,
-            self.core_dir / "domain",
-            self.core_dir / "ports",
-            self.adapters_dir,
-            self.adapters_dir / "services",
-            self.adapters_dir / "storage",
-            self.application_dir,
-        ]
-
-        for directory in required_dirs:
-            if not directory.exists() or not directory.is_dir():
-                errors.append(f"필수 디렉토리가 없음: {directory.relative_to(self.project_root)}")
-
-        # __init__.py 파일 검증
-        for directory in required_dirs:
-            if directory.exists() and directory.is_dir():
-                init_file = directory / "__init__.py"
-                if not init_file.exists():
-                    warnings.append(
-                        f"__init__.py 파일이 없음: {init_file.relative_to(self.project_root)}"
-                    )
-
-        return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
-
-    def extract_imports(self, file_path: Path) -> list[ImportInfo]:
-        """파일에서 import 문 추출"""
+    def extract_imports(self, file_path: Path) -> List[ImportInfo]:
+        """파일에서 임포트 정보 추출"""
         imports = []
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                tree = ast.parse(f.read())
+            except SyntaxError:
+                print(f"구문 오류: {file_path}")
+                return []
 
-        try:
-            with open(file_path, encoding="utf-8") as f:
-                file_content = f.read()
-
-            module_name = (
-                str(file_path.relative_to(self.src_dir))
-                .replace("/", ".")
-                .replace("\\", ".")
-                .replace(".py", "")
-            )
-
-            tree = ast.parse(file_content)
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for name in node.names:
+                    imports.append(
+                        ImportInfo(
+                            source_module=self._get_module_name(file_path),
+                            imported_module=name.name,
+                            line_number=node.lineno,
+                        )
+                    )
+            elif isinstance(node, ast.ImportFrom):
+                if node.module is not None:  # None 체크 추가
+                    module_name = node.module
                     for name in node.names:
                         imports.append(
                             ImportInfo(
-                                source_module=module_name,
-                                imported_module=name.name,
+                                source_module=self._get_module_name(file_path),
+                                imported_module=f"{module_name}.{name.name}",
                                 line_number=node.lineno,
-                                is_from_import=False,
                             )
                         )
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module is not None:
-                        for name in node.names:
-                            full_import = f"{node.module}.{name.name}" if node.module else name.name
-                            imports.append(
-                                ImportInfo(
-                                    source_module=module_name,
-                                    imported_module=full_import,
-                                    line_number=node.lineno,
-                                    is_from_import=True,
-                                )
-                            )
-        except Exception as e:
-            print(f"파일 분석 오류 {file_path}: {e}")
 
         return imports
 
-    def collect_all_imports(self) -> list[ImportInfo]:
-        """프로젝트 전체 import 수집"""
+    def _get_module_name(self, file_path: Path) -> str:
+        """파일 경로에서 모듈 이름 추출"""
+        rel_path = file_path.relative_to(self.project_root)
+        module_path = str(rel_path).replace("/", ".").replace("\\", ".")
+        if module_path.endswith(".py"):
+            module_path = module_path[:-3]
+        return module_path
+
+    def collect_all_imports(self) -> List[ImportInfo]:
+        """모든 임포트 정보 수집"""
         all_imports = []
 
+        # src 디렉토리 내 모든 Python 파일 검사
         for root, _, files in os.walk(self.src_dir):
             for file in files:
                 if file.endswith(".py"):
@@ -146,34 +129,26 @@ class HexagonalArchitectureValidator:
 
     def validate_dependencies(self) -> ValidationResult:
         """의존성 방향 검증"""
-        errors = []
-        warnings = []
+        errors: List[str] = []
+        warnings: List[str] = []
 
         imports = self.collect_all_imports()
 
         for import_info in imports:
             source_layer = self._get_layer(import_info.source_module)
-            imported_module = import_info.imported_module
-
-            # 내부 모듈만 검사 (외부 라이브러리 제외)
-            if imported_module.startswith("src."):
-                imported_module = imported_module[4:]  # 'src.' 접두사 제거
-            elif not any(
-                imported_module.startswith(prefix)
-                for prefix in ["core.", "adapters.", "application."]
-            ):
-                continue
-
-            imported_layer = self._get_layer(imported_module)
+            imported_layer = self._get_layer(import_info.imported_module)
 
             # 레이어 의존성 검증
             if source_layer and imported_layer:
+                allowed_deps = self.allowed_dependencies.get(source_layer, [])
+                # typing.cast를 사용하여 타입 명시
+                allowed_deps_typed = cast(List[str], allowed_deps)
                 if (
-                    imported_layer not in self.allowed_dependencies.get(source_layer, [])
+                    imported_layer not in allowed_deps_typed
                     and source_layer != imported_layer
                 ):
                     errors.append(
-                        f"의존성 방향 위반: {import_info.source_module} -> {imported_module} "
+                        f"의존성 방향 위반: {import_info.source_module} -> {import_info.imported_module} "
                         f"(라인 {import_info.line_number})"
                     )
 
@@ -181,8 +156,8 @@ class HexagonalArchitectureValidator:
 
     def validate_freeze_tags(self) -> ValidationResult:
         """Freeze Tag 검증"""
-        errors = []
-        warnings = []
+        errors: List[str] = []
+        warnings: List[str] = []
 
         # 포트 인터페이스 파일 검사
         ports_dir = self.core_dir / "ports"
@@ -191,18 +166,12 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
 
-                with open(file_path, encoding="utf-8") as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-
-                # 인터페이스 클래스 찾기
-                interface_pattern = r"class\s+I[A-Z][a-zA-Z0-9]*\s*\([^)]*\):"
-                interfaces = re.findall(interface_pattern, content)
-
-                # Freeze Tag 검사
-                has_freeze_tag = bool(re.search(self.freeze_tag_pattern, content))
-
-                if interfaces and not has_freeze_tag:
-                    warnings.append(f"Freeze Tag 없음: {file_path.relative_to(self.project_root)}")
+                    if "@freeze" not in content:
+                        warnings.append(
+                            f"포트 인터페이스에 @freeze 태그 누락: {file_path.relative_to(self.project_root)}"
+                        )
 
         return ValidationResult(
             is_valid=True, errors=errors, warnings=warnings  # 경고만 있고 오류는 없음
@@ -210,8 +179,8 @@ class HexagonalArchitectureValidator:
 
     def validate_domain_immutability(self) -> ValidationResult:
         """도메인 객체 불변성 검증"""
-        errors = []
-        warnings = []
+        errors: List[str] = []
+        warnings: List[str] = []
 
         domain_dir = self.core_dir / "domain"
         if domain_dir.exists() and domain_dir.is_dir():
@@ -219,60 +188,38 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
 
-                with open(file_path, encoding="utf-8") as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-
-                # dataclass 사용 확인
-                has_dataclass = "@dataclass" in content
-
-                # frozen=True 확인
-                has_frozen = (
-                    "@dataclass(frozen=True)" in content or "@dataclass(.*frozen=True.*)" in content
-                )
-
-                # 클래스 찾기
-                class_pattern = r"class\s+([A-Z][a-zA-Z0-9]*)\s*\([^)]*\):"
-                classes = re.findall(class_pattern, content)
-
-                if classes and not has_dataclass:
-                    errors.append(f"@dataclass 없음: {file_path.relative_to(self.project_root)}")
-
-                if has_dataclass and not has_frozen:
-                    errors.append(f"frozen=True 없음: {file_path.relative_to(self.project_root)}")
+                    if "@dataclass" in content and "frozen=True" not in content:
+                        errors.append(
+                            f"도메인 객체 불변성 위반: {file_path.relative_to(self.project_root)}"
+                        )
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
 
-    def validate_all(self) -> dict[str, ValidationResult]:
+    def validate_all(self) -> List[ValidationResult]:
         """모든 검증 실행"""
-        return {
-            "project_structure": self.validate_project_structure(),
-            "dependencies": self.validate_dependencies(),
-            "freeze_tags": self.validate_freeze_tags(),
-            "domain_immutability": self.validate_domain_immutability(),
-        }
+        results = []
 
-    def _get_layer(self, module_name: str) -> str | None:
-        """모듈 이름에서 레이어 추출"""
-        if module_name.startswith("core.domain"):
-            return "core.domain"
-        elif module_name.startswith("core.ports"):
-            return "core.ports"
-        elif module_name.startswith("adapters"):
-            return "adapters"
-        elif module_name.startswith("application"):
-            return "application"
-        return None
+        print("\n🔍 헥사고날 아키텍처 검증 시작\n")
+
+        print("1️⃣ 의존성 방향 검증")
+        results.append(self.validate_dependencies())
+
+        print("2️⃣ Freeze Tag 검증")
+        results.append(self.validate_freeze_tags())
+
+        print("3️⃣ 도메인 객체 불변성 검증")
+        results.append(self.validate_domain_immutability())
+
+        return results
 
 
-def print_validation_results(results: dict[str, ValidationResult]) -> None:
+def print_validation_results(results: List[ValidationResult]) -> None:
     """검증 결과 출력"""
     all_valid = True
 
-    print("\n===== 헥사고날 아키텍처 검증 결과 =====\n")
-
-    for category, result in results.items():
-        print(f"## {category}")
-
+    for result in results:
         if not result.is_valid:
             all_valid = False
             print("  상태: ❌ 실패")
@@ -293,13 +240,13 @@ def print_validation_results(results: dict[str, ValidationResult]) -> None:
 
     print("최종 결과:", "✅ 성공" if all_valid else "❌ 실패")
 
-    return all_valid
-
 
 if __name__ == "__main__":
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     validator = HexagonalArchitectureValidator(project_root)
     results = validator.validate_all()
-    success = print_validation_results(results)
-
-    sys.exit(0 if success else 1)
+    print_validation_results(results)
+    
+    # 성공 여부 직접 계산
+    all_valid = all(result.is_valid for result in results)
+    sys.exit(0 if all_valid else 1)

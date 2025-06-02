@@ -6,6 +6,7 @@
 """
 
 from abc import ABC, abstractmethod
+from typing import List, Optional
 
 from ..domain.events import Event
 from ..domain.game_state import GameState
@@ -16,8 +17,8 @@ class IEventService(ABC):
 
     @abstractmethod
     def get_applicable_events(
-        self, game_state: GameState, category: str | None = None
-    ) -> list[Event]:
+        self, game_state: GameState, category: Optional[str] = None
+    ) -> List[Event]:
         """현재 상태에서 발생 가능한 이벤트 목록 반환
 
         Args:
@@ -78,5 +79,30 @@ class IEventService(ABC):
 
         Returns:
             이벤트 발생 가능 여부 (True: 쿨다운 종료, False: 쿨다운 중)
+        """
+        pass
+
+    @abstractmethod
+    def get_event_by_id(self, event_id: str) -> Optional[Event]:
+        """ID로 이벤트 조회
+
+        Args:
+            event_id: 이벤트 ID
+
+        Returns:
+            이벤트 객체 또는 None (이벤트가 없는 경우)
+        """
+        pass
+
+    @abstractmethod
+    def apply_event(self, event: Event, game_state: GameState) -> GameState:
+        """이벤트를 적용하여 게임 상태 업데이트
+
+        Args:
+            event: 적용할 이벤트
+            game_state: 현재 게임 상태
+
+        Returns:
+            업데이트된 게임 상태
         """
         pass
