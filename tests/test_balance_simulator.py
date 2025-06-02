@@ -10,6 +10,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple
 
 import pytest
 
@@ -20,7 +21,7 @@ TEST_DATA_DIR = Path(__file__).parent / "test_data" / "balance_simulator"
 
 
 @pytest.fixture
-def setup_test_data():
+def setup_test_data() -> Generator[None, None, None]:
     """테스트 데이터 디렉토리 설정"""
     os.makedirs(TEST_DATA_DIR, exist_ok=True)
     os.makedirs(TEST_DATA_DIR / "daily_routine", exist_ok=True)
@@ -139,7 +140,7 @@ def setup_test_data():
 
 
 # 테스트 1: 시뮬레이션 설정 유효성 검증
-def test_simulation_config_validation():
+def test_simulation_config_validation() -> None:
     """시뮬레이션 설정 유효성 검증 테스트"""
     # 유효한 설정
     # valid_config = SimulationConfig(
@@ -168,7 +169,7 @@ def test_simulation_config_validation():
 
 
 # 테스트 2: 게임 상태 기본 기능
-def test_game_state_basic_functionality():
+def test_game_state_basic_functionality() -> None:
     """게임 상태 기본 기능 테스트"""
     # 기본 상태 생성
     # state = GameState()
@@ -241,7 +242,7 @@ def test_game_state_basic_functionality():
 
 
 # 테스트 3: 이벤트 시뮬레이터 초기화 및 이벤트 로드
-def test_event_simulator_initialization(setup_test_data):
+def test_event_simulator_initialization(setup_test_data: None) -> None:
     """이벤트 시뮬레이터 초기화 및 이벤트 로드 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -264,7 +265,7 @@ def test_event_simulator_initialization(setup_test_data):
 
 
 # 테스트 4: 조건 평가
-def test_condition_evaluation():
+def test_condition_evaluation() -> None:
     """조건 평가 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -310,7 +311,7 @@ def test_condition_evaluation():
 
 
 # 테스트 5: 트리거 가능한 이벤트 확인
-def test_triggerable_events(setup_test_data):
+def test_triggerable_events(setup_test_data: None) -> None:
     """트리거 가능한 이벤트 확인 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -336,7 +337,7 @@ def test_triggerable_events(setup_test_data):
 
 
 # 테스트 6: 선택지 선택 및 효과 적용
-def test_choice_selection_and_effect_application(setup_test_data):
+def test_choice_selection_and_effect_application(setup_test_data: None) -> None:
     """선택지 선택 및 효과 적용 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -387,7 +388,7 @@ def test_choice_selection_and_effect_application(setup_test_data):
 
 
 # 테스트 7: 이벤트 연쇄 시뮬레이션
-def test_cascade_simulation(setup_test_data):
+def test_cascade_simulation(setup_test_data: None) -> None:
     """이벤트 연쇄 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42, cascade_depth_limit=3)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -418,7 +419,7 @@ def test_cascade_simulation(setup_test_data):
 
 
 # 테스트 8: 턴 및 일일 시뮬레이션
-def test_turn_and_day_simulation(setup_test_data):
+def test_turn_and_day_simulation(setup_test_data: None) -> None:
     """턴 및 일일 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -446,7 +447,7 @@ def test_turn_and_day_simulation(setup_test_data):
 
 
 # 테스트 9: 전체 게임 시뮬레이션
-def test_game_simulation(setup_test_data):
+def test_game_simulation(setup_test_data: None) -> None:
     """전체 게임 시뮬레이션 테스트"""
     # config = SimulationConfig(seed=42, turns_per_sim=5)
     # simulator = EventSimulator(TEST_DATA_DIR, config)
@@ -478,7 +479,7 @@ def test_game_simulation(setup_test_data):
 
 
 # 테스트 10: 보고서 생성 및 시각화
-def test_report_generation(setup_test_data):
+def test_report_generation(setup_test_data: None) -> None:
     """보고서 생성 및 시각화 테스트"""
     # config = SimulationConfig(seed=42, iterations=2, turns_per_sim=3)
     # simulator = EventSimulator(TEST_DATA_DIR, config)

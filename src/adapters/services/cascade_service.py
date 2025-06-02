@@ -4,8 +4,9 @@
 이 모듈은 ICascadeService 인터페이스를 구현하여 연쇄 이벤트 처리 기능을 제공합니다.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
+from typing import Dict, FrozenSet, List, Optional, Set, Tuple
 
 from ...core.ports.cascade_port import ICascadeService
 from ...core.ports.event_port import IEventService
@@ -17,6 +18,7 @@ from ...core.domain.cascade import (
     CascadeType,
     PendingEvent,
     CascadeResult,
+    TriggerCondition,
 )
 
 
@@ -30,8 +32,8 @@ class CascadeServiceImpl(ICascadeService):
             event_service: 이벤트 서비스 인스턴스
         """
         self._event_service = event_service
-        self._cascade_chains: dict[str, CascadeChain] = {}
-        self._pending_events: list[PendingEvent] = []
+        self._cascade_chains: Dict[str, CascadeChain] = {}
+        self._pending_events: List[PendingEvent] = []
         self._max_cascade_depth = 5  # 기본 최대 연쇄 깊이
 
     def register_cascade_relation(
@@ -39,10 +41,10 @@ class CascadeServiceImpl(ICascadeService):
         trigger_event_id: str,
         target_event_id: str,
         cascade_type: CascadeType,
-        delay=None,
-        conditions=None,
-        probability=1.0,
-        impact_factor=1.0,
+        delay: Optional[timedelta] = None,
+        conditions: Optional[List[TriggerCondition]] = None,
+        probability: float = 1.0,
+        impact_factor: float = 1.0,
     ) -> None:
         """연쇄 관계 등록
 
@@ -70,17 +72,29 @@ class CascadeServiceImpl(ICascadeService):
 
         # 체인에 노드 추가
         if trigger_event_id not in self._cascade_chains:
+            # 초기 노드 맵 생성
+            nodes_dict: Dict[str, FrozenSet[CascadeNode]] = {}
+            
             self._cascade_chains[trigger_event_id] = CascadeChain(
-                trigger_event_id=trigger_event_id, nodes={}, max_depth=self._max_cascade_depth
+                trigger_event_id=trigger_event_id, 
+                nodes=nodes_dict, 
+                max_depth=self._max_cascade_depth
             )
 
         chain = self._cascade_chains[trigger_event_id]
+        
+        # 노드 집합 업데이트
         if trigger_event_id not in chain.nodes:
-            chain.nodes[trigger_event_id] = set()
+            # 새 frozenset 생성
+            nodes_set: FrozenSet[CascadeNode] = frozenset([node])
+            chain.nodes[trigger_event_id] = nodes_set
+        else:
+            # 기존 frozenset에 노드 추가
+            existing_nodes = set(chain.nodes[trigger_event_id])
+            existing_nodes.add(node)
+            chain.nodes[trigger_event_id] = frozenset(existing_nodes)
 
-        chain.nodes[trigger_event_id].add(node)
-
-    def get_cascade_events(self, trigger_event: Event, game_state: GameState) -> list[Event]:
+    def get_cascade_events(self, trigger_event: Event, game_state: GameState) -> List[Event]:
         """트리거 이벤트로 인한 연쇄 이벤트 목록
 
         Args:
@@ -90,7 +104,7 @@ class CascadeServiceImpl(ICascadeService):
         Returns:
             연쇄 발생 이벤트 목록
         """
-        result_events = []
+        result_events: List[Event] = []
 
         # 해당 이벤트에 대한 연쇄 체인이 없으면 빈 목록 반환
         if trigger_event.id not in self._cascade_chains:
@@ -155,7 +169,7 @@ class CascadeServiceImpl(ICascadeService):
         if initial_event.id not in self._cascade_chains:
             return 0
 
-        visited = set()
+        visited: Set[str] = set()
 
         def dfs(event_id: str, depth: int) -> int:
             if event_id in visited:
@@ -191,7 +205,7 @@ class CascadeServiceImpl(ICascadeService):
 
     def process_cascade_chain(
         self, trigger_event: Event, game_state: GameState, max_depth: int = 5
-    ) -> tuple[list[Event], GameState]:
+    ) -> Tuple[List[Event], GameState]:
         """전체 연쇄 체인 처리
 
         Args:
@@ -203,15 +217,15 @@ class CascadeServiceImpl(ICascadeService):
             (발생한 모든 이벤트 목록, 최종 게임 상태) 튜플
         """
         self._max_cascade_depth = max_depth
-        processed_events = [trigger_event]
-        pending_events = []
-        metrics_impact = {}
+        processed_events: List[Event] = [trigger_event]
+        pending_events: List[PendingEvent] = []
+        metrics_impact: Dict[str, float] = {}
         current_depth = 0
         cycle_detected = False
 
         # BFS로 연쇄 관계 탐색
-        queue = [(trigger_event, 0)]  # (이벤트, 깊이)
-        visited = {trigger_event.id}
+        queue: List[Tuple[Event, int]] = [(trigger_event, 0)]  # (이벤트, 깊이)
+        visited: Set[str] = {trigger_event.id}
 
         while queue and current_depth <= max_depth:
             current_event, depth = queue.pop(0)
@@ -234,11 +248,12 @@ class CascadeServiceImpl(ICascadeService):
                 game_state = self._event_service.apply_event(event, game_state)
 
                 # 지표 영향 기록
-                for metric, value in event.metrics_impact.items():
-                    if metric in metrics_impact:
-                        metrics_impact[metric] += value
-                    else:
-                        metrics_impact[metric] = value
+                if hasattr(event, 'metrics_impact'):
+                    for metric, value in event.metrics_impact.items():
+                        if metric in metrics_impact:
+                            metrics_impact[metric] += value
+                        else:
+                            metrics_impact[metric] = value
 
                 # 다음 깊이 탐색 예약
                 if depth + 1 <= max_depth:
@@ -250,7 +265,7 @@ class CascadeServiceImpl(ICascadeService):
                 pending_events.append(pending)
 
         # 결과 생성 - 튜플로 변환하여 불변성 보장
-        CascadeResult(
+        result = CascadeResult(
             events=tuple(processed_events),  # List → Tuple
             pending_events=tuple(pending_events),  # List → Tuple
             metrics_impact=metrics_impact,
@@ -260,7 +275,7 @@ class CascadeServiceImpl(ICascadeService):
 
         return processed_events, game_state
 
-    def check_cascade_cycle(self, event_chain: list[Event]) -> bool:
+    def check_cascade_cycle(self, event_chain: List[Event]) -> bool:
         """연쇄 효과 사이클 검사
 
         Args:

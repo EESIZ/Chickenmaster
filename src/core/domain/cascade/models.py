@@ -10,6 +10,7 @@ Cascade 모듈의 도메인 모델.
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from datetime import datetime, timedelta
+from typing import Dict, FrozenSet, Optional, Set, Tuple
 
 from ..events import Event
 from ..game_state import GameState
@@ -47,17 +48,17 @@ class TriggerCondition:
         current_value = game_state.metrics[self.metric_name]
 
         if self.comparison == ">":
-            return current_value > self.threshold
+            return bool(current_value > self.threshold)
         elif self.comparison == "<":
-            return current_value < self.threshold
+            return bool(current_value < self.threshold)
         elif self.comparison == ">=":
-            return current_value >= self.threshold
+            return bool(current_value >= self.threshold)
         elif self.comparison == "<=":
-            return current_value <= self.threshold
+            return bool(current_value <= self.threshold)
         elif self.comparison == "==":
-            return current_value == self.threshold
+            return bool(current_value == self.threshold)
         elif self.comparison == "!=":
-            return current_value != self.threshold
+            return bool(current_value != self.threshold)
         else:
             return False  # 알 수 없는 비교 연산자
 
@@ -68,7 +69,7 @@ class PendingEvent:
 
     event: Event
     trigger_time: datetime
-    conditions: tuple[TriggerCondition, ...] = field(
+    conditions: Tuple[TriggerCondition, ...] = field(
         default_factory=tuple
     )  # List → Tuple로 변경 (hashable)
     probability: float = 1.0  # 발생 확률 (0.0 ~ 1.0)
@@ -101,8 +102,8 @@ class CascadeNode:
 
     event_id: str
     cascade_type: CascadeType
-    delay: timedelta | None = None
-    conditions: tuple[TriggerCondition, ...] = field(
+    delay: Optional[timedelta] = None
+    conditions: Tuple[TriggerCondition, ...] = field(
         default_factory=tuple
     )  # List → Tuple로 변경 (hashable)
     probability: float = 1.0
@@ -125,10 +126,10 @@ class CascadeChain:
     """연쇄 이벤트 체인"""
 
     trigger_event_id: str
-    nodes: dict[str, frozenset[CascadeNode]]  # Set → FrozenSet으로 변경 (hashable)
+    nodes: Dict[str, FrozenSet[CascadeNode]]  # Set → FrozenSet으로 변경 (hashable)
     max_depth: int = 5
 
-    def get_next_nodes(self, event_id: str) -> frozenset[CascadeNode]:
+    def get_next_nodes(self, event_id: str) -> FrozenSet[CascadeNode]:
         """다음 연쇄 노드 목록
 
         Args:
@@ -145,8 +146,8 @@ class CascadeChain:
         Returns:
             사이클 존재 여부
         """
-        visited = set()
-        path = set()
+        visited: Set[str] = set()
+        path: Set[str] = set()
 
         def dfs(node_id: str) -> bool:
             if node_id in path:
@@ -164,16 +165,16 @@ class CascadeChain:
             path.remove(node_id)
             return False
 
-        return dfs(self.trigger_event_id)
+        return bool(dfs(self.trigger_event_id))
 
 
 @dataclass(frozen=True)
 class CascadeResult:
     """연쇄 이벤트 처리 결과"""
 
-    events: tuple[Event, ...]  # List → Tuple로 변경 (hashable)
-    pending_events: tuple[PendingEvent, ...]  # List → Tuple로 변경 (hashable)
-    metrics_impact: dict[str, float]
+    events: Tuple[Event, ...]  # List → Tuple로 변경 (hashable)
+    pending_events: Tuple[PendingEvent, ...]  # List → Tuple로 변경 (hashable)
+    metrics_impact: Dict[str, float]
     max_depth_reached: int
     cycle_detected: bool = False
 
