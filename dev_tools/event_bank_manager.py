@@ -18,6 +18,7 @@ from typing import Any, ClassVar
 from tqdm import tqdm
 
 from dev_tools.config import EVENT_CATEGORIES
+from game_constants import SCORE_THRESHOLD_HIGH, SCORE_THRESHOLD_MEDIUM
 
 # 프로젝트 루트 경로 설정 (절대 경로 사용)
 # 이 파일의 위치를 기준으로 프로젝트 루트를 추정합니다.
@@ -113,8 +114,6 @@ class EventBankManager:
     CATEGORIES = EVENT_CATEGORIES
 
     # 상수 정의
-    SCORE_THRESHOLD_HIGH = 0.7
-    SCORE_THRESHOLD_MEDIUM = 0.5
     EVENT_TYPES: ClassVar[list[str]] = ["RANDOM", "THRESHOLD", "SCHEDULED", "CASCADE"]
 
     def __init__(self) -> None:
@@ -352,10 +351,8 @@ class EventBankManager:
         for name, score in category_metrics.items():
             status = (
                 "✅"
-                if score >= self.SCORE_THRESHOLD_HIGH
-                else "⚠️"
-                if score >= self.SCORE_THRESHOLD_MEDIUM
-                else "❌"
+                if score >= SCORE_THRESHOLD_HIGH
+                else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
             )
             print(f"  {status} {name}: {score:.2f}")
             sys.stdout.flush()
@@ -427,10 +424,8 @@ class EventBankManager:
                 for name, score in balance_scores.items():
                     status = (
                         "✅"
-                        if score >= BALANCE_SCORE_GOOD_THRESHOLD
-                        else "⚠️"
-                        if score >= BALANCE_SCORE_NORMAL_THRESHOLD
-                        else "❌"
+                        if score >= SCORE_THRESHOLD_HIGH
+                        else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
                     )
                     print(f"  {status} {name}: {score:.2f}")
                     sys.stdout.flush()
@@ -507,43 +502,72 @@ class EventBankManager:
         Returns:
             저장된 파일 경로
         """
-        print(f"📤 이벤트 뱅크 내보내기 시작: {output_path}")
+        print("📤 이벤트 뱅크 내보내기 시작...")
         sys.stdout.flush()
 
-        # 모든 이벤트를 하나의 리스트로 병합
+        # 모든 이벤트를 하나의 리스트로 합치기
         all_events = []
-        for events in self.events.values():
-            all_events.extend(events)
+        for category, events in self.events.items():
+            for event in events:
+                # _source_file 필드 제거
+                event_copy = event.copy()
+                event_copy.pop("_source_file", None)
+                all_events.append(event_copy)
 
-        if not all_events:
-            print("❌ 내보낼 이벤트가 없습니다.")
-            sys.stdout.flush()
-            return ""
-
-        # 통계 데이터 생성
-        stats = self.generate_bank_statistics()
-
-        # 출력 데이터 구성
-        output_data = {
-            "metadata": {
-                "version": "1.0.0",
-                "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "total_events": len(all_events),
-                "statistics": stats,
-            },
-            "events": all_events,
-        }
-
-        # JSON 파일 저장
+        # 결과 저장
         if not self.dry_run:
             with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(output_data, f, ensure_ascii=False, indent=2)
-            print(f"✅ {len(all_events)}개 이벤트가 {output_path}에 저장되었습니다.")
+                json.dump({"events": all_events}, f, ensure_ascii=False, indent=2)
+            print(f"✅ 이벤트 뱅크가 {output_path}에 저장되었습니다.")
         else:
-            print(f"🔍 [DRY RUN] {len(all_events)}개 이벤트가 {output_path}에 저장됩니다.")
+            print(f"🔍 [DRY RUN] 이벤트 뱅크가 {output_path}에 저장됩니다.")
 
         sys.stdout.flush()
         return str(output_path)
+
+    def export_bank_by_category(self, output_dir: Path) -> list[str]:
+        """
+        이벤트 뱅크를 카테고리별로 내보내기
+
+        Args:
+            output_dir: 출력 디렉토리 경로
+
+        Returns:
+            저장된 파일 경로 목록
+        """
+        print("📤 카테고리별 이벤트 뱅크 내보내기 시작...")
+        sys.stdout.flush()
+
+        output_dir.mkdir(exist_ok=True, parents=True)
+        saved_files = []
+
+        for category, events in self.events.items():
+            if not events:
+                print(f"⚠️ '{category}' 카테고리에 이벤트 없음, 건너뜀")
+                sys.stdout.flush()
+                continue
+
+            # _source_file 필드 제거
+            cleaned_events = []
+            for event in events:
+                event_copy = event.copy()
+                event_copy.pop("_source_file", None)
+                cleaned_events.append(event_copy)
+
+            # 결과 저장
+            output_path = output_dir / f"{category}.json"
+            if not self.dry_run:
+                with open(output_path, "w", encoding="utf-8") as f:
+                    json.dump({"events": cleaned_events}, f, ensure_ascii=False, indent=2)
+                print(f"✅ '{category}' 카테고리 이벤트가 {output_path}에 저장되었습니다.")
+                saved_files.append(str(output_path))
+            else:
+                print(f"🔍 [DRY RUN] '{category}' 카테고리 이벤트가 {output_path}에 저장됩니다.")
+                saved_files.append(str(output_path))
+
+            sys.stdout.flush()
+
+        return saved_files
 
     def backup_event_bank(self) -> str:
         """
@@ -552,54 +576,93 @@ class EventBankManager:
         Returns:
             백업 디렉토리 경로
         """
-        print("💾 이벤트 뱅크 백업 시작...")
+        print("📦 이벤트 뱅크 백업 시작...")
         sys.stdout.flush()
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_dir = Path(f"backups/events_{timestamp}")
+        # 백업 디렉토리 생성
+        timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
+        backup_dir = self.out_dir / f"backup_{timestamp}"
+        backup_dir.mkdir(exist_ok=True, parents=True)
 
-        if not self.dry_run:
-            backup_dir.mkdir(parents=True, exist_ok=True)
+        # 각 카테고리 디렉토리 복사
+        for category in self.CATEGORIES:
+            category_dir = self.data_dir / category
+            if category_dir.exists():
+                backup_category_dir = backup_dir / category
+                if not self.dry_run:
+                    shutil.copytree(category_dir, backup_category_dir)
+                    print(f"✅ '{category}' 카테고리 백업 완료")
+                else:
+                    print(f"🔍 [DRY RUN] '{category}' 카테고리 백업 예정")
+                sys.stdout.flush()
 
-            # 데이터 디렉토리 복사
-            shutil.copytree(self.data_dir, backup_dir / "data", dirs_exist_ok=True)
-
-            # 통계 데이터 저장
-            stats = self.generate_bank_statistics()
-            with open(backup_dir / "statistics.json", "w", encoding="utf-8") as f:
-                json.dump(stats, f, ensure_ascii=False, indent=2)
-
-            print(f"✅ 이벤트 뱅크가 {backup_dir}에 백업되었습니다.")
-        else:
-            print(f"🔍 [DRY RUN] 이벤트 뱅크가 {backup_dir}에 백업됩니다.")
-
+        print(f"✅ 백업이 {backup_dir}에 완료되었습니다.")
         sys.stdout.flush()
         return str(backup_dir)
 
-    def generate_event_id(self, category: str) -> str:
+    def merge_event_banks(self, source_dir: Path) -> int:
         """
-        새 이벤트 ID 생성
+        다른 이벤트 뱅크 병합
 
         Args:
-            category: 이벤트 카테고리
+            source_dir: 소스 이벤트 뱅크 디렉토리
 
         Returns:
-            생성된 이벤트 ID
+            병합된 이벤트 수
         """
-        # 해당 카테고리의 기존 ID 수집
-        existing_ids = set()
-        for event in self.events.get(category, []):
-            event_id = event.get("id", "")
-            if event_id:
-                existing_ids.add(event_id)
+        print(f"🔄 이벤트 뱅크 병합 시작: {source_dir}")
+        sys.stdout.flush()
 
-        # 새 ID 생성
-        counter = 1
-        while True:
-            new_id = f"{category}_{counter:03d}"
-            if new_id not in existing_ids:
-                return new_id
-            counter += 1
+        if not source_dir.exists():
+            print(f"❌ 소스 디렉토리가 존재하지 않습니다: {source_dir}")
+            sys.stdout.flush()
+            return 0
+
+        merged_count = 0
+
+        # 각 카테고리 디렉토리 처리
+        for category in self.CATEGORIES:
+            source_category_dir = source_dir / category
+            if not source_category_dir.exists():
+                print(f"⚠️ 소스에 '{category}' 카테고리 없음, 건너뜀")
+                sys.stdout.flush()
+                continue
+
+            # TOML 파일 처리
+            for file_path in source_category_dir.glob("*.toml"):
+                target_path = self.data_dir / category / file_path.name
+                if target_path.exists():
+                    print(f"⚠️ 대상 파일이 이미 존재합니다: {target_path}")
+                    sys.stdout.flush()
+                    continue
+
+                if not self.dry_run:
+                    shutil.copy2(file_path, target_path)
+                    print(f"✅ 파일 복사 완료: {file_path.name}")
+                else:
+                    print(f"🔍 [DRY RUN] 파일 복사 예정: {file_path.name}")
+                sys.stdout.flush()
+                merged_count += 1
+
+            # JSON 파일 처리
+            for file_path in source_category_dir.glob("*.json"):
+                target_path = self.data_dir / category / file_path.name
+                if target_path.exists():
+                    print(f"⚠️ 대상 파일이 이미 존재합니다: {target_path}")
+                    sys.stdout.flush()
+                    continue
+
+                if not self.dry_run:
+                    shutil.copy2(file_path, target_path)
+                    print(f"✅ 파일 복사 완료: {file_path.name}")
+                else:
+                    print(f"🔍 [DRY RUN] 파일 복사 예정: {file_path.name}")
+                sys.stdout.flush()
+                merged_count += 1
+
+        print(f"✅ 병합 완료: {merged_count}개 파일 병합됨")
+        sys.stdout.flush()
+        return merged_count
 
     def print_balance_report(self, balance_metrics: dict[str, Any]) -> None:
         """밸런스 분석 결과를 보기 좋게 출력합니다."""
@@ -629,143 +692,106 @@ class EventBankManager:
 
 
 def main() -> int:
-    print("🚀 이벤트 뱅크 관리 도구 시작...")
-    sys.stdout.flush()
-
-    parser = argparse.ArgumentParser(description="치킨집 경영 게임 이벤트 뱅크 관리 도구")
-    parser.add_argument("--load", action="store_true", help="모든 이벤트 로드")
-    parser.add_argument("--validate", action="store_true", help="모든 이벤트 검증")
-    parser.add_argument("--metrics", action="store_true", help="품질 메트릭 계산")
+    """메인 함수"""
+    parser = argparse.ArgumentParser(description="이벤트 뱅크 관리 도구")
+    parser.add_argument("--load", action="store_true", help="모든 이벤트 로드 및 통계 출력")
+    parser.add_argument("--validate", action="store_true", help="모든 이벤트 검증 및 리포트 생성")
+    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
     parser.add_argument("--simulate", action="store_true", help="밸런스 시뮬레이션 실행")
-    parser.add_argument("--turns", type=int, default=100, help="시뮬레이션할 턴 수 (기본값: 100)")
-    parser.add_argument("--export", type=str, help="이벤트 뱅크를 JSON 파일로 내보내기")
+    parser.add_argument("--export", action="store_true", help="이벤트 뱅크 내보내기")
     parser.add_argument("--backup", action="store_true", help="이벤트 뱅크 백업")
-    parser.add_argument("--stats", action="store_true", help="이벤트 뱅크 통계 출력")
-    parser.add_argument("--save-report", type=str, help="검증 결과를 지정된 경로에 저장")
-    parser.add_argument("--dry-run", action="store_true", help="실제 파일 변경 없이 시뮬레이션만 수행")
+    parser.add_argument("--merge", type=str, help="다른 이벤트 뱅크 병합 (디렉토리 경로)")
+    parser.add_argument("--dry-run", action="store_true", help="실제 파일 변경 없이 실행")
+    parser.add_argument("--output", type=str, default="out", help="출력 디렉토리 (기본값: out)")
 
     args = parser.parse_args()
-    print(f"📋 명령줄 인자: {args}")
-    sys.stdout.flush()
 
-    manager = EventBankManager()
-
-    # dry-run 모드 설정
-    if args.dry_run:
-        print("🔍 DRY RUN 모드: 실제 파일 변경이 발생하지 않습니다.")
-        sys.stdout.flush()
-        manager.dry_run = True
-
-    # 기본 동작: 모든 이벤트 로드
+    # 기본 작업 설정
     if not any(
         [
             args.load,
             args.validate,
-            args.metrics,
+            args.quality,
             args.simulate,
             args.export,
             args.backup,
-            args.stats,
+            args.merge,
         ]
     ):
-        print("ℹ️ 기본 동작: 모든 이벤트 로드")
-        sys.stdout.flush()
-        args.load = True
+        args.load = True  # 기본 작업: 로드
 
-    # 이벤트 로드
+    # 이벤트 뱅크 관리자 초기화
+    manager = EventBankManager()
+    manager.dry_run = args.dry_run
+    manager.out_dir = Path(args.output)
+    manager.out_dir.mkdir(exist_ok=True)
+
+    # 작업 실행
     if args.load:
-        print("📂 이벤트 로드 옵션 실행")
-        sys.stdout.flush()
         manager.load_all_events()
-
-    # 이벤트 검증
-    if args.validate:
-        print("🔍 이벤트 검증 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
-        manager.validate_all_events()
-
-        # 검증 결과 저장
-        if args.save_report:
-            manager.save_validation_report(Path(args.save_report))
-        else:
-            manager.save_validation_report()
-
-    # 품질 메트릭 계산
-    if args.metrics:
-        print("📊 품질 메트릭 계산 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
-        manager.calculate_quality_metrics()
-
-    # 밸런스 시뮬레이션
-    if args.simulate:
-        print("🔄 밸런스 시뮬레이션 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
-        manager.run_balance_simulation(turns=args.turns)
-
-    # 이벤트 뱅크 내보내기
-    if args.export:
-        print("📤 이벤트 뱅크 내보내기 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
-        manager.export_bank_to_json(Path(args.export))
-
-    # 이벤트 뱅크 백업
-    if args.backup:
-        print("💾 이벤트 뱅크 백업 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
-        manager.backup_event_bank()
-
-    # 이벤트 뱅크 통계
-    if args.stats:
-        print("📊 이벤트 뱅크 통계 옵션 실행")
-        sys.stdout.flush()
-        if not manager.events or all(len(events) == 0 for events in manager.events.values()):
-            manager.load_all_events()
         stats = manager.generate_bank_statistics()
-
         print("\n📊 이벤트 뱅크 통계:")
         sys.stdout.flush()
-        print(f"  총 이벤트 수: {stats['total_events']}개")
-        sys.stdout.flush()
-
-        print("\n  카테고리별 이벤트 수:")
-        sys.stdout.flush()
         for category, count in stats["categories"].items():
-            print(f"    - {category}: {count}개")
+            print(f"  • {category}: {count}개 이벤트")
             sys.stdout.flush()
-
-        print("\n  타입별 이벤트 수:")
+        print(f"  [TOTAL] 총 {stats['total_events']}개 이벤트")
         sys.stdout.flush()
-        for event_type, count in stats["types"].items():
-            print(f"    - {event_type}: {count}개")
-            sys.stdout.flush()
 
-        print("\n  영향받는 메트릭:")
+    if args.validate:
+        if not manager.events:
+            manager.load_all_events()
+        manager.validate_all_events()
+        report_path = manager.save_validation_report()
+        print(f"📄 검증 리포트: {report_path}")
         sys.stdout.flush()
-        for metric, count in stats["metrics"].items():
-            print(f"    - {metric}: {count}개")
-            sys.stdout.flush()
 
-        print("\n  상위 태그:")
+    if args.quality:
+        if not manager.events:
+            manager.load_all_events()
+        metrics = manager.calculate_quality_metrics()
+        print("\n📊 품질 메트릭 요약:")
         sys.stdout.flush()
-        sorted_tags = sorted(stats["tags"].items(), key=lambda x: x[1], reverse=True)[:10]
-        for tag, count in sorted_tags:
-            print(f"    - {tag}: {count}개")
+        for category, category_metrics in metrics.items():
+            print(f"  • {category}:")
             sys.stdout.flush()
+            for name, score in category_metrics.items():
+                status = (
+                    "✅"
+                    if score >= SCORE_THRESHOLD_HIGH
+                    else "⚠️" if score >= SCORE_THRESHOLD_MEDIUM else "❌"
+                )
+                print(f"    - {status} {name}: {score:.2f}")
+                sys.stdout.flush()
 
-    print("✅ 이벤트 뱅크 관리 도구 종료")
-    sys.stdout.flush()
+    if args.simulate:
+        if not manager.events:
+            manager.load_all_events()
+        manager.run_balance_simulation()
+
+    if args.export:
+        if not manager.events:
+            manager.load_all_events()
+        # 단일 파일로 내보내기
+        output_path = manager.out_dir / "all_events.json"
+        manager.export_bank_to_json(output_path)
+        # 카테고리별로 내보내기
+        category_dir = manager.out_dir / "categories"
+        manager.export_bank_by_category(category_dir)
+
+    if args.backup:
+        backup_dir = manager.backup_event_bank()
+        print(f"📦 백업 디렉토리: {backup_dir}")
+        sys.stdout.flush()
+
+    if args.merge:
+        source_dir = Path(args.merge)
+        merged_count = manager.merge_event_banks(source_dir)
+        print(f"🔄 병합된 파일 수: {merged_count}")
+        sys.stdout.flush()
+
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

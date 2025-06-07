@@ -5,6 +5,8 @@ Placeholder 테스트 파일
 실제 기능 테스트는 각 모듈별 테스트 파일에서 구현됩니다.
 """
 
+from game_constants import TEST_POSSIBLE_OUTCOME
+
 
 def test_placeholder_always_passes() -> None:
     """
@@ -27,4 +29,6 @@ def test_uncertainty_principle() -> None:
 
     # 어떤 결과가 나오든 그것은 가능한 결과 중 하나여야 함
     # 불확실성은 있지만, 완전한 무작위는 아님
-    assert 3 in possible_outcomes, "불확실하지만 가능한 범위 내의 결과여야 합니다"
+    assert (
+        TEST_POSSIBLE_OUTCOME in possible_outcomes
+    ), "불확실하지만 가능한 범위 내의 결과여야 합니다"

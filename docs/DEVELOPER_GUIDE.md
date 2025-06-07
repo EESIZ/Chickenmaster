@@ -9,8 +9,9 @@
 3. [코드베이스 이해](#코드베이스-이해)
 4. [첫 번째 실행](#첫-번째-실행)
 5. [개발 워크플로우](#개발-워크플로우)
-6. [테스트 실행](#테스트-실행)
-7. [다음 단계](#다음-단계)
+6. [코드 스타일 가이드](#코드-스타일-가이드)
+7. [테스트 실행](#테스트-실행)
+8. [다음 단계](#다음-단계)
 
 ---
 
@@ -197,6 +198,101 @@ git push origin feature/new-feature
 
 ---
 
+## 📝 코드 스타일 가이드
+
+### 1. 매직 넘버 처리 원칙 (PLR2004)
+
+매직 넘버는 코드 가독성과 유지보수성을 저해합니다. Chicken-RNG 프로젝트에서는 다음 원칙을 따릅니다:
+
+#### 매직 넘버 처리 규칙
+- 모든 매직 넘버는 `game_constants.py`에 중앙 관리되는 상수로 정의
+- 의미 있는 상수명 사용 (예: `FLOAT_EPSILON`, `SCORE_THRESHOLD_HIGH`)
+- 관련 상수는 Frozen Dataclass 패턴으로 그룹화
+
+#### 예시: 매직 넘버 대신 상수 사용
+```python
+# ❌ 잘못된 예
+if random_value < 0.5:
+    trigger_event()
+    
+if score >= 0.7:
+    award_achievement()
+
+# ✅ 올바른 예 - 중앙 관리 상수 사용
+from game_constants import ProbabilityConstants, SCORE_THRESHOLD_HIGH
+
+if random_value < ProbabilityConstants.RANDOM_THRESHOLD:
+    trigger_event()
+    
+if score >= SCORE_THRESHOLD_HIGH:
+    award_achievement()
+```
+
+#### 예시: Frozen Dataclass 패턴
+```python
+# game_constants.py
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class ProbabilityConstants:
+    """확률 관련 상수를 그룹화한 Frozen Dataclass"""
+    RANDOM_THRESHOLD: float = 0.5
+    EVENT_CHANCE_HIGH: float = 0.7
+    EVENT_CHANCE_MEDIUM: float = 0.5
+    EVENT_CHANCE_LOW: float = 0.3
+
+@dataclass(frozen=True)
+class TestConstants:
+    """테스트 관련 상수를 그룹화한 Frozen Dataclass"""
+    MIN_CASCADE_EVENTS: int = 3
+    EXPECTED_EVENTS: int = 2
+    METRICS_HISTORY_LENGTH: int = 5
+```
+
+### 2. 변수 및 함수 명명 규칙
+
+#### 게임 철학 키워드 사용
+변수, 함수, 테스트 이름에 게임 철학을 반영하는 키워드를 사용합니다:
+- `tradeoff`: 트레이드오프 관계를 나타내는 요소
+- `uncertainty`: 불확실성 요소
+- `noRightAnswer`: 정답이 없는 선택지
+
+```python
+# 예시
+def calculate_tradeoff_effect(choice_id: str) -> dict[Metric, float]:
+    """선택에 따른 트레이드오프 효과를 계산합니다."""
+    
+def apply_uncertainty_factor(base_value: float, day: int) -> float:
+    """불확실성 요소를 적용합니다."""
+    
+class NoRightAnswerChoice:
+    """정답이 없는 선택지를 표현하는 클래스."""
+```
+
+### 3. 코드 포맷팅 및 문서화
+
+#### 독스트링 형식
+```python
+def function_name(param1: type, param2: type) -> return_type:
+    """함수의 주요 목적을 한 문장으로 설명합니다.
+    
+    더 자세한 설명이 필요한 경우 여기에 작성합니다.
+    여러 줄에 걸쳐 작성할 수 있습니다.
+    
+    Args:
+        param1: 첫 번째 매개변수 설명
+        param2: 두 번째 매개변수 설명
+        
+    Returns:
+        반환값에 대한 설명
+        
+    Raises:
+        ValueError: 예외 발생 조건 설명
+    """
+```
+
+---
+
 ## 🧪 테스트 실행
 
 ### 테스트 명령어 모음
@@ -229,6 +325,7 @@ pytest --durations=10
 # tests/test_example.py
 import pytest
 from src.core.domain.game_state import GameState
+from game_constants import TEST_POSSIBLE_OUTCOME
 
 def test_game_state_immutable():
     """게임 상태가 불변인지 확인"""
@@ -239,6 +336,14 @@ def test_game_state_immutable():
     
     assert state.money == 100  # 원본 불변
     assert new_state.money == 110  # 새 객체 변경
+    
+def test_uncertainty_principle():
+    """불확실성 원칙을 검증하는 테스트"""
+    expected_range = range(1, 7)  # 주사위 눈금 범위
+    possible_outcomes = set(expected_range)
+    
+    # 매직 넘버 대신 상수 사용
+    assert TEST_POSSIBLE_OUTCOME in possible_outcomes
 ```
 
 ---
@@ -250,12 +355,14 @@ def test_game_state_immutable():
 - [🏗️ 아키텍처 명세](architecture_specification.md) - 기술적 구조
 - [🔧 API 문서](API.md) - 모듈별 사용법
 - [📝 기여 가이드](CONTRIBUTING.md) - 코드 기여 방법
+- [🔄 리팩토링 가이드라인](REFACTORING_GUIDELINES.md) - 코드 개선 방법
 
 ### 2. 추천 첫 기여 항목
 - [ ] 기존 테스트에 추가 케이스 작성
 - [ ] 독스트링 개선
 - [ ] 타입 힌트 보완
 - [ ] 문서 오타 수정
+- [ ] 매직 넘버를 상수로 교체
 
 ### 3. 고급 개발 도구
 ```bash
@@ -296,6 +403,14 @@ mypy --cache-clear
 mypy src/specific_file.py
 ```
 
+**Q: PLR2004 매직 넘버 린트 오류?**
+```bash
+# 매직 넘버 검사만 실행
+ruff check . --select=PLR2004
+
+# 매직 넘버를 game_constants.py에 상수로 추가하고 임포트하여 사용
+```
+
 ### 2. 문제 해결 순서
 1. **에러 메시지 확인** - 로그를 자세히 읽어보세요
 2. **관련 테스트 실행** - 해당 모듈의 테스트를 실행해보세요
@@ -313,5 +428,6 @@ mypy src/specific_file.py
 - [ ] 첫 번째 커밋 완료
 - [ ] 아키텍처 이해
 - [ ] 게임 규칙 숙지
+- [ ] 매직 넘버 처리 원칙 이해
 
-**축하합니다! 이제 Chicken-RNG 개발자입니다! 🎉** 
+**축하합니다! 이제 Chicken-RNG 개발자입니다! 🎉**

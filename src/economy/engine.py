@@ -4,16 +4,9 @@
 게임의 핵심 경제 로직을 처리하는 엔진입니다.
 """
 
-import json
-import math
-import random
-from decimal import Decimal
-from pathlib import Path
 from typing import Any
 
 from game_constants import (
-    METRIC_RANGES,
-    TRADEOFF_RELATIONSHIPS,
     ActionType,
     Metric,
     cap_metric_value,
@@ -23,23 +16,21 @@ from game_constants import (
 from src.economy.models import load_economy_config
 
 # 트레이드오프 상수
-TRADEOFF_FACTORS = {
-    "PRICE_TO_REPUTATION": 0.3,
-    "PRICE_TO_FATIGUE": 0.2
-}
+TRADEOFF_FACTORS = {"PRICE_TO_REPUTATION": 0.3, "PRICE_TO_FATIGUE": 0.2}
+
 
 def compute_profit_no_right_answer(
     units_sold: int, unit_cost: float, price: float, fixed_cost: float
 ) -> float:
     """
     이익을 계산합니다. 정답이 없는 문제에서 사용됩니다.
-    
+
     Args:
         units_sold: 판매된 단위 수
         unit_cost: 단위당 비용
         price: 판매 가격
         fixed_cost: 고정 비용
-        
+
     Returns:
         float: 계산된 이익
     """

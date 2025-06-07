@@ -133,7 +133,7 @@ class TestEventValidator(unittest.TestCase):
         with open(self.trigger_file, "w", encoding="utf-8") as f:
             json.dump(self.trigger_events, f, ensure_ascii=False, indent=2)
 
-    def tearDown(self) -> None:
+    def tear_down(self) -> None:
         """테스트 정리"""
         shutil.rmtree(self.temp_dir)
 
@@ -182,7 +182,7 @@ class TestEventValidator(unittest.TestCase):
             modified_trigger_dict["condition"],
         )
 
-    def test_calculate_metrics_noRightAnswer(self) -> None:
+    def test_calculate_metrics_no_right_answer(self) -> None:
         """메트릭 계산 - 정답 없음 테스트"""
         validator = EventValidator()
 
@@ -289,7 +289,7 @@ class TestEventGenerator(unittest.TestCase):
             # 프롬프트에 JSON 형식 지침이 포함되어 있는지 확인
             self.assertIn("JSON", prompt)
 
-    def test_save_events_noRightAnswer(self) -> None:
+    def test_save_events_no_right_answer(self) -> None:
         """이벤트 저장 - 정답 없음 테스트"""
         # 테스트 이벤트 데이터
         test_events = [

@@ -4,11 +4,6 @@
 이 파일은 게임의 핵심 철학인 트레이드오프 관계가 올바르게 구현되어 있는지 검증합니다.
 """
 
-import random
-from decimal import Decimal
-
-import pytest
-
 from game_constants import TRADEOFF_RELATIONSHIPS, Metric
 
 
@@ -52,7 +47,7 @@ def test_price_decrease_increases_staff_fatigue() -> None:
     ), "평판(손님 증가)과 직원 피로도는 트레이드오프 관계여야 합니다"
 
 
-def test_noRightAnswer_in_pricing_strategy() -> None:
+def test_no_right_answer_in_pricing_strategy() -> None:
     """
     가격 전략에 '정답 없음' 원칙 검증
 

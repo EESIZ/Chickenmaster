@@ -8,8 +8,9 @@ import random
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
+from typing import Dict, List, Optional, Union, Any
 
-from game_constants import Metric
+from game_constants import FLOAT_EPSILON, Metric
 
 
 class TriggerCondition(Enum):
@@ -58,11 +59,11 @@ class Trigger:
 
     metric: Metric
     condition: TriggerCondition
-    value: float | None = None
-    range_min: float | None = None
-    range_max: float | None = None
+    value: Optional[float] = None
+    range_min: Optional[float] = None
+    range_max: Optional[float] = None
 
-    def evaluate(self, current_metrics: dict[Metric, float]) -> bool:
+    def evaluate(self, current_metrics: Dict[Metric, float]) -> bool:
         """
         트리거 조건을 평가합니다.
 
@@ -82,9 +83,9 @@ class Trigger:
         elif self.condition == TriggerCondition.GREATER_THAN:
             return self.value is not None and current_value > self.value
         elif self.condition == TriggerCondition.EQUAL:
-            return self.value is not None and abs(current_value - self.value) < 0.001
+            return self.value is not None and abs(current_value - self.value) < FLOAT_EPSILON
         elif self.condition == TriggerCondition.NOT_EQUAL:
-            return self.value is not None and abs(current_value - self.value) >= 0.001
+            return self.value is not None and abs(current_value - self.value) >= FLOAT_EPSILON
         elif self.condition == TriggerCondition.GREATER_THAN_OR_EQUAL:
             return self.value is not None and current_value >= self.value
         elif self.condition == TriggerCondition.LESS_THAN_OR_EQUAL:
@@ -116,9 +117,9 @@ class Effect:
 
     metric: Metric
     formula: str
-    message: str | None = None
+    message: Optional[str] = None
 
-    def apply(self, current_metrics: dict[Metric, float]) -> float:
+    def apply(self, current_metrics: Dict[Metric, float]) -> float:
         """
         효과를 적용하여 새 지표 값을 계산합니다.
 
@@ -180,18 +181,19 @@ class Event:
     type: EventCategory
     name: str
     description: str
-    effects: list[Effect]
-    trigger: Trigger | None = None
+    effects: List[Effect]
+    trigger: Optional[Trigger] = None
     probability: float = 1.0
     priority: int = 0
     cooldown: int = 0
     category: str = "default"
-    last_triggered: datetime | None = None
+    last_triggered: Optional[datetime] = None
     turn: int = 0
     severity: str = "INFO"
-    timestamp: str | None = None
-    tags: list[str] = field(default_factory=list)
+    timestamp: Optional[str] = None
+    tags: List[str] = field(default_factory=list)
     cascade_depth: int = 0
+    schedule: Optional[int] = None  # 스케줄 속성 추가
 
     def __post_init__(self) -> None:
         """
@@ -219,7 +221,7 @@ class Event:
         return True
 
     def evaluate_trigger(
-        self, current_metrics: dict[Metric, float], rng: random.Random | None = None
+        self, current_metrics: Dict[Metric, float], rng: Optional[random.Random] = None
     ) -> bool:
         """
         이벤트 트리거 조건을 평가합니다.
@@ -252,7 +254,7 @@ class Event:
             from game_constants import DEFAULT_GAME_LENGTH
 
             current_day = DEFAULT_GAME_LENGTH  # 실제 구현에서는 현재 게임 일수를 사용
-            return current_day % self.schedule == 0
+            return bool(current_day % self.schedule == 0)  # bool 타입으로 명시적 변환
 
         elif self.type == EventCategory.CASCADE:
             # CASCADE 타입은 직접 평가하지 않고 다른 이벤트에 의해 트리거됨
@@ -260,7 +262,7 @@ class Event:
 
         return False
 
-    def apply_effects(self, current_metrics: dict[Metric, float]) -> dict[Metric, float]:
+    def apply_effects(self, current_metrics: Dict[Metric, float]) -> Dict[Metric, float]:
         """
         이벤트 효과를 적용합니다.
 
@@ -278,7 +280,7 @@ class Event:
 
         return result
 
-    def fire(self, current_metrics: dict[Metric, float], current_turn: int) -> dict[Metric, float]:
+    def fire(self, current_metrics: Dict[Metric, float], current_turn: int) -> Dict[Metric, float]:
         """
         이벤트를 발생시키고 효과를 적용합니다.
 
@@ -307,10 +309,10 @@ class Alert:
 
     event_id: str
     message: str
-    metrics: dict[Metric, float]
+    metrics: Dict[Metric, float]
     turn: int
     severity: str = "INFO"
-    timestamp: str | None = None
+    timestamp: Optional[str] = None
 
     def __post_init__(self) -> None:
         """

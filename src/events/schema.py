@@ -96,15 +96,17 @@ def load_events_from_toml(file_path: Path) -> EventContainer[Event]:
     elif isinstance(data, list):
         # TOML 파일이 이벤트 객체의 리스트를 직접 반환하는 경우 (현재 data/events.toml 형태)
         return EventContainer[Event].model_validate({"events": data})
-    elif isinstance(data, dict) and len(data) > 0 and isinstance(list(data.values())[0], list):
+    elif isinstance(data, dict) and len(data) > 0 and isinstance(next(iter(data.values())), list):
         # heuristic: dictionary인데 첫번째 value가 list of event인 경우 [[events]] 같은 키가 있었던것으로 가정.
         # ex: {"events": [...]} or {"something_else": [...]}
         # 이 경우 data.values()의 첫번째 list를 events로 간주. (단, TOML에 하나의 최상위 배열만 있다고 가정)
-        potential_events_list = list(data.values())[0]
+        potential_events_list = next(iter(data.values()))
         if all(isinstance(item, dict) for item in potential_events_list):
             return EventContainer[Event].model_validate({"events": potential_events_list})
 
-    raise ValueError("TOML 파일의 이벤트 데이터 형식이 올바르지 않습니다. 최상위에 'events' 키가 있거나 이벤트 객체의 리스트여야 합니다.")
+    raise ValueError(
+        "TOML 파일의 이벤트 데이터 형식이 올바르지 않습니다. 최상위에 'events' 키가 있거나 이벤트 객체의 리스트여야 합니다."
+    )
 
 
 def save_events_to_json(

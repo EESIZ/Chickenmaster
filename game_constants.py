@@ -12,6 +12,7 @@ Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈
 
 from enum import Enum, auto
 from typing import Final
+from dataclasses import dataclass
 
 # 무한대 값을 위한 타입 힌트 호환 상수
 INF: Final = float("inf")
@@ -117,6 +118,29 @@ GAME_OVER_CONDITIONS: Final[dict[str, str]] = {
 }
 DEFAULT_GAME_LENGTH: Final[int] = 30  # 기본 게임 길이 (일)
 
+# 부동소수점 비교 관련 상수
+FLOAT_EPSILON: Final[float] = 0.001  # 부동소수점 비교 오차 허용 범위
+
+# 평판 관련 상수
+REPUTATION_BASELINE: Final[int] = 50  # 평판 기준점
+
+# 점수 임계값 상수
+SCORE_THRESHOLD_HIGH: Final[float] = 0.7  # 높은 점수 임계값
+SCORE_THRESHOLD_MEDIUM: Final[float] = 0.5  # 중간 점수 임계값
+
+# 테스트 관련 상수
+TEST_MIN_CASCADE_EVENTS: Final[int] = 3  # 최소 연쇄 효과 메시지 수
+TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
+TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
+TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
+
+
+@dataclass(frozen=True)
+class ProbabilityConstants:
+    """확률 관련 상수"""
+
+    RANDOM_THRESHOLD: float = 0.5  # 50% 확률 기준점
+
 
 def cap_metric_value(metric: Metric, value: float) -> float:
     """
@@ -157,4 +181,4 @@ def are_happiness_suffering_balanced(happiness: float, suffering: float) -> bool
     Returns:
         bool: 행복과 고통의 합이 100인 경우 True
     """
-    return abs((happiness + suffering) - 100) < 0.001  # 부동소수점 오차 허용
+    return abs((happiness + suffering) - 100) < FLOAT_EPSILON  # 부동소수점 오차 허용

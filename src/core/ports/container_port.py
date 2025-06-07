@@ -5,27 +5,25 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, TypeVar
+from typing import TypeVar
+from collections.abc import Callable
 
 T = TypeVar("T")
 
 
 # @freeze v0.1.0
 class IServiceContainer(ABC):
-    """
-    의존성 주입 컨테이너 인터페이스.
-
-    이 인터페이스는 서비스 등록 및 조회, 의존성 검증 등의 기능을 제공합니다.
-    """
+    """의존성 주입 컨테이너 인터페이스"""
 
     @abstractmethod
-    def register_singleton(self, service_type: type[T], implementation: Optional[T] = None) -> None:
-        """
-        싱글톤 서비스를 등록합니다.
+    def register_singleton(
+        self, interface: type[T], implementation: Callable[["IServiceContainer"], T]
+    ) -> None:
+        """싱글톤 서비스 등록
 
         Args:
-            service_type: 서비스 타입 (인터페이스)
-            implementation: 구현체 인스턴스 (없으면 자동 생성)
+            interface: 서비스 인터페이스 타입
+            implementation: 구현체 팩토리 함수
 
         Raises:
             ValueError: 이미 등록된 서비스인 경우
@@ -33,13 +31,14 @@ class IServiceContainer(ABC):
         pass
 
     @abstractmethod
-    def register_transient(self, service_type: type[T], implementation_type: type[T]) -> None:
-        """
-        트랜지언트 서비스를 등록합니다.
+    def register_transient(
+        self, interface: type[T], implementation: Callable[["IServiceContainer"], T]
+    ) -> None:
+        """트랜지언트 서비스 등록
 
         Args:
-            service_type: 서비스 타입 (인터페이스)
-            implementation_type: 구현체 타입
+            interface: 서비스 인터페이스 타입
+            implementation: 구현체 팩토리 함수
 
         Raises:
             ValueError: 이미 등록된 서비스인 경우
@@ -47,12 +46,11 @@ class IServiceContainer(ABC):
         pass
 
     @abstractmethod
-    def get(self, service_type: type[T]) -> T:
-        """
-        서비스 인스턴스를 조회합니다.
+    def get(self, interface: type[T]) -> T:
+        """서비스 인스턴스 조회
 
         Args:
-            service_type: 서비스 타입 (인터페이스)
+            interface: 서비스 인터페이스 타입
 
         Returns:
             서비스 인스턴스
@@ -63,12 +61,11 @@ class IServiceContainer(ABC):
         pass
 
     @abstractmethod
-    def has(self, service_type: type[T]) -> bool:
-        """
-        서비스 등록 여부를 확인합니다.
+    def has(self, interface: type[T]) -> bool:
+        """서비스 등록 여부 확인
 
         Args:
-            service_type: 서비스 타입 (인터페이스)
+            interface: 서비스 인터페이스 타입
 
         Returns:
             등록되어 있으면 True, 아니면 False
@@ -81,11 +78,11 @@ class IServiceContainer(ABC):
         pass
 
     @abstractmethod
-    def validate_dependencies(self) -> bool:
-        """
-        의존성 순환 참조를 검증합니다.
+    def validate_dependencies(self) -> dict[str, list[str]]:
+        """의존성 순환 참조 검증
 
         Returns:
-            순환 참조가 없으면 True, 있으면 False
+            의존성 그래프 정보
         """
         pass
+

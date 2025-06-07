@@ -161,7 +161,9 @@ def test_modifier_interface() -> None:
     adaptive_modifier = AdaptiveModifier()
     modifiers: list[MetricModifier] = [simple_modifier, adaptive_modifier]
     for modifier_instance in modifiers:
-        assert hasattr(modifier_instance, "apply"), f"{modifier_instance.get_name()}에 apply 메서드 없음"
+        assert hasattr(
+            modifier_instance, "apply"
+        ), f"{modifier_instance.get_name()}에 apply 메서드 없음"
         assert hasattr(
             modifier_instance, "get_name"
         ), f"{modifier_instance.get_name()}에 get_name 메서드 없음"
@@ -336,7 +338,9 @@ def test_max_snapshots_limit(test_metrics: dict[MetricEnum, float], temp_data_di
     recent_snapshots = snapshot_paths[-MAX_SNAPSHOTS:]
     old_snapshots = snapshot_paths[:-MAX_SNAPSHOTS]
     for path_val in recent_snapshots:
-        assert path_val is None or os.path.exists(path_val), f"최근 스냅샷이 유지되지 않음: {path_val}"
+        assert path_val is None or os.path.exists(
+            path_val
+        ), f"최근 스냅샷이 유지되지 않음: {path_val}"
     for path_val in old_snapshots:
         if path_val is not None:
             assert not os.path.exists(path_val), f"오래된 스냅샷이 삭제되지 않음: {path_val}"
@@ -347,16 +351,24 @@ def test_threshold_events(test_metrics: dict[MetricEnum, float]) -> None:
     tracker = MetricsTracker(initial_metrics=test_metrics)
     tracker.update_metric(MetricEnum.MONEY, 900.0)
     events_list = tracker.check_threshold_events()
-    assert any("자금 위기" in event_item for event_item in events_list), "자금 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "자금 위기" in event_item for event_item in events_list
+    ), "자금 위기 이벤트가 트리거되지 않음"
     tracker.update_metric(MetricEnum.REPUTATION, 15.0)
     events_list = tracker.check_threshold_events()
-    assert any("평판 위기" in event_item for event_item in events_list), "평판 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "평판 위기" in event_item for event_item in events_list
+    ), "평판 위기 이벤트가 트리거되지 않음"
     tracker.update_metric(MetricEnum.FACILITY, 25.0)
     events_list = tracker.check_threshold_events()
-    assert any("시설 위기" in event_item for event_item in events_list), "시설 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "시설 위기" in event_item for event_item in events_list
+    ), "시설 위기 이벤트가 트리거되지 않음"
     tracker.update_metric(MetricEnum.STAFF_FATIGUE, 85.0)
     events_list = tracker.check_threshold_events()
-    assert any("직원 위기" in event_item for event_item in events_list), "직원 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "직원 위기" in event_item for event_item in events_list
+    ), "직원 위기 이벤트가 트리거되지 않음"
 
 
 def test_extreme_case_bankruptcy(test_metrics: dict[MetricEnum, float]) -> None:
@@ -366,7 +378,9 @@ def test_extreme_case_bankruptcy(test_metrics: dict[MetricEnum, float]) -> None:
     metrics_dict = tracker.get_metrics()
     assert metrics_dict[MetricEnum.MONEY] == 0.0, "자금이 0 이하로 내려감"
     events_list = tracker.check_threshold_events()
-    assert any("자금 위기" in event_item for event_item in events_list), "파산 시 자금 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "자금 위기" in event_item for event_item in events_list
+    ), "파산 시 자금 위기 이벤트가 트리거되지 않음"
 
 
 def test_extreme_case_zero_reputation(test_metrics: dict[MetricEnum, float]) -> None:
@@ -376,7 +390,9 @@ def test_extreme_case_zero_reputation(test_metrics: dict[MetricEnum, float]) -> 
     metrics_dict = tracker.get_metrics()
     assert metrics_dict[MetricEnum.REPUTATION] == 0.0, "평판이 0 이하로 내려감"
     events_list = tracker.check_threshold_events()
-    assert any("평판 위기" in event_item for event_item in events_list), "평판 0 시 평판 위기 이벤트가 트리거되지 않음"
+    assert any(
+        "평판 위기" in event_item for event_item in events_list
+    ), "평판 0 시 평판 위기 이벤트가 트리거되지 않음"
     initial_money = metrics_dict[MetricEnum.MONEY]
     tracker.apply_cascade_effects({MetricEnum.REPUTATION})
     current_money = tracker.get_metrics()[MetricEnum.MONEY]
@@ -435,7 +451,8 @@ def test_performance_10k_turns() -> None:
             tracker.tradeoff_update_metrics(updated_metrics_dict)
     elapsed_time = time.time() - start_time
     error_msg = (
-        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 " f"(실제: {elapsed_time:.2f}초)"
+        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 "
+        f"(실제: {elapsed_time:.2f}초)"
     )
     assert elapsed_time < PERFORMANCE_TIMEOUT, error_msg
     metrics_result = tracker.get_metrics()
@@ -453,7 +470,8 @@ def test_performance(test_metrics: dict[MetricEnum, float]) -> None:
         tracker.update_metric(MetricEnum.REPUTATION, random.uniform(*REPUTATION_FLUCTUATION_RANGE))
     elapsed_time = time.time() - start_time
     error_msg = (
-        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 " f"(실제: {elapsed_time:.2f}초)"
+        f"{SIMULATION_ITERATIONS}턴 시뮬레이션이 {PERFORMANCE_TIMEOUT}초를 초과함 "
+        f"(실제: {elapsed_time:.2f}초)"
     )
     assert elapsed_time < PERFORMANCE_TIMEOUT, error_msg
 

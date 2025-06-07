@@ -4,10 +4,6 @@
 이벤트 시스템을 게임의 메인 루프와 통합하여 매 턴마다 적절한 이벤트를 발생시킵니다.
 """
 
-import json
-import random
-import uuid
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -148,11 +144,11 @@ class GameEventSystem:
     ) -> dict[str, Any]:
         """
         시나리오를 시뮬레이션합니다. 정답이 없는 문제에서 사용됩니다.
-        
+
         Args:
             scenario: 시뮬레이션할 시나리오
             days: 시뮬레이션 일수
-            
+
         Returns:
             dict[str, Any]: 시뮬레이션 결과
         """
