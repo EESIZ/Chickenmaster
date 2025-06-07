@@ -401,3 +401,20 @@ class MetricsTracker:
                         simulated_metrics[Metric.MONEY] *= 0.9
 
         return simulated_metrics
+
+    def reset(self) -> None:
+        """
+        MetricsTracker를 초기 상태로 리셋합니다.
+        """
+        # 지표를 기본값으로 초기화
+        for metric, (_min_val, _max_val, default_val) in METRIC_RANGES.items():
+            self.metrics[metric] = default_val
+        
+        # 히스토리 및 이벤트 초기화
+        self.history.clear()
+        self.events.clear()
+        self.day = 0
+        
+        # 초기 상태를 히스토리에 추가
+        self.history.append(self.metrics.copy())
+

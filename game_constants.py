@@ -134,6 +134,14 @@ TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
 TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
 TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
 
+# Magic number 상수들
+MAGIC_NUMBER_ZERO: Final[float] = 0.0  # 0.0 비교용
+MAGIC_NUMBER_ONE: Final[float] = 1.0  # 1.0 비교용
+MAGIC_NUMBER_TWO: Final[int] = 2  # 2 비교용
+MAGIC_NUMBER_FIVE: Final[int] = 5  # 5 비교용
+MAGIC_NUMBER_TWENTY: Final[int] = 20  # 20 비교용
+MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN: Final[int] = 115  # 115 비교용
+
 
 @dataclass(frozen=True)
 class ProbabilityConstants:

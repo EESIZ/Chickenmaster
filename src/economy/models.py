@@ -72,21 +72,21 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
     base_demand = demand_config.get("base_demand", 50)
     price_elasticity = demand_config.get("price_elasticity", -0.5)
     reputation_effect = demand_config.get("reputation_effect", 0.2)
-    optimal_price = demand_config.get("optimal_price", 100)
+    optimal_price = demand_config.get("optimal_price", 10000)
 
+    # 가격 탄력성 적용 (가격이 높을수록 수요 감소, 낮을수록 수요 증가)
     price_factor = 1.0
     if optimal_price > 0 and price != optimal_price:
+        # 가격 변화에 따른 수요 변화 계산
         price_factor = 1 + price_elasticity * (price - optimal_price) / optimal_price
-    elif price == optimal_price:
-        price_factor = 1.0
-    else:
-        price_factor = 1.0
-
+    
+    # 평판 효과 적용 (평판이 높을수록 수요 증가)
     reputation_factor = 1.0
     if reputation != REPUTATION_BASELINE:
         reputation_factor = (
             1 + reputation_effect * (reputation - REPUTATION_BASELINE) / REPUTATION_BASELINE
         )
 
-    calculated_demand = int(max(0, base_demand * price_factor * reputation_factor))
-    return calculated_demand
+    # 최종 수요 계산 (음수 방지, 소수점 반올림)
+    calculated_demand = max(0, base_demand * price_factor * reputation_factor)
+    return round(calculated_demand)

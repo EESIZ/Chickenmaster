@@ -1,8 +1,8 @@
 {
   "demand": {
     "base_demand": 50,
-    "price_sensitivity": 0.5,
-    "reputation_factor": 0.8,
+    "price_elasticity": -1.5,
+    "reputation_effect": 0.2,
     "min_price": 5000,
     "max_price": 20000,
     "optimal_price": 10000,
