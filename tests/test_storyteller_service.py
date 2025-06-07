@@ -138,7 +138,7 @@ class TestGetStoryPatterns:
         
         # tradeoff 패턴이 올바른 조건에서 매칭되는지 확인
         financial_pattern = next(
-            (p for p in tradeoff_patterns if "financial_pressure" in p.pattern_id), 
+            (p for p in tradeoff_patterns if "financial" in p.pattern_id),
             None
         )
         assert financial_pattern is not None

@@ -63,8 +63,16 @@ class StoryPattern:
     def matches(self, metrics: Dict[str, float]) -> bool:
         """현재 지표가 패턴의 트리거 조건과 일치하는지 확인."""
         for metric, threshold in self.trigger_conditions.items():
-            if metric not in metrics or metrics[metric] < threshold:
-                return False
+            current_value = metrics.get(metric, 0)
+            # 패턴 타입에 따라 다른 매칭 로직 적용
+            if self.pattern_type in ["crisis", "tradeoff"]:
+                # 위기/트레이드오프 패턴: 임계값 이하일 때 매칭
+                if current_value >= threshold:
+                    return False
+            else:
+                # 기본 패턴: 임계값 이상일 때 매칭
+                if current_value < threshold:
+                    return False
         return True
 
 

@@ -58,14 +58,9 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-<<<<<<< HEAD
-        self.events = []  # 초기에는 빈 리스트
-        self.event_queue = deque()
-=======
         self.events_container: Optional[EventContainer[PydanticEvent]] = None
         self.events: List[PydanticEvent] = []
         self.event_queue: deque[PydanticEvent] = deque()
->>>>>>> origin/main
         self.alert_queue: deque[Alert] = deque()
         self.cascade_matrix: Dict[MetricEnum, List[Dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
@@ -99,12 +94,7 @@ class EventEngine:
             filepath: 이벤트 정의 파일 경로 (Path 객체)
         """
         if filepath.suffix == ".toml":
-<<<<<<< HEAD
-            # load_events_from_toml은 EventContainer[PydanticEvent]를 반환
-            self.events = load_events_from_toml(filepath)
-=======
             self.events_container = load_events_from_toml(filepath)
->>>>>>> origin/main
         elif filepath.suffix == ".json":
             self.events_container = load_events_from_json(filepath)
         else:
@@ -211,21 +201,9 @@ class EventEngine:
         elif condition_str == "GREATER_THAN":
             return current_value > trigger_value
         elif condition_str == "EQUAL":
-<<<<<<< HEAD
-            return (
-                trigger_value is not None
-                and abs(current_value - trigger_value) < FLOAT_COMPARISON_EPSILON
-            )
-        elif condition_str == "NOT_EQUAL":
-            return (
-                trigger_value is not None
-                and abs(current_value - trigger_value) >= FLOAT_COMPARISON_EPSILON
-            )
-=======
             return abs(current_value - trigger_value) < FLOAT_EPSILON  # 부동소수점 비교
         elif condition_str == "NOT_EQUAL":
             return abs(current_value - trigger_value) >= FLOAT_EPSILON
->>>>>>> origin/main
         elif condition_str == "GREATER_THAN_OR_EQUAL":
             return current_value >= trigger_value
         elif condition_str == "LESS_THAN_OR_EQUAL":

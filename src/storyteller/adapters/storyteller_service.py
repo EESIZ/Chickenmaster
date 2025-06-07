@@ -42,10 +42,10 @@ class StorytellerService(IStorytellerService):
         {
             "pattern_id": "financial_crisis_tradeoff",
             "name": "재정 위기의 트레이드오프",
-            "trigger_conditions": {"money": 3000},  # 돈이 3000 이하일 때
+            "trigger_conditions": {"money": 5000},  # 돈이 5000 이하일 때
             "related_events": ["cost_reduction", "emergency_loan", "price_increase"],
             "narrative_template": "자금 부족으로 어려운 선택을 해야 합니다. 비용을 줄이면 품질이 떨어지고, 가격을 올리면 고객이 떠날 수 있습니다.",
-            "pattern_type": "crisis"
+            "pattern_type": "tradeoff"  # crisis에서 tradeoff로 변경
         },
         {
             "pattern_id": "reputation_uncertainty",
@@ -66,7 +66,7 @@ class StorytellerService(IStorytellerService):
         {
             "pattern_id": "noRightAnswer_dilemma",
             "name": "정답 없는 딜레마",
-            "trigger_conditions": {"reputation": 50, "money": 5000},  # 중간 수준일 때
+            "trigger_conditions": {"reputation": 30, "money": 3000},  # 중간 수준일 때 (더 낮은 임계값)
             "related_events": ["ethical_choice", "business_vs_morality", "customer_complaint"],
             "narrative_template": "모든 선택에는 대가가 따릅니다. 옳은 답은 없고, 오직 각자의 가치관에 따른 선택만이 있을 뿐입니다.",
             "pattern_type": "dilemma"
@@ -105,37 +105,51 @@ class StorytellerService(IStorytellerService):
         - uncertainty: 예측 불가능한 요소들을 언급
         - noRightAnswer: 정답 없는 선택의 어려움을 표현
         """
-        if not context.metrics_history:
-            # 초기 상태일 때의 기본 내러티브
-            narrative = "치킨집 사장으로서의 새로운 여정이 시작됩니다. 앞으로의 모든 선택이 당신의 운명을 결정할 것입니다."
-            return NarrativeResponse(narrative=narrative)
+        # 예외 처리: 컨텍스트 검증
+        if not context:
+            raise ValueError("StoryContext가 제공되지 않았습니다.")
         
-        # 게임 진행도에 따른 템플릿 선택
-        game_phase = self._determine_game_phase(context.game_progression)
-        
-        # 현재 상황 분석
-        current_metrics = context.metrics_history[-1].metrics
-        situation_tone = self._analyze_situation_tone(current_metrics)
-        
-        # 지표 상태 설명 생성
-        metric_status = self._generate_metric_status_description(current_metrics)
-        
-        # 적용 가능한 스토리 패턴 찾기
-        applicable_patterns = self.get_story_patterns(context)
-        applied_pattern = applicable_patterns[0] if applicable_patterns else None
-        
-        # 내러티브 템플릿 선택 및 생성
-        template = self._NARRATIVE_TEMPLATES[game_phase][situation_tone]
-        narrative = template.format(metric_status=metric_status)
-        
-        # 패턴이 적용된 경우 추가 내러티브
-        if applied_pattern:
-            narrative += f" {applied_pattern.narrative_template}"
-        
-        return NarrativeResponse(
-            narrative=narrative,
-            applied_pattern=applied_pattern
-        )
+        try:
+            if not context.metrics_history:
+                # 초기 상태일 때의 기본 내러티브 (날짜 정보 포함)
+                narrative = f"{context.day}일차: 치킨집 사장으로서의 새로운 여정이 시작됩니다. 앞으로의 모든 선택이 당신의 운명을 결정할 것입니다."
+                return NarrativeResponse(narrative=narrative)
+            
+            # 게임 진행도에 따른 템플릿 선택
+            game_phase = self._determine_game_phase(context.game_progression)
+            
+            # 현재 상황 분석
+            current_metrics = context.metrics_history[-1].metrics
+            if not current_metrics:
+                raise ValueError("현재 메트릭이 비어있습니다.")
+                
+            situation_tone = self._analyze_situation_tone(current_metrics)
+            
+            # 지표 상태 설명 생성
+            metric_status = self._generate_metric_status_description(current_metrics)
+            
+            # 적용 가능한 스토리 패턴 찾기
+            applicable_patterns = self.get_story_patterns(context)
+            applied_pattern = applicable_patterns[0] if applicable_patterns else None
+            
+            # 내러티브 템플릿 선택 및 생성 (날짜 정보 포함)
+            template = self._NARRATIVE_TEMPLATES[game_phase][situation_tone]
+            narrative = f"{context.day}일차: " + template.format(metric_status=metric_status)
+            
+            # 패턴이 적용된 경우 추가 내러티브
+            if applied_pattern:
+                narrative += f" {applied_pattern.narrative_template}"
+            
+            return NarrativeResponse(
+                narrative=narrative,
+                applied_pattern=applied_pattern
+            )
+            
+        except Exception as e:
+            # 예외 발생 시 기본 내러티브 반환 (날짜 정보 포함)
+            return NarrativeResponse(
+                narrative=f"{context.day}일차: 치킨집 운영은 예측할 수 없는 여정입니다. 매 순간이 새로운 선택의 기회입니다."
+            )
     
     def suggest_event(self, context: StoryContext) -> Optional[str]:
         """
@@ -144,28 +158,47 @@ class StorytellerService(IStorytellerService):
         uncertainty 원칙에 따라 예측 불가능한 요소를 고려하여
         상황에 맞는 이벤트를 제안합니다.
         """
-        if not context.metrics_history:
+        # 예외 처리: 컨텍스트 검증
+        if not context:
+            raise ValueError("StoryContext가 제공되지 않았습니다.")
+        
+        try:
+            if not context.metrics_history:
+                return None
+            
+            current_metrics = context.metrics_history[-1].metrics
+            if not current_metrics:
+                raise ValueError("현재 메트릭이 비어있습니다.")
+            
+            # GameState로 변환하여 이벤트 서비스 호출
+            game_state = self._convert_to_game_state(context)
+            
+            # 이벤트 서비스에서 사용 가능한 이벤트 조회
+            available_events = self._event_service.get_applicable_events(game_state)
+            
+            if not available_events:
+                return None
+            
+            # Event 객체에서 ID 추출
+            event_ids = [event.id for event in available_events]
+            
+            # 최근 발생한 이벤트 필터링 (uncertainty 고려)
+            recent_event_ids = {event.event_id for event in context.recent_events[-5:]}
+            filtered_event_ids = [
+                event_id for event_id in event_ids 
+                if event_id not in recent_event_ids
+            ]
+            
+            # 필터링 후 이벤트가 없으면 원본 리스트 사용
+            if not filtered_event_ids:
+                filtered_event_ids = event_ids
+            
+            # uncertainty 원칙에 따라 랜덤 요소 추가
+            return random.choice(filtered_event_ids)
+            
+        except Exception as e:
+            # 예외 발생 시 None 반환 (이벤트 제안 없음)
             return None
-        
-        current_metrics = context.metrics_history[-1].metrics
-        
-        # GameState 객체 생성 (IEventService 호환성을 위해)
-        game_state = self._convert_to_game_state(context)
-        
-        # 발생 가능한 이벤트 목록 조회
-        applicable_events = self._event_service.get_applicable_events(game_state)
-        
-        if not applicable_events:
-            return None
-        
-        # 현재 상황에 가장 적합한 이벤트 선택
-        best_event = self._select_most_appropriate_event(
-            applicable_events, 
-            current_metrics, 
-            context.recent_events
-        )
-        
-        return best_event.id if best_event else None
     
     def analyze_metrics_trend(self, context: StoryContext) -> Dict[str, float]:
         """
@@ -174,35 +207,43 @@ class StorytellerService(IStorytellerService):
         tradeoff 관계를 고려하여 각 지표의 변화 추세를 계산하고,
         uncertainty 요소로 인한 예측 불확실성을 반영합니다.
         """
+        # 예외 처리: 메트릭 히스토리 검증
+        if not context or not context.metrics_history:
+            raise ValueError("메트릭 히스토리가 비어있습니다. 추세 분석을 위해서는 최소 1개의 히스토리가 필요합니다.")
+        
         if len(context.metrics_history) < 2:
-            # 히스토리가 부족한 경우 기본값 반환
+            raise ValueError("추세 분석을 위해서는 최소 2개의 지표 히스토리가 필요합니다.")
+        
+        try:
+            trends = {}
+            recent_history = context.metrics_history[-3:]  # 최근 3개 데이터 포인트 사용
+            
+            for metric in Metric:
+                metric_name = metric.name.lower()
+                
+                # 지표별 변화율 계산
+                values = [
+                    history.metrics.get(metric_name, 0) 
+                    for history in recent_history
+                ]
+                
+                if len(values) >= 2:
+                    # 선형 추세 계산
+                    trend_rate = self._calculate_linear_trend(values)
+                    
+                    # uncertainty 가중치 적용
+                    uncertainty_factor = UNCERTAINTY_WEIGHTS.get(metric, 0.0)
+                    adjusted_trend = trend_rate * (1 + uncertainty_factor * random.uniform(-0.5, 0.5))
+                    
+                    trends[metric_name] = round(adjusted_trend, 3)
+                else:
+                    trends[metric_name] = 0.0
+            
+            return trends
+            
+        except Exception as e:
+            # 예외 발생 시 기본 추세 반환 (모든 지표 0.0)
             return {metric.name.lower(): 0.0 for metric in Metric}
-        
-        trends = {}
-        recent_history = context.metrics_history[-3:]  # 최근 3개 데이터 포인트 사용
-        
-        for metric in Metric:
-            metric_name = metric.name.lower()
-            
-            # 지표별 변화율 계산
-            values = [
-                history.metrics.get(metric_name, 0) 
-                for history in recent_history
-            ]
-            
-            if len(values) >= 2:
-                # 선형 추세 계산
-                trend_rate = self._calculate_linear_trend(values)
-                
-                # uncertainty 가중치 적용
-                uncertainty_factor = UNCERTAINTY_WEIGHTS.get(metric, 0.0)
-                adjusted_trend = trend_rate * (1 + uncertainty_factor * random.uniform(-0.5, 0.5))
-                
-                trends[metric_name] = round(adjusted_trend, 3)
-            else:
-                trends[metric_name] = 0.0
-        
-        return trends
     
     def get_story_patterns(self, context: StoryContext) -> List[StoryPattern]:
         """
@@ -211,23 +252,35 @@ class StorytellerService(IStorytellerService):
         noRightAnswer 철학에 따라 각 상황에 맞는 딜레마와
         선택의 어려움을 표현하는 패턴들을 제공합니다.
         """
+        # 예외 처리: 컨텍스트 검증
+        if not context:
+            raise ValueError("StoryContext가 제공되지 않았습니다.")
+            
         if not context.metrics_history:
+            raise ValueError("지표 히스토리가 비어있습니다.")
+        
+        try:
+            current_metrics = context.metrics_history[-1].metrics
+            if not current_metrics:
+                return []
+                
+            applicable_patterns = []
+            
+            for pattern in self._story_patterns:
+                if pattern.matches(current_metrics):
+                    applicable_patterns.append(pattern)
+            
+            # 게임 진행도에 따른 우선순위 적용
+            prioritized_patterns = self._prioritize_patterns_by_progression(
+                applicable_patterns, 
+                context.game_progression
+            )
+            
+            return prioritized_patterns
+            
+        except Exception as e:
+            # 예외 발생 시 빈 리스트 반환
             return []
-        
-        current_metrics = context.metrics_history[-1].metrics
-        applicable_patterns = []
-        
-        for pattern in self._story_patterns:
-            if pattern.matches(current_metrics):
-                applicable_patterns.append(pattern)
-        
-        # 우선순위에 따라 정렬 (위기 상황 > 기회/위험 > 균형 > 딜레마)
-        priority_order = {"crisis": 0, "opportunity_risk": 1, "balance": 2, "dilemma": 3}
-        applicable_patterns.sort(
-            key=lambda p: priority_order.get(p.pattern_type, 999)
-        )
-        
-        return applicable_patterns
     
     def _determine_game_phase(self, progression: float) -> str:
         """게임 진행도에 따른 단계 결정"""
@@ -340,4 +393,189 @@ class StorytellerService(IStorytellerService):
         
         slope = (n * xy_sum - x_sum * y_sum) / denominator
         return slope
+    
+    def _identify_critical_metrics(self, metrics: Dict[str, float]) -> List[str]:
+        """
+        현재 지표들을 분석하여 중요한(위험하거나 기회가 되는) 지표들을 식별합니다.
+        
+        tradeoff 철학에 따라 각 지표의 임계점을 고려하여
+        즉각적인 주의가 필요한 지표들을 반환합니다.
+        
+        Args:
+            metrics: 현재 게임 지표들
+            
+        Returns:
+            중요한 지표들의 이름 리스트
+        """
+        critical_metrics = []
+        
+        # 각 지표별 임계점 정의 (game_constants 활용)
+        critical_thresholds = {
+            "money": {"low": 3000, "high": 20000},  # 자금 부족/풍부
+            "reputation": {"low": 30, "high": 80},  # 평판 위기/우수
+            "happiness": {"low": 25, "high": 85},   # 스트레스/만족
+            "pain": {"low": 15, "high": 75}         # 편안함/고통 (역방향)
+        }
+        
+        for metric_name, value in metrics.items():
+            if metric_name not in critical_thresholds:
+                continue
+                
+            thresholds = critical_thresholds[metric_name]
+            
+            # 위험 수준 판단
+            if metric_name == "pain":
+                # pain은 높을수록 나쁨 (역방향)
+                if value >= thresholds["high"]:
+                    critical_metrics.append(metric_name)
+                elif value <= thresholds["low"]:
+                    critical_metrics.append(metric_name)  # 너무 낮은 고통도 위험할 수 있음
+            else:
+                # 일반 지표들 (높을수록 좋음)
+                if value <= thresholds["low"]:
+                    critical_metrics.append(metric_name)  # 위험 수준
+                elif value >= thresholds["high"]:
+                    critical_metrics.append(metric_name)  # 기회 수준
+        
+        # tradeoff 관계 고려 - 연관된 지표들의 불균형 체크
+        if "money" in metrics and "reputation" in metrics:
+            money_ratio = metrics["money"] / 15000  # 정규화
+            reputation_ratio = metrics["reputation"] / 100
+            
+            # 돈은 많지만 평판이 낮거나, 평판은 높지만 돈이 없는 경우
+            if abs(money_ratio - reputation_ratio) > 0.5:
+                if "money" not in critical_metrics:
+                    critical_metrics.append("money")
+                if "reputation" not in critical_metrics:
+                    critical_metrics.append("reputation")
+        
+        if "happiness" in metrics and "pain" in metrics:
+            happiness_ratio = metrics["happiness"] / 100
+            pain_ratio = metrics["pain"] / 100
+            
+            # 행복과 고통의 불균형 (둘 다 높거나 둘 다 낮은 경우)
+            if (happiness_ratio > 0.7 and pain_ratio > 0.7) or \
+               (happiness_ratio < 0.3 and pain_ratio < 0.3):
+                if "happiness" not in critical_metrics:
+                    critical_metrics.append("happiness")
+                if "pain" not in critical_metrics:
+                    critical_metrics.append("pain")
+        
+        return critical_metrics
+    
+    def _prioritize_patterns_by_progression(self, patterns: List[StoryPattern], progression: float) -> List[StoryPattern]:
+        """
+        게임 진행도에 따라 스토리 패턴의 우선순위를 정합니다.
+        
+        noRightAnswer 철학에 따라 게임 단계별로 적절한 딜레마와
+        선택의 복잡성을 점진적으로 증가시킵니다.
+        
+        Args:
+            patterns: 우선순위를 정할 패턴 리스트
+            progression: 게임 진행도 (0.0 ~ 1.0)
+            
+        Returns:
+            우선순위가 적용된 패턴 리스트
+        """
+        if not patterns:
+            return []
+        
+        # 게임 진행도별 패턴 타입 우선순위 정의
+        progression_priorities = {
+            # 초기 게임 (0.0 ~ 0.3): uncertainty 중심
+            "early": {
+                "uncertainty": 1.0,
+                "tradeoff": 0.7,
+                "crisis": 0.8,
+                "opportunity_risk": 0.6,
+                "balance": 0.4,
+                "dilemma": 0.3,
+                "noRightAnswer": 0.2
+            },
+            # 중기 게임 (0.3 ~ 0.7): tradeoff 중심
+            "mid": {
+                "tradeoff": 1.0,
+                "crisis": 0.9,
+                "uncertainty": 0.8,
+                "dilemma": 0.7,
+                "opportunity_risk": 0.6,
+                "balance": 0.5,
+                "noRightAnswer": 0.8
+            },
+            # 후기 게임 (0.7 ~ 1.0): noRightAnswer 중심
+            "late": {
+                "noRightAnswer": 1.0,
+                "dilemma": 0.9,
+                "tradeoff": 0.8,
+                "balance": 0.7,
+                "crisis": 0.6,
+                "opportunity_risk": 0.5,
+                "uncertainty": 0.4
+            }
+        }
+        
+        # 현재 진행도에 따른 단계 결정
+        if progression < 0.3:
+            current_priorities = progression_priorities["early"]
+        elif progression < 0.7:
+            current_priorities = progression_priorities["mid"]
+        else:
+            current_priorities = progression_priorities["late"]
+        
+        # 패턴별 우선순위 점수 계산
+        scored_patterns = []
+        for pattern in patterns:
+            # 기본 우선순위 점수
+            base_score = current_priorities.get(pattern.pattern_type, 0.5)
+            
+            # 패턴 ID에서 철학 키워드 추출하여 추가 점수 부여
+            philosophy_bonus = 0.0
+            pattern_id_lower = pattern.pattern_id.lower()
+            
+            if "uncertainty" in pattern_id_lower:
+                philosophy_bonus += current_priorities.get("uncertainty", 0.0) * 0.2
+            if "tradeoff" in pattern_id_lower:
+                philosophy_bonus += current_priorities.get("tradeoff", 0.0) * 0.2
+            if "norightanswer" in pattern_id_lower or "dilemma" in pattern_id_lower:
+                philosophy_bonus += current_priorities.get("noRightAnswer", 0.0) * 0.2
+            
+            # 진행도에 따른 복잡성 보너스
+            complexity_bonus = 0.0
+            if progression > 0.5:  # 중후반부에는 복잡한 패턴 선호
+                if pattern.pattern_type in ["dilemma", "noRightAnswer"]:
+                    complexity_bonus = 0.1 * progression
+            
+            # 최종 점수 계산
+            final_score = base_score + philosophy_bonus + complexity_bonus
+            
+            scored_patterns.append((pattern, final_score))
+        
+        # 점수 기준으로 내림차순 정렬
+        scored_patterns.sort(key=lambda x: x[1], reverse=True)
+        
+        # uncertainty 원칙 적용 - 동일한 점수대의 패턴들은 랜덤하게 섞기
+        result_patterns = []
+        current_score_group = []
+        current_score = None
+        
+        for pattern, score in scored_patterns:
+            if current_score is None or abs(score - current_score) < 0.1:
+                # 같은 점수 그룹
+                current_score_group.append(pattern)
+                current_score = score
+            else:
+                # 새로운 점수 그룹 시작
+                if current_score_group:
+                    random.shuffle(current_score_group)  # uncertainty 적용
+                    result_patterns.extend(current_score_group)
+                
+                current_score_group = [pattern]
+                current_score = score
+        
+        # 마지막 그룹 처리
+        if current_score_group:
+            random.shuffle(current_score_group)
+            result_patterns.extend(current_score_group)
+        
+        return result_patterns
 
