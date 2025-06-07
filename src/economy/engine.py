@@ -11,6 +11,7 @@ from game_constants import (
     ActionType,
     Metric,
     cap_metric_value,
+    MAGIC_NUMBER_ONE_HUNDRED,
 )
 
 # 경제 모델 함수 가져오기

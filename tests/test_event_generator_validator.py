@@ -139,7 +139,7 @@ class TestEventValidator(unittest.TestCase):
 
     def test_validate_event_structure_tradeoff(self) -> None:
         """이벤트 구조 검증 - 트레이드오프 테스트"""
-        validator = EventValidator()
+        validator = EventValidator(self.valid_file)
 
         # 메트릭 계산 테스트 (실제 검증 로직 대신)
         metrics = validator.calculate_quality_metrics(self.valid_events["events"])
@@ -184,7 +184,7 @@ class TestEventValidator(unittest.TestCase):
 
     def test_calculate_metrics_no_right_answer(self) -> None:
         """메트릭 계산 - 정답 없음 테스트"""
-        validator = EventValidator()
+        validator = EventValidator(self.valid_file)
 
         # 메트릭 계산
         metrics = validator.calculate_quality_metrics(self.valid_events["events"])

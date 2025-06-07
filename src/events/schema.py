@@ -110,10 +110,23 @@ def load_events_from_toml(file_path: Path) -> EventContainer[Event]:
 
 
 def save_events_to_json(
-    events: EventContainer[Event], file_path: Path, *, indent: int = 2, ensure_ascii: bool = False
+    events: EventContainer[Event] | list[Event], file_path: Path, *, indent: int = 2, ensure_ascii: bool = False
 ) -> None:
     """이벤트를 JSON 파일로 저장"""
     import json
+    from enum import Enum
+
+    def enum_serializer(obj):
+        """Enum 객체를 JSON 직렬화 가능한 형태로 변환"""
+        if isinstance(obj, Enum):
+            return obj.name
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(events.model_dump(), f, indent=indent, ensure_ascii=ensure_ascii)
+        if isinstance(events, list):
+            # 리스트인 경우 EventContainer로 감싸기
+            container = EventContainer(events=events)
+            json.dump(container.model_dump(), f, indent=indent, ensure_ascii=ensure_ascii, default=enum_serializer)
+        else:
+            # 이미 EventContainer인 경우
+            json.dump(events.model_dump(), f, indent=indent, ensure_ascii=ensure_ascii, default=enum_serializer)

@@ -34,20 +34,24 @@ class TestEventConditionFixer(unittest.TestCase):
         self.input_file = os.path.join(self.test_dir, "test_events.json")
         self.output_file = os.path.join(self.test_dir, "fixed_events.json")
 
-        # 테스트 이벤트 데이터 생성
+        # 테스트 이벤트 데이터 생성 (events 키로 감싸기)
         self.test_events = {
-            "test_event_1": {
-                "trigger": {"condition": "less"},
-                "effects": [{"metric": "money", "formula": "-500"}],
-            },
-            "test_event_2": {
-                "trigger": {"condition": "greater"},
-                "effects": [{"metric": "reputation", "formula": "+10"}],
-            },
+            "events": [
+                {
+                    "id": "test_event_1",
+                    "trigger": {"condition": "<"},
+                    "effects": [{"metric": "money", "formula": "-500"}],
+                },
+                {
+                    "id": "test_event_2", 
+                    "trigger": {"condition": ">"},
+                    "effects": [{"metric": "reputation", "formula": "+10"}],
+                },
+            ]
         }
 
         # 테스트 파일 작성
-        with open(self.input_file, encoding="utf-8") as f:
+        with open(self.input_file, "w", encoding="utf-8") as f:
             json.dump(self.test_events, f, indent=2)
 
     def tearDown(self) -> None:
@@ -73,9 +77,9 @@ class TestEventConditionFixer(unittest.TestCase):
             fixed_data = json.load(f)
 
         # 데이터가 올바르게 저장되었는지 확인
-        assert len(fixed_data) == TEST_EVENT_COUNT
-        assert all("trigger" in event for event in fixed_data.values())
-        assert all("effects" in event for event in fixed_data.values())
+        assert len(fixed_data["events"]) == TEST_EVENT_COUNT
+        assert all("trigger" in event for event in fixed_data["events"])
+        assert all("effects" in event for event in fixed_data["events"])
 
 
 class TestEventBankIndexer(unittest.TestCase):
@@ -88,35 +92,33 @@ class TestEventBankIndexer(unittest.TestCase):
         self.output_dir = os.path.join(self.test_dir, "output")
         self.metadata_file = os.path.join(self.output_dir, "metadata.json")
 
-        # 테스트 이벤트 데이터 생성
-        self.test_events = {
-            "test_event_1": {
-                "data": {
-                    "name": "테스트 이벤트",
-                    "category": "daily_routine",
-                    "tags": ["돈"],
-                    "choices": [
-                        {"text": "선택 1", "effects": []},
-                        {"text": "선택 2", "effects": []},
-                    ],
-                }
+        # 테스트 이벤트 데이터 생성 (리스트 형태로 수정)
+        self.test_events = [
+            {
+                "id": "test_event_1",
+                "name": "테스트 이벤트",
+                "category": "daily_routine",
+                "tags": ["돈"],
+                "choices": [
+                    {"text": "선택 1", "effects": []},
+                    {"text": "선택 2", "effects": []},
+                ],
             },
-            "cascade_event_1": {
-                "data": {
-                    "name": "연쇄 이벤트",
-                    "category": "daily_routine",
-                    "tags": ["돈"],
-                    "choices": [
-                        {"text": "선택 1", "effects": []},
-                        {"text": "선택 2", "effects": []},
-                    ],
-                }
+            {
+                "id": "cascade_event_1",
+                "name": "연쇄 이벤트",
+                "category": "daily_routine", 
+                "tags": ["돈"],
+                "choices": [
+                    {"text": "선택 1", "effects": []},
+                    {"text": "선택 2", "effects": []},
+                ],
             },
-        }
+        ]
 
         # 테스트 파일 작성
         os.makedirs(self.output_dir, exist_ok=True)
-        with open(self.input_file, encoding="utf-8") as f:
+        with open(self.input_file, "w", encoding="utf-8") as f:
             json.dump(self.test_events, f, indent=2)
 
     def tearDown(self) -> None:
@@ -155,10 +157,12 @@ class TestEventBankIndexer(unittest.TestCase):
         with open(self.metadata_file, encoding="utf-8") as f:
             metadata = json.load(f)
 
-        # 메타데이터 검증
-        assert "total_events" in metadata
-        assert "categories" in metadata
-        assert "tags" in metadata
+        # 메타데이터 검증 (EventBankIndexer는 개별 이벤트 메타데이터를 저장)
+        assert len(metadata) == TEST_EVENT_COUNT  # 각 이벤트별 메타데이터
+        for event_id in ["test_event_1", "cascade_event_1"]:
+            assert event_id in metadata
+            assert "id" in metadata[event_id]
+            assert "category" in metadata[event_id]
 
 
 if __name__ == "__main__":

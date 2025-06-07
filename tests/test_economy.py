@@ -16,7 +16,7 @@ from typing import Any, cast
 
 import pytest
 
-from game_constants import Metric, cap_metric_value
+from game_constants import Metric, cap_metric_value, MAGIC_NUMBER_ONE_HUNDRED
 from src.economy.engine import (
     compute_profit_no_right_answer,
     uncertainty_adjust_inventory,

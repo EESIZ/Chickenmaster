@@ -30,6 +30,7 @@ MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN = 115
 # 확률 관련 상수
 PROBABILITY_LOW_THRESHOLD = 0.3
 PROBABILITY_HIGH_THRESHOLD = 0.7
+PROBABILITY_HIGH_THRESHOLD5 = 0.75  # 높은 확률 임계값 5단계
 
 
 class Metric(Enum):
@@ -71,6 +72,9 @@ class EventCategory(Enum):
     CRISIS = auto()  # 위기 상황
     OPPORTUNITY = auto()  # 기회
     RANDOM = auto()  # 랜덤 이벤트
+    THRESHOLD = auto()  # 임계값 기반 이벤트
+    SCHEDULED = auto()  # 스케줄 기반 이벤트
+    CASCADE = auto()  # 연쇄 효과 이벤트
 
 
 class TriggerCondition(Enum):
@@ -87,7 +91,7 @@ class TriggerCondition(Enum):
 # 트레이드오프 관계 정의 (한 지표가 오르면 다른 지표는 내려감)
 TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
     Metric.MONEY: [Metric.HAPPINESS, Metric.STAFF_FATIGUE],
-    Metric.REPUTATION: [Metric.MONEY],
+    Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],  # 평판 상승 시 직원 피로도 증가 (손님 증가로 인한)
     Metric.HAPPINESS: [Metric.SUFFERING],
     Metric.SUFFERING: [Metric.HAPPINESS],
     Metric.INVENTORY: [Metric.MONEY],
@@ -169,4 +173,7 @@ def cap_metric_value(metric: Metric, value: float) -> float:
     """
     min_val, max_val, _ = METRIC_RANGES[metric]
     return max(min_val, min(max_val, value))
+
+
+    THRESHOLD = auto()  # 임계값 기반 이벤트
 

@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from game_constants import FLOAT_EPSILON, Metric as MetricEnum, EventCategory
-from src.events.models import Alert, TriggerCondition  # TriggerCondition import 추가
+from src.events.models import Alert, TriggerCondition, Trigger  # Trigger import 추가
 from src.events.schema import Event as PydanticEvent  # PydanticEvent alias 사용
 from src.events.schema import EventContainer  # EventContainer import 추가
 from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
@@ -177,7 +177,7 @@ class EventEngine:
                     )
             # TODO: SCHEDULED, CASCADE 타입 처리
 
-        # 우선순위에 따라 정렬 (PydanticEvent에 priority가 있으므로 사용 가능)
+        # 우선순위에 따라 정렬 (Event에 priority가 있으므로 사용 가능)
         triggered_events.sort(key=lambda e: -e.priority)
 
         for event_to_fire in triggered_events:
@@ -186,7 +186,7 @@ class EventEngine:
         return triggered_events  # 실제 발생 "가능성이 있는" 이벤트 목록 반환
 
     def _evaluate_pydantic_trigger(
-        self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]
+        self, trigger: Trigger, current_metrics: dict[MetricEnum, float]
     ) -> bool:
         """Pydantic EventTrigger 모델을 평가합니다."""
         # trigger.metric이 MetricEnum인 경우와 문자열인 경우 모두 처리
@@ -240,7 +240,7 @@ class EventEngine:
             events_to_iterate = self.events
 
         for event_data in events_to_iterate:
-            if event_data.type != "THRESHOLD":
+            if event_data.type != EventCategory.THRESHOLD:
                 continue
 
             can_fire_event = True  # 임시 (cooldown 로직은 poll에서 처리 가정 또는 EventEngine에서 상태 관리 필요)
@@ -251,7 +251,7 @@ class EventEngine:
                 event_data.trigger, current_metrics
             ):
                 threshold_events.append(event_data)
-                alert_message = event_data.text_ko or f"임계값 이벤트 발생: {event_data.name_ko}"
+                alert_message = event_data.description or f"임계값 이벤트 발생: {event_data.name}"
                 alert = Alert(
                     event_id=event_data.id,
                     message=alert_message,
@@ -261,7 +261,7 @@ class EventEngine:
                 )
                 self.alert_queue.append(alert)
                 self.metrics_tracker.add_event(
-                    f"Triggered: {event_data.id} - {event_data.name_ko}"
+                    f"Triggered: {event_data.id} - {event_data.name}"
                 )  # 이벤트 발생 기록
         return threshold_events
 
@@ -526,7 +526,9 @@ class EventEngine:
         visited: set[str] = set()
         rec_stack: set[str] = set()
 
-        for node in graph:
+        # 딕셔너리 순회 중 크기 변경 방지를 위해 키 리스트를 미리 생성
+        graph_nodes = list(graph.keys())
+        for node in graph_nodes:
             if node not in visited:
                 if is_cyclic(node, visited, rec_stack):
                     return False

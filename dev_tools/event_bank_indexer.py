@@ -173,6 +173,52 @@ class EventBankIndexer:
         # 메타데이터 저장
         self.save_metadata(metadata)
 
+    def process_tradeoff(self) -> Any:
+        """
+        트레이드오프 이벤트 처리
+
+        Returns:
+            처리 결과 객체
+        """
+        events = self.load_events()
+        metadata = self.update_metadata(events)
+        self.save_metadata(metadata)
+        
+        # 시뮬레이터 객체 모방
+        class MockSimulator:
+            def __init__(self, events_data: list[dict[str, Any]], metadata_data: dict[str, Any]):
+                # 이벤트 데이터를 딕셔너리 형태로 변환
+                self.events = {}
+                for event in events_data:
+                    event_id = event.get("id", f"event_{len(self.events)}")
+                    self.events[event_id] = {"data": event}
+                
+                # 메타데이터 통계 생성
+                self.metadata = {
+                    "total_events": len(events_data),
+                    "categories": {},
+                    "tags": {}
+                }
+                
+                # 카테고리별 통계
+                for event in events_data:
+                    category = event.get("category", "unknown")
+                    self.metadata["categories"][category] = self.metadata["categories"].get(category, 0) + 1
+                    
+                    # 태그별 통계
+                    for tag in event.get("tags", []):
+                        self.metadata["tags"][tag] = self.metadata["tags"].get(tag, 0) + 1
+        
+        return MockSimulator(events, metadata)
+
+    def process_no_right_answer(self) -> None:
+        """
+        정답이 없는 상황 처리
+        """
+        events = self.load_events()
+        metadata = self.update_metadata(events)
+        self.save_metadata(metadata)
+
 
 def main() -> None:
     """메인 함수"""
@@ -187,3 +233,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

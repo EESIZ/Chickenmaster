@@ -490,6 +490,66 @@ class EventValidator:
         if self.output_file:
             self.save_results(results)
 
+    def calculate_quality_metrics(self, events: list[dict[str, Any]]) -> dict[str, float]:
+        """
+        이벤트 품질 메트릭 계산
+
+        Args:
+            events: 이벤트 목록
+
+        Returns:
+            품질 메트릭 딕셔너리
+        """
+        if not events:
+            return {
+                "diversity_score": 0.0,
+                "tradeoff_clarity": 0.0,
+                "cultural_authenticity": 0.0,
+                "replayability": 0.0,
+            }
+
+        # 다양성 점수 계산
+        categories = set()
+        types = set()
+        for event in events:
+            if "category" in event:
+                categories.add(event["category"])
+            if "type" in event:
+                types.add(event["type"])
+
+        diversity_score = min(1.0, (len(categories) + len(types)) / 10.0)
+
+        # 트레이드오프 명확성 계산
+        tradeoff_events = 0
+        for event in events:
+            if "effects" in event and len(event["effects"]) > 1:
+                tradeoff_events += 1
+
+        tradeoff_clarity = min(1.0, tradeoff_events / len(events))
+
+        # 문화적 진정성 (한국어 텍스트 비율)
+        korean_events = 0
+        for event in events:
+            if "name_ko" in event or "text_ko" in event:
+                korean_events += 1
+
+        cultural_authenticity = korean_events / len(events)
+
+        # 재플레이성 (확률 기반 이벤트 비율)
+        random_events = 0
+        for event in events:
+            if event.get("type") == "RANDOM" or event.get("probability", 0) < 1.0:
+                random_events += 1
+
+        replayability = random_events / len(events)
+
+        return {
+            "diversity_score": diversity_score,
+            "tradeoff_clarity": tradeoff_clarity,
+            "cultural_authenticity": cultural_authenticity,
+            "replayability": replayability,
+        }
+
 
 def main() -> None:
     """메인 함수"""

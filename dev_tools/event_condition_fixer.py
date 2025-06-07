@@ -132,6 +132,42 @@ class EventConditionFixer:
         # 수정된 이벤트 저장
         self.save_events(fixed_events)
 
+    def process_tradeoff(self) -> list[dict[str, Any]]:
+        """
+        트레이드오프 이벤트 처리
+
+        Returns:
+            처리된 이벤트 목록
+        """
+        data = self.load_events()
+        events = data.get("events", [])
+        
+        # 트리거 조건 수정
+        fixed_events = self.fix_trigger_conditions(events)
+        
+        # 수정된 이벤트 저장
+        self.save_events(fixed_events)
+        
+        return fixed_events
+
+    def process_no_right_answer(self) -> list[dict[str, Any]]:
+        """
+        정답이 없는 상황 처리
+
+        Returns:
+            처리된 이벤트 목록
+        """
+        data = self.load_events()
+        events = data.get("events", [])
+        
+        # 트리거 조건 수정
+        fixed_events = self.fix_trigger_conditions(events)
+        
+        # 수정된 이벤트 저장
+        self.save_events(fixed_events)
+        
+        return fixed_events
+
 
 def main() -> None:
     """메인 함수"""
@@ -146,3 +182,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
