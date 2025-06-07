@@ -8,7 +8,7 @@ Cascade 모듈의 도메인 모델.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Dict, FrozenSet, Mapping, Optional, Tuple, Union
+from collections.abc import Mapping
 from uuid import UUID, uuid4
 
 
@@ -30,7 +30,7 @@ class TriggerCondition:
     """
     
     expression: str  # 조건식 (예: "metrics.money > threshold")
-    parameters: Mapping[str, Union[int, float, str, bool]] = field(default_factory=dict)
+    parameters: Mapping[str, int | float | str | bool] = field(default_factory=dict)
     
     def __post_init__(self) -> None:
         """불변 매핑으로 파라미터 변환."""
@@ -77,9 +77,9 @@ class CascadeNode:
     event_id: str
     depth: int  # 연쇄 깊이 (루트는 0)
     cascade_type: CascadeType
-    parent_id: Optional[str] = None  # 부모 이벤트 ID (없으면 None)
+    parent_id: str | None = None  # 부모 이벤트 ID (없으면 None)
     node_id: UUID = field(default_factory=uuid4)  # 노드 고유 ID
-    trigger_condition: Optional[TriggerCondition] = None  # 트리거 조건
+    trigger_condition: TriggerCondition | None = None  # 트리거 조건
     probability: float = 1.0  # 발생 확률 (0.0~1.0)
     delay_turns: int = 0  # 지연 턴 수
     
@@ -128,7 +128,7 @@ class CascadeChain:
     """
     
     root_event_id: str  # 최초 트리거 이벤트 ID
-    nodes: FrozenSet[CascadeNode]  # 연쇄 노드들의 집합
+    nodes: frozenset[CascadeNode]  # 연쇄 노드들의 집합
     max_depth: int = 5  # 최대 연쇄 깊이
     chain_id: UUID = field(default_factory=uuid4)  # 체인 고유 ID
     created_at: datetime = field(default_factory=datetime.now)
@@ -146,15 +146,15 @@ class CascadeChain:
         if not root_exists:
             raise ValueError(f"루트 이벤트 ID '{self.root_event_id}'에 해당하는 루트 노드가 없습니다.")
     
-    def get_nodes_at_depth(self, depth: int) -> Tuple[CascadeNode, ...]:
+    def get_nodes_at_depth(self, depth: int) -> tuple[CascadeNode, ...]:
         """특정 깊이의 노드들을 반환."""
         return tuple(node for node in self.nodes if node.depth == depth)
     
-    def get_child_nodes(self, parent_id: str) -> Tuple[CascadeNode, ...]:
+    def get_child_nodes(self, parent_id: str) -> tuple[CascadeNode, ...]:
         """특정 부모 노드의 자식 노드들을 반환."""
         return tuple(node for node in self.nodes if node.parent_id == parent_id)
     
-    def get_node_by_event_id(self, event_id: str) -> Optional[CascadeNode]:
+    def get_node_by_event_id(self, event_id: str) -> CascadeNode | None:
         """이벤트 ID로 노드를 찾아 반환."""
         for node in self.nodes:
             if node.event_id == event_id:
@@ -206,9 +206,9 @@ class CascadeResult:
     연쇄 이벤트 체인 처리 결과를 표현합니다.
     """
     
-    triggered_events: Tuple[str, ...]  # 트리거된 이벤트 ID 목록
-    pending_events: Tuple[PendingEvent, ...]  # 지연된 이벤트 정보
-    metrics_impact: Dict[str, float]  # 지표 영향도
+    triggered_events: tuple[str, ...]  # 트리거된 이벤트 ID 목록
+    pending_events: tuple[PendingEvent, ...]  # 지연된 이벤트 정보
+    metrics_impact: dict[str, float]  # 지표 영향도
     depth_reached: int  # 도달한 최대 깊이
     result_id: UUID = field(default_factory=uuid4)  # 결과 고유 ID
     created_at: datetime = field(default_factory=datetime.now)

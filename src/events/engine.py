@@ -13,10 +13,10 @@
 import random
 from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any
 
-from game_constants import FLOAT_EPSILON, Metric as MetricEnum
-from src.events.models import Alert  # models.Event는 더 이상 직접 사용하지 않음
+from game_constants import FLOAT_EPSILON, Metric as MetricEnum, EventCategory
+from src.events.models import Alert, TriggerCondition  # TriggerCondition import 추가
 from src.events.schema import Event as PydanticEvent  # PydanticEvent alias 사용
 from src.events.schema import EventContainer  # EventContainer import 추가
 from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
@@ -42,9 +42,9 @@ class EventEngine:
     def __init__(
         self,
         metrics_tracker: MetricsTracker,
-        events_file: Optional[str] = None,
-        tradeoff_file: Optional[str] = None,
-        seed: Optional[int] = None,
+        events_file: str | None = None,
+        tradeoff_file: str | None = None,
+        seed: int | None = None,
         max_cascade_depth: int = 10,
     ):
         """
@@ -58,11 +58,11 @@ class EventEngine:
             max_cascade_depth: 최대 연쇄 깊이 (기본값: 10)
         """
         self.metrics_tracker = metrics_tracker
-        self.events_container: Optional[EventContainer[PydanticEvent]] = None
-        self.events: List[PydanticEvent] = []
+        self.events_container: EventContainer[PydanticEvent] | None = None
+        self.events: list[PydanticEvent] = []
         self.event_queue: deque[PydanticEvent] = deque()
         self.alert_queue: deque[Alert] = deque()
-        self.cascade_matrix: Dict[MetricEnum, List[Dict[str, Any]]] = {}
+        self.cascade_matrix: dict[MetricEnum, list[dict[str, Any]]] = {}
         self.max_cascade_depth = max_cascade_depth
         self.current_turn = 0
 
@@ -77,7 +77,7 @@ class EventEngine:
         if tradeoff_file:
             self.load_tradeoff_matrix(tradeoff_file)
 
-    def set_seed(self, seed: Optional[int] = None) -> None:
+    def set_seed(self, seed: int | None = None) -> None:
         """
         난수 생성 시드를 설정합니다.
 
@@ -131,7 +131,7 @@ class EventEngine:
         except Exception as e:
             print(f"트레이드오프 매트릭스 로드 실패: {e}")
 
-    def poll(self) -> List[PydanticEvent]:
+    def poll(self) -> list[PydanticEvent]:
         """
         현재 턴에 발생 가능한 이벤트를 폴링합니다.
 
@@ -139,7 +139,7 @@ class EventEngine:
             List[PydanticEvent]: 발생 가능한 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
-        triggered_events: List[PydanticEvent] = []
+        triggered_events: list[PydanticEvent] = []
 
         events_to_iterate = []
         if self.events_container and hasattr(self.events_container, "events"):
@@ -157,19 +157,23 @@ class EventEngine:
             if not can_fire_event:
                 continue
 
-            if event_data.type == "THRESHOLD":
+            if event_data.type == EventCategory.THRESHOLD:
                 if event_data.trigger and self._evaluate_pydantic_trigger(
                     event_data.trigger, current_metrics
                 ):
                     triggered_events.append(event_data)
+                    # Event 객체의 속성에 따라 적절한 이름 사용
+                    event_name = getattr(event_data, 'name_ko', getattr(event_data, 'name', event_data.id))
                     self.metrics_tracker.add_event(
-                        f"Polled THRESHOLD: {event_data.id} - {event_data.name_ko}"
+                        f"Polled THRESHOLD: {event_data.id} - {event_name}"
                     )
-            elif event_data.type == "RANDOM":
+            elif event_data.type == EventCategory.RANDOM:
                 if self.rng.random() < event_data.probability:
                     triggered_events.append(event_data)
+                    # Event 객체의 속성에 따라 적절한 이름 사용
+                    event_name = getattr(event_data, 'name_ko', getattr(event_data, 'name', event_data.id))
                     self.metrics_tracker.add_event(
-                        f"Polled RANDOM: {event_data.id} - {event_data.name_ko}"
+                        f"Polled RANDOM: {event_data.id} - {event_name}"
                     )
             # TODO: SCHEDULED, CASCADE 타입 처리
 
@@ -182,18 +186,25 @@ class EventEngine:
         return triggered_events  # 실제 발생 "가능성이 있는" 이벤트 목록 반환
 
     def _evaluate_pydantic_trigger(
-        self, trigger: EventTrigger, current_metrics: Dict[MetricEnum, float]
+        self, trigger: EventTrigger, current_metrics: dict[MetricEnum, float]
     ) -> bool:
         """Pydantic EventTrigger 모델을 평가합니다."""
-        metric_enum = getattr(
-            MetricEnum, trigger.metric.upper(), None
-        )  # trigger.metric이 문자열이므로 upper()로 Enum 멤버 이름과 일치시킴
+        # trigger.metric이 MetricEnum인 경우와 문자열인 경우 모두 처리
+        if isinstance(trigger.metric, MetricEnum):
+            metric_enum = trigger.metric
+        else:
+            metric_enum = getattr(MetricEnum, trigger.metric.upper(), None)
+        
         if not metric_enum or metric_enum not in current_metrics:
             print(f"[Debug] Metric {trigger.metric} not found in current_metrics or MetricEnum")
             return False
         current_value = current_metrics[metric_enum]
 
-        condition_str = trigger.condition.upper()
+        # TriggerCondition enum 처리
+        if isinstance(trigger.condition, TriggerCondition):
+            condition_str = trigger.condition.name
+        else:
+            condition_str = trigger.condition.upper()
         trigger_value = trigger.value
 
         if condition_str == "LESS_THAN":
@@ -212,7 +223,7 @@ class EventEngine:
         print(f"[Debug] Unknown condition: {trigger.condition}")
         return False
 
-    def evaluate_triggers(self) -> List[PydanticEvent]:  # 반환 타입을 PydanticEvent로 명시
+    def evaluate_triggers(self) -> list[PydanticEvent]:  # 반환 타입을 PydanticEvent로 명시
         """
         임계값 기반 트리거를 평가합니다.
 
@@ -220,7 +231,7 @@ class EventEngine:
             List[PydanticEvent]: 트리거된 이벤트 목록
         """
         current_metrics = self.metrics_tracker.get_metrics()
-        threshold_events: List[PydanticEvent] = []  # 타입 명시
+        threshold_events: list[PydanticEvent] = []  # 타입 명시
 
         events_to_iterate = []
         if self.events_container and hasattr(self.events_container, "events"):
@@ -254,7 +265,7 @@ class EventEngine:
                 )  # 이벤트 발생 기록
         return threshold_events
 
-    def apply_effects(self) -> Dict[MetricEnum, float]:
+    def apply_effects(self) -> dict[MetricEnum, float]:
         """
         큐에 있는 모든 이벤트의 효과를 적용합니다.
 
@@ -279,10 +290,16 @@ class EventEngine:
             if can_fire_this_event:
                 event.last_fired = self.current_turn
 
-                updates: Dict[MetricEnum, float] = {}
+                updates: dict[MetricEnum, float] = {}
                 for effect_data in event.effects:
-                    metric_name = effect_data.metric.upper()
-                    metric_enum = getattr(MetricEnum, metric_name, None)
+                    # effect_data.metric이 MetricEnum인 경우 처리
+                    if isinstance(effect_data.metric, MetricEnum):
+                        metric_enum = effect_data.metric
+                    else:
+                        # 문자열인 경우 기존 로직 사용
+                        metric_name = effect_data.metric.upper()
+                        metric_enum = getattr(MetricEnum, metric_name, None)
+                    
                     if metric_enum and metric_enum in current_metrics:
                         current_value = current_metrics[metric_enum]
                         new_value = current_value
@@ -317,7 +334,11 @@ class EventEngine:
 
                 if updates:
                     self.metrics_tracker.tradeoff_update_metrics(updates)
-                self.metrics_tracker.add_event(f"Applied event: {event.id} - {event.name_ko}")
+                    # 캐스케이드 효과 처리
+                    self._process_cascade_effects(set(updates.keys()), 0)
+                # Event 객체의 속성에 따라 적절한 이름 사용
+                event_name = getattr(event, 'name_ko', getattr(event, 'name', event.id))
+                self.metrics_tracker.add_event(f"Applied event: {event.id} - {event_name}")
             else:
                 self.metrics_tracker.add_event(
                     f"Event {event.id} in cooldown. Turn: {self.current_turn}, Last Fired: {event.last_fired}, Cooldown: {event.cooldown}"
@@ -326,7 +347,7 @@ class EventEngine:
             current_metrics = self.metrics_tracker.get_metrics()
         return current_metrics
 
-    def _process_cascade_effects(self, changed_metrics: Set[MetricEnum], depth: int) -> None:
+    def _process_cascade_effects(self, changed_metrics: set[MetricEnum], depth: int) -> None:
         """
         지표 변화의 연쇄 효과를 처리합니다.
 
@@ -347,7 +368,7 @@ class EventEngine:
 
         # 연쇄 효과 적용
         cascade_updates = {}
-        next_changed_metrics: Set[MetricEnum] = set()
+        next_changed_metrics: set[MetricEnum] = set()
 
         for metric in changed_metrics:
             if metric not in self.cascade_matrix:
@@ -417,7 +438,7 @@ class EventEngine:
             if next_changed_metrics:
                 self._process_cascade_effects(next_changed_metrics, depth + 1)
 
-    def update(self) -> Dict[MetricEnum, float]:
+    def update(self) -> dict[MetricEnum, float]:
         """
         이벤트 엔진을 한 턴 업데이트합니다.
 
@@ -436,7 +457,7 @@ class EventEngine:
         # 효과 적용
         return self.apply_effects()
 
-    def get_alerts(self, count: Optional[int] = None) -> List[Alert]:
+    def get_alerts(self, count: int | None = None) -> list[Alert]:
         """
         알림 큐에서 알림을 가져옵니다.
 
@@ -469,7 +490,7 @@ class EventEngine:
             return True
 
         # 간선 목록 생성
-        edges: List[Tuple[str, str]] = []
+        edges: list[tuple[str, str]] = []
         for source, targets in self.cascade_matrix.items():
             for edge in targets:
                 try:
@@ -481,12 +502,12 @@ class EventEngine:
                     print(f"Invalid edge: {edge}")
 
         # 그래프 생성
-        graph: Dict[str, List[str]] = defaultdict(list)
+        graph: dict[str, list[str]] = defaultdict(list)
         for source_str, target_str in edges:
             graph[source_str].append(target_str)
 
         # 사이클 검사
-        def is_cyclic(node: str, visited: Set[str], rec_stack: Set[str]) -> bool:
+        def is_cyclic(node: str, visited: set[str], rec_stack: set[str]) -> bool:
             """DFS를 사용하여 사이클 검사"""
             visited.add(node)
             rec_stack.add(node)
@@ -502,8 +523,8 @@ class EventEngine:
             return False
 
         # 모든 노드에 대해 사이클 검사
-        visited: Set[str] = set()
-        rec_stack: Set[str] = set()
+        visited: set[str] = set()
+        rec_stack: set[str] = set()
 
         for node in graph:
             if node not in visited:

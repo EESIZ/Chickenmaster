@@ -5,10 +5,7 @@
 """
 
 import random
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
-from uuid import UUID
+from typing import Any
 
 from src.cascade.domain.models import (
     CascadeChain, CascadeNode, CascadeResult, CascadeType, 
@@ -33,10 +30,10 @@ class CascadeServiceImpl(ICascadeService):
             event_service: 이벤트 서비스 인스턴스
         """
         self._event_service = event_service
-        self._cascade_relations: Dict[str, List[CascadeNode]] = {}  # 부모 이벤트 ID -> 자식 노드 목록
-        self._pending_events: List[PendingEvent] = []  # 지연 이벤트 목록
+        self._cascade_relations: dict[str, list[CascadeNode]] = {}  # 부모 이벤트 ID -> 자식 노드 목록
+        self._pending_events: list[PendingEvent] = []  # 지연 이벤트 목록
     
-    def get_cascade_events(self, event_id: str, game_state: Any) -> List[str]:
+    def get_cascade_events(self, event_id: str, game_state: Any) -> list[str]:
         """
         트리거 이벤트로 인한 연쇄 이벤트 목록을 반환합니다.
         
@@ -53,7 +50,7 @@ class CascadeServiceImpl(ICascadeService):
         if event_id not in self._cascade_relations:
             return []
         
-        result: List[str] = []
+        result: list[str] = []
         
         for node in self._cascade_relations[event_id]:
             # 조건부 이벤트인 경우 조건 평가
@@ -143,9 +140,9 @@ class CascadeServiceImpl(ICascadeService):
             raise ValueError(f"연쇄 체인이 최대 깊이({max_depth})를 초과합니다.")
         
         # 처리 결과 초기화
-        triggered_events: List[str] = []
-        pending_events: List[PendingEvent] = []
-        triggered_event_objects: List[Any] = []
+        triggered_events: list[str] = []
+        pending_events: list[PendingEvent] = []
+        triggered_event_objects: list[Any] = []
         
         # 루트 이벤트 처리
         triggered_events.append(root_event_id)
@@ -230,7 +227,7 @@ class CascadeServiceImpl(ICascadeService):
         """
         return event_chain.has_cycles()
     
-    def get_pending_events(self, current_turn: int) -> List[PendingEvent]:
+    def get_pending_events(self, current_turn: int) -> list[PendingEvent]:
         """
         현재 턴에 처리해야 할 지연 이벤트 목록을 반환합니다.
         
@@ -258,7 +255,7 @@ class CascadeServiceImpl(ICascadeService):
         parent_event_id: str, 
         child_event_id: str,
         cascade_type_str: str,
-        trigger_condition: Optional[Dict[str, Any]] = None,
+        trigger_condition: dict[str, Any] | None = None,
         probability: float = 1.0,
         delay_turns: int = 0
     ) -> CascadeNode:
@@ -284,7 +281,7 @@ class CascadeServiceImpl(ICascadeService):
             self._event_service.get_event_by_id(parent_event_id)
             self._event_service.get_event_by_id(child_event_id)
         except ValueError as e:
-            raise ValueError(f"유효하지 않은 이벤트 ID: {str(e)}")
+            raise ValueError(f"유효하지 않은 이벤트 ID: {e!s}")
         
         # 연쇄 유형 변환
         try:
@@ -346,10 +343,10 @@ class CascadeServiceImpl(ICascadeService):
         try:
             self._event_service.get_event_by_id(root_event_id)
         except ValueError as e:
-            raise ValueError(f"유효하지 않은 루트 이벤트 ID: {str(e)}")
+            raise ValueError(f"유효하지 않은 루트 이벤트 ID: {e!s}")
         
         # 노드 집합 초기화
-        nodes: Set[CascadeNode] = set()
+        nodes: set[CascadeNode] = set()
         
         # 루트 노드 추가
         root_node = CascadeNode(
@@ -406,9 +403,9 @@ class CascadeServiceImpl(ICascadeService):
     
     def calculate_metrics_impact(
         self, 
-        triggered_events: List[Any], 
+        triggered_events: list[Any], 
         game_state: Any
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         트리거된 이벤트들의 지표 영향도를 계산합니다.
         
@@ -420,7 +417,7 @@ class CascadeServiceImpl(ICascadeService):
             지표별 영향도 (지표명: 영향값)
         """
         # 지표 영향도 초기화
-        metrics_impact: Dict[str, float] = {}
+        metrics_impact: dict[str, float] = {}
         
         # 각 이벤트의 효과를 누적
         for event in triggered_events:

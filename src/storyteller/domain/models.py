@@ -7,7 +7,6 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional
 from uuid import UUID, uuid4
 
 
@@ -16,7 +15,7 @@ class MetricsHistory:
     """지표 변화 히스토리."""
     
     day: int
-    metrics: Dict[str, float]
+    metrics: dict[str, float]
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -27,7 +26,7 @@ class RecentEvent:
     day: int
     event_id: str
     severity: float
-    effects: Dict[str, float]
+    effects: dict[str, float]
 
 
 @dataclass(frozen=True)
@@ -36,8 +35,8 @@ class StoryContext:
     
     day: int
     game_progression: float  # 0.0 ~ 1.0
-    metrics_history: List[MetricsHistory]
-    recent_events: List[RecentEvent]
+    metrics_history: list[MetricsHistory]
+    recent_events: list[RecentEvent]
     context_id: UUID = field(default_factory=uuid4)
     
     def __post_init__(self) -> None:
@@ -55,12 +54,12 @@ class StoryPattern:
     
     pattern_id: str
     name: str
-    trigger_conditions: Dict[str, float]  # 지표명: 임계값
-    related_events: List[str]  # 연관 이벤트 ID 목록
+    trigger_conditions: dict[str, float]  # 지표명: 임계값
+    related_events: list[str]  # 연관 이벤트 ID 목록
     narrative_template: str
     pattern_type: str = "default"
     
-    def matches(self, metrics: Dict[str, float]) -> bool:
+    def matches(self, metrics: dict[str, float]) -> bool:
         """현재 지표가 패턴의 트리거 조건과 일치하는지 확인."""
         for metric, threshold in self.trigger_conditions.items():
             current_value = metrics.get(metric, 0)
@@ -81,7 +80,7 @@ class NarrativeResponse:
     """스토리텔러의 응답."""
     
     narrative: str
-    suggested_event: Optional[str] = None  # 제안된 이벤트 ID
-    applied_pattern: Optional[StoryPattern] = None
+    suggested_event: str | None = None  # 제안된 이벤트 ID
+    applied_pattern: StoryPattern | None = None
     response_id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=datetime.now) 

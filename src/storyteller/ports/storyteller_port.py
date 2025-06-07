@@ -5,7 +5,6 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
 
 from src.storyteller.domain.models import NarrativeResponse, StoryContext, StoryPattern
 
@@ -35,7 +34,7 @@ class IStorytellerService(ABC):
         pass
     
     @abstractmethod
-    def suggest_event(self, context: StoryContext) -> Optional[str]:
+    def suggest_event(self, context: StoryContext) -> str | None:
         """
         현재 상황에 적절한 이벤트를 제안합니다.
         
@@ -51,7 +50,7 @@ class IStorytellerService(ABC):
         pass
     
     @abstractmethod
-    def analyze_metrics_trend(self, context: StoryContext) -> Dict[str, float]:
+    def analyze_metrics_trend(self, context: StoryContext) -> dict[str, float]:
         """
         지표 변화 추세를 분석합니다.
         
@@ -67,7 +66,7 @@ class IStorytellerService(ABC):
         pass
     
     @abstractmethod
-    def get_story_patterns(self, context: StoryContext) -> List[StoryPattern]:
+    def get_story_patterns(self, context: StoryContext) -> list[StoryPattern]:
         """
         현재 상황에 적용 가능한 스토리 패턴을 반환합니다.
         

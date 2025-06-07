@@ -4,7 +4,7 @@
 이 모듈은 IEventService 인터페이스를 구현하여 이벤트 처리 로직을 제공합니다.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from src.cascade.ports.event_port import IEventService
 
@@ -55,7 +55,7 @@ class EventServiceAdapter(IEventService):
         # 이 어댑터는 독립적인 테스트를 위한 Mock 구현입니다.
         return game_state
     
-    def evaluate_trigger_condition(self, condition: Dict[str, Any], game_state: Any) -> bool:
+    def evaluate_trigger_condition(self, condition: dict[str, Any], game_state: Any) -> bool:
         """
         트리거 조건을 평가합니다.
         
@@ -70,7 +70,7 @@ class EventServiceAdapter(IEventService):
         # 이 어댑터는 독립적인 테스트를 위한 Mock 구현입니다.
         return True
     
-    def get_applicable_events(self, game_state: Any) -> List[Any]:
+    def get_applicable_events(self, game_state: Any) -> list[Any]:
         """
         현재 상태에서 발생 가능한 이벤트 목록을 반환합니다.
         

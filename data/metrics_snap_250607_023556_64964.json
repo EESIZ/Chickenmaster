@@ -1,17 +1,18 @@
 {
-  "day": 4,
-  "timestamp": "2025-06-07T00:35:06.590984",
+  "day": 3,
+  "timestamp": "2025-06-07T02:35:56.649657",
   "metrics": {
-    "MONEY": 8888.088245171532,
-    "REPUTATION": 50.08240252614978,
-    "HAPPINESS": 49.06510532231752,
-    "SUFFERING": 50.93489467768248,
-    "INVENTORY": 113.67909015811921,
-    "STAFF_FATIGUE": 35.511917500154645,
-    "FACILITY": 65.50983569206618,
-    "DEMAND": 58.98924412796541
+    "MONEY": 4915.194701476102,
+    "REPUTATION": 47.923028589816454,
+    "HAPPINESS": 50.49711137707979,
+    "SUFFERING": 49.50288862292021,
+    "INVENTORY": 105.6723231059493,
+    "STAFF_FATIGUE": 35.33114215119681,
+    "FACILITY": 65.0617510560253,
+    "DEMAND": 61.64199074547161
   },
   "events": [
+    "평판 변동으로 인한 경미한 매출 변화, 자금 -100 변동",
     "Polled RANDOM: viral_marketing - 바이럴 마케팅 성공",
     "평판 변동으로 인한 경미한 매출 변화, 자금 -100 변동",
     "Applied event: viral_marketing - 바이럴 마케팅 성공",
@@ -20,9 +21,7 @@
     "Event viral_marketing in cooldown. Turn: 2, Last Fired: 1, Cooldown: 5",
     "Applied event: random_opportunity - 뜻밖의 행운 발견",
     "Polled RANDOM: viral_marketing - 바이럴 마케팅 성공",
-    "Event viral_marketing in cooldown. Turn: 3, Last Fired: 1, Cooldown: 5",
-    "Polled RANDOM: viral_marketing - 바이럴 마케팅 성공",
-    "Event viral_marketing in cooldown. Turn: 4, Last Fired: 1, Cooldown: 5"
+    "Event viral_marketing in cooldown. Turn: 3, Last Fired: 1, Cooldown: 5"
   ],
   "modifier": "SimpleSeesawModifier"
 }

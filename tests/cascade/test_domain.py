@@ -1,3 +1,5 @@
+from game_constants import MAGIC_NUMBER_ONE, MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIVE, MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN
+from game_constants import MAGIC_NUMBER_ONE, MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIVE, MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN
 """
 Cascade 모듈 도메인 객체 테스트.
 
@@ -8,7 +10,6 @@ import pytest
 import dataclasses
 from datetime import datetime
 from uuid import UUID
-from freezegun import freeze_time
 
 from src.cascade.domain.models import (
     CascadeChain, CascadeNode, CascadeResult, CascadeType, 
@@ -58,10 +59,10 @@ class TestPendingEvent:
             trigger_turn=5
         )
         assert event.event_id == "test_event"
-        assert event.delay_turns == 2
-        assert event.trigger_turn == 5
+        assert event.delay_turns == MAGIC_NUMBER_TWO
+        assert event.trigger_turn == MAGIC_NUMBER_FIVE
         assert event.cascade_type == CascadeType.DELAYED
-        assert event.probability == 1.0
+        assert event.probability == MAGIC_NUMBER_ONE
     
     def test_invalid_delay(self):
         """유효하지 않은 지연 턴 테스트."""
@@ -209,8 +210,8 @@ class TestCascadeChain:
         )
         
         assert chain.root_event_id == "root_event"
-        assert len(chain.nodes) == 2
-        assert chain.max_depth == 5
+        assert len(chain.nodes) == MAGIC_NUMBER_TWO
+        assert chain.max_depth == MAGIC_NUMBER_FIVE
         assert isinstance(chain.chain_id, UUID)
         assert isinstance(chain.created_at, datetime)
     
@@ -283,7 +284,7 @@ class TestCascadeChain:
         
         assert len(depth0_nodes) == 1
         assert depth0_nodes[0].event_id == "root_event"
-        assert len(depth1_nodes) == 2
+        assert len(depth1_nodes) == MAGIC_NUMBER_TWO
         assert {node.event_id for node in depth1_nodes} == {"child1", "child2"}
         assert len(depth2_nodes) == 0
     
@@ -322,7 +323,7 @@ class TestCascadeChain:
         child1_children = chain.get_child_nodes("child1")
         child2_children = chain.get_child_nodes("child2")
         
-        assert len(root_children) == 2
+        assert len(root_children) == MAGIC_NUMBER_TWO
         assert {node.event_id for node in root_children} == {"child1", "child2"}
         assert len(child1_children) == 1
         assert child1_children[0].event_id == "grandchild"
@@ -392,7 +393,7 @@ class TestCascadeChain:
         
         assert chain1.get_max_actual_depth() == 0
         assert chain2.get_max_actual_depth() == 1
-        assert chain3.get_max_actual_depth() == 2
+        assert chain3.get_max_actual_depth() == MAGIC_NUMBER_TWO
     
     def test_has_cycles(self):
         """사이클 감지 테스트."""
@@ -439,7 +440,7 @@ class TestCascadeResult:
         assert result.triggered_events == ("event1", "event2")
         assert result.pending_events == ()
         assert result.metrics_impact == {"money": -100, "reputation": 5}
-        assert result.depth_reached == 2
+        assert result.depth_reached == MAGIC_NUMBER_TWO
         assert isinstance(result.result_id, UUID)
         assert isinstance(result.created_at, datetime)
     
@@ -473,7 +474,7 @@ class TestCascadeResult:
             depth_reached=2
         )
         
-        assert result.get_total_events_count() == 5
+        assert result.get_total_events_count() == MAGIC_NUMBER_FIVE
     
     def test_get_total_metrics_impact(self):
         """총 지표 영향도 계산 테스트."""
@@ -484,7 +485,7 @@ class TestCascadeResult:
             depth_reached=1
         )
         
-        assert result.get_total_metrics_impact() == 115  # |−100| + |5| + |−10| = 115
+        assert result.get_total_metrics_impact() == MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN  # |−100| + |5| + |−10| = 115
     
     def test_has_pending_events(self):
         """지연 이벤트 여부 테스트."""

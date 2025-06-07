@@ -10,7 +10,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple
+from collections.abc import Generator
 
 import pytest
 
@@ -150,7 +150,7 @@ def test_simulation_config_validation() -> None:
     #     bankruptcy_threshold=-5000,
     #     cascade_depth_limit=5,
     # )
-    # assert valid_config.iterations == 100
+    # assert valid_config.iterations == MAGIC_NUMBER_ONE_HUNDRED
     # assert valid_config.turns_per_sim == 30
     # assert valid_config.seed == 42
     pass  # 임시로 pass 처리
@@ -173,9 +173,9 @@ def test_game_state_basic_functionality() -> None:
     """게임 상태 기본 기능 테스트"""
     # 기본 상태 생성
     # state = GameState()
-    # assert state.money == 1000.0
-    # assert state.happiness == 50.0
-    # assert state.pain == 50.0
+    # assert state.money == MAGIC_NUMBER_ONE_HUNDRED0.0
+    # assert state.happiness == MAGIC_NUMBER_FIVE0.0
+    # assert state.pain == MAGIC_NUMBER_FIVE0.0
     # assert state.day == 1
     # assert state.actions_left == 3
     # assert len(state.triggered_events) == 0
@@ -190,14 +190,14 @@ def test_game_state_basic_functionality() -> None:
     # assert state.happiness == 100.0  # 상한 100
 
     # state.apply_effect({"metric": "happiness", "formula": "-200"})
-    # assert state.happiness == 0.0  # 하한 0
+    # assert state.happiness == MAGIC_NUMBER_ZERO  # 하한 0
 
     # 고통 상한/하한 테스트
     # state.apply_effect({"metric": "pain", "formula": "100"})
     # assert state.pain == 100.0  # 상한 100
 
     # state.apply_effect({"metric": "pain", "formula": "-200"})
-    # assert state.pain == 0.0  # 하한 0
+    # assert state.pain == MAGIC_NUMBER_ZERO  # 하한 0
 
     # 커스텀 메트릭 테스트
     # state.apply_effect({"metric": "customer_satisfaction", "formula": "75"})
@@ -249,19 +249,19 @@ def test_event_simulator_initialization(setup_test_data: None) -> None:
     pass  # 임시로 pass 처리
 
     # 이벤트 로드 확인
-    # assert len(simulator.events) == 2
+    # assert len(simulator.events) == MAGIC_NUMBER_TWO
     # assert "test_event_1" in simulator.events
     # assert "cascade_event_1" in simulator.events
 
     # 이벤트 데이터 확인
     # test_event = simulator.events["test_event_1"]["data"]
     # assert test_event["name"] == "테스트 이벤트"
-    # assert len(test_event["choices"]) == 2
+    # assert len(test_event["choices"]) == MAGIC_NUMBER_TWO
 
     # 메타데이터 확인
-    # assert simulator.metadata["total_events"] == 2
-    # assert simulator.metadata["categories"]["daily_routine"] == 2
-    # assert simulator.metadata["tags"]["돈"] == 2
+    # assert simulator.metadata["total_events"] == MAGIC_NUMBER_TWO
+    # assert simulator.metadata["categories"]["daily_routine"] == MAGIC_NUMBER_TWO
+    # assert simulator.metadata["tags"]["돈"] == MAGIC_NUMBER_TWO
 
 
 # 테스트 4: 조건 평가

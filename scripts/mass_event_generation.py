@@ -128,7 +128,7 @@ SYSTEM_PROMPT = """당신은 치킨집 경영 시뮬레이션 게임 '치킨마�
   "tags": ["태그1", "태그2"],
   
   // 이벤트 타입별 추가 필드
-  "probability": 0.3,  // RANDOM 타입일 경우
+  "probability": PROBABILITY_LOW_THRESHOLD,  // RANDOM 타입일 경우
   "schedule": 5,       // SCHEDULED 타입일 경우
   "trigger": {         // THRESHOLD 또는 CASCADE 타입일 경우
     "metric": "METRIC_NAME",

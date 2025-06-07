@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_HIGH_THRESHOLD
 #!/usr/bin/env python3
 """
 파일: dev_tools/event_generator.py
@@ -58,7 +59,7 @@ class EventGenerator:
             response = self.client.messages.create(
                 model="claude-3-5-sonnet-20241022",  # 최신 모델로 변경
                 max_tokens=4000,
-                temperature=0.7,
+                temperature=PROBABILITY_HIGH_THRESHOLD,
                 messages=[{"role": "user", "content": prompt}],
             )
             return {"messages": response.content[0].text}
@@ -158,7 +159,7 @@ class EventGenerator:
         category: str,
         tags: list[str] | None = None,
         count: int = 1,
-        temperature: float = 0.7,
+        temperature: float = PROBABILITY_HIGH_THRESHOLD,
         max_tokens: int = 2048,
     ) -> list[dict[str, Any]]:
         """지정된 카테고리와 태그로 이벤트를 생성합니다."""
@@ -180,7 +181,12 @@ class EventGenerator:
         if not response or "messages" not in response:
             return None
 
-        return self._extract_json_from_response(response["messages"])
+        # JSON 추출 후 events 배열에서 첫 번째 이벤트 반환
+        extracted_data = self._extract_json_from_response(response["messages"])
+        if extracted_data and "events" in extracted_data and extracted_data["events"]:
+            return extracted_data["events"][0]  # 첫 번째 이벤트 반환
+        
+        return extracted_data  # events 키가 없으면 전체 데이터 반환
 
     def _extract_json_from_response(self, response_text: str) -> dict[str, Any] | None:
         """API 응답에서 JSON 추출"""

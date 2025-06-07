@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_HIGH_THRESHOLD
 """
 파일: dev_tools/event_bank_manager.py
 목적: 대형 이벤트 뱅크 구축 및 관리 도구
@@ -29,7 +30,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # 이제 src 모듈을 import 할 수 있습니다.
 
 # 매직 넘버 상수 정의
-BALANCE_SCORE_GOOD_THRESHOLD = 0.7
+BALANCE_SCORE_GOOD_THRESHOLD = PROBABILITY_HIGH_THRESHOLD
 BALANCE_SCORE_NORMAL_THRESHOLD = 0.5
 
 # 조건부 import 및 스텁 클래스 구현

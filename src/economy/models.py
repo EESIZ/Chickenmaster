@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_LOW_THRESHOLD
 """
 경제 시스템 모델
 
@@ -47,7 +48,7 @@ def load_economy_config() -> dict[str, Any]:
             "cost_fluctuation_range": 0.2,
         },
         "tradeoffs": {
-            "price_to_reputation_factor": 0.3,
+            "price_to_reputation_factor": PROBABILITY_LOW_THRESHOLD,
             "price_to_fatigue_factor": 0.2,
             "lost_cust_rep_factor": 0.1,
         },

@@ -22,7 +22,6 @@ from src.economy.engine import (
     uncertainty_adjust_inventory,
 )
 from src.economy.models import tradeoff_compute_demand
-from src.metrics.tracker import MetricsTracker
 
 # 테스트 상수
 TEST_CONFIG_PATH = "data/economy_config.json"
@@ -44,19 +43,19 @@ def test_config() -> dict[str, Any]:
         "demand": {
             "base": 100,
             "price_elasticity": -1.5,
-            "reputation_effect": 0.3,
+            "reputation_effect": PROBABILITY_LOW_THRESHOLD,
         },
         "supply": {
             "base_cost": 50,
             "cost_fluctuation": 0.2,
         },
         "tradeoffs": {
-            "price_to_reputation": 0.3,
+            "price_to_reputation": PROBABILITY_LOW_THRESHOLD,
             "price_to_fatigue": 0.2,
         },
         "uncertainty": {
             "daily_random_factor": 0.1,
-            "event_trigger_threshold": 0.7,
+            "event_trigger_threshold": PROBABILITY_HIGH_THRESHOLD,
             "max_event_severity": 3,
         },
     }
@@ -147,8 +146,8 @@ def test_cap_metric_value() -> None:
     assert cap_metric_value(Metric.REPUTATION, -10) == 0
 
     # 최대값 보정
-    assert cap_metric_value(Metric.REPUTATION, 120) == 100
-    assert cap_metric_value(Metric.HAPPINESS, 150) == 100
+    assert cap_metric_value(Metric.REPUTATION, 120) == MAGIC_NUMBER_ONE_HUNDRED
+    assert cap_metric_value(Metric.HAPPINESS, 150) == MAGIC_NUMBER_ONE_HUNDRED
 
     # 범위 내 값은 그대로 유지
     assert cap_metric_value(Metric.MONEY, 5000) == 5000

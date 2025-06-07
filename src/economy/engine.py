@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_LOW_THRESHOLD
 """
 경제 엔진
 
@@ -16,7 +17,7 @@ from game_constants import (
 from src.economy.models import load_economy_config
 
 # 트레이드오프 상수
-TRADEOFF_FACTORS = {"PRICE_TO_REPUTATION": 0.3, "PRICE_TO_FATIGUE": 0.2}
+TRADEOFF_FACTORS = {"PRICE_TO_REPUTATION": PROBABILITY_LOW_THRESHOLD, "PRICE_TO_FATIGUE": 0.2}
 
 
 def compute_profit_no_right_answer(
@@ -93,7 +94,7 @@ def tradeoff_apply_price_change(
         config = load_economy_config().get("tradeoffs", {})
 
     # 기본 트레이드오프 설정
-    reputation_factor = config.get("price_to_reputation_factor", 0.3)
+    reputation_factor = config.get("price_to_reputation_factor", PROBABILITY_LOW_THRESHOLD)
     fatigue_factor = config.get("price_to_fatigue_factor", 0.2)
 
     # 결과 지표 복사

@@ -8,7 +8,6 @@ import random
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Dict, List, Optional, Union, Any
 
 from game_constants import FLOAT_EPSILON, Metric
 
@@ -59,11 +58,11 @@ class Trigger:
 
     metric: Metric
     condition: TriggerCondition
-    value: Optional[float] = None
-    range_min: Optional[float] = None
-    range_max: Optional[float] = None
+    value: float | None = None
+    range_min: float | None = None
+    range_max: float | None = None
 
-    def evaluate(self, current_metrics: Dict[Metric, float]) -> bool:
+    def evaluate(self, current_metrics: dict[Metric, float]) -> bool:
         """
         트리거 조건을 평가합니다.
 
@@ -117,9 +116,9 @@ class Effect:
 
     metric: Metric
     formula: str
-    message: Optional[str] = None
+    message: str | None = None
 
-    def apply(self, current_metrics: Dict[Metric, float]) -> float:
+    def apply(self, current_metrics: dict[Metric, float]) -> float:
         """
         효과를 적용하여 새 지표 값을 계산합니다.
 
@@ -181,19 +180,19 @@ class Event:
     type: EventCategory
     name: str
     description: str
-    effects: List[Effect]
-    trigger: Optional[Trigger] = None
+    effects: list[Effect]
+    trigger: Trigger | None = None
     probability: float = 1.0
     priority: int = 0
     cooldown: int = 0
     category: str = "default"
-    last_triggered: Optional[datetime] = None
+    last_triggered: datetime | None = None
     turn: int = 0
     severity: str = "INFO"
-    timestamp: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
+    timestamp: str | None = None
+    tags: list[str] = field(default_factory=list)
     cascade_depth: int = 0
-    schedule: Optional[int] = None  # 스케줄 속성 추가
+    schedule: int | None = None  # 스케줄 속성 추가
 
     def __post_init__(self) -> None:
         """
@@ -221,7 +220,7 @@ class Event:
         return True
 
     def evaluate_trigger(
-        self, current_metrics: Dict[Metric, float], rng: Optional[random.Random] = None
+        self, current_metrics: dict[Metric, float], rng: random.Random | None = None
     ) -> bool:
         """
         이벤트 트리거 조건을 평가합니다.
@@ -262,7 +261,7 @@ class Event:
 
         return False
 
-    def apply_effects(self, current_metrics: Dict[Metric, float]) -> Dict[Metric, float]:
+    def apply_effects(self, current_metrics: dict[Metric, float]) -> dict[Metric, float]:
         """
         이벤트 효과를 적용합니다.
 
@@ -280,7 +279,7 @@ class Event:
 
         return result
 
-    def fire(self, current_metrics: Dict[Metric, float], current_turn: int) -> Dict[Metric, float]:
+    def fire(self, current_metrics: dict[Metric, float], current_turn: int) -> dict[Metric, float]:
         """
         이벤트를 발생시키고 효과를 적용합니다.
 
@@ -309,10 +308,10 @@ class Alert:
 
     event_id: str
     message: str
-    metrics: Dict[Metric, float]
+    metrics: dict[Metric, float]
     turn: int
     severity: str = "INFO"
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
 
     def __post_init__(self) -> None:
         """

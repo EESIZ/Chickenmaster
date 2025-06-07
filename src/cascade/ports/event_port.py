@@ -5,7 +5,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 # 타입 변수 정의
 GameState = TypeVar('GameState')
@@ -50,7 +50,7 @@ class IEventService(ABC):
         pass
     
     @abstractmethod
-    def evaluate_trigger_condition(self, condition: Dict[str, Any], game_state: GameState) -> bool:
+    def evaluate_trigger_condition(self, condition: dict[str, Any], game_state: GameState) -> bool:
         """
         트리거 조건을 평가합니다.
         
@@ -64,7 +64,7 @@ class IEventService(ABC):
         pass
     
     @abstractmethod
-    def get_applicable_events(self, game_state: GameState) -> List[Event]:
+    def get_applicable_events(self, game_state: GameState) -> list[Event]:
         """
         현재 상태에서 발생 가능한 이벤트 목록을 반환합니다.
         

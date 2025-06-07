@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_HIGH_THRESHOLD, PROBABILITY_LOW_THRESHOLD
 """
 StorytellerService 테스트
 
@@ -6,14 +7,11 @@ StorytellerService 테스트
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock
-from datetime import datetime
-from typing import Dict, List
+from unittest.mock import Mock
 
 from src.core.ports.container_port import IServiceContainer
 from src.core.ports.event_port import IEventService
 from src.core.domain.events import Event
-from src.core.domain.game_state import GameState
 from src.storyteller.adapters.storyteller_service import StorytellerService
 from src.storyteller.domain.models import (
     StoryContext, NarrativeResponse, StoryPattern, 
@@ -64,14 +62,14 @@ def sample_story_context():
         RecentEvent(
             day=2,
             event_id="price_increase",
-            severity=0.3,
+            severity=PROBABILITY_LOW_THRESHOLD,
             effects={"money": 500, "reputation": -5}
         )
     ]
     
     return StoryContext(
         day=3,
-        game_progression=0.3,
+        game_progression=PROBABILITY_LOW_THRESHOLD,
         metrics_history=metrics_history,
         recent_events=recent_events
     )
@@ -90,7 +88,7 @@ def sample_events():
             text_en="An opportunity to reduce operating costs has arisen.",
             effects={"money": 1000, "reputation": -10, "happiness": -5},
             conditions=("money < 10000",),
-            probability=0.7,
+            probability=PROBABILITY_HIGH_THRESHOLD,
             cooldown=3,
             category="financial"
         ),
@@ -319,7 +317,7 @@ class TestGenerateNarrative:
         # tradeoff 관련 키워드가 포함될 수 있음
         narrative_lower = response.narrative.lower()
         tradeoff_keywords = ["딜레마", "선택", "양보", "포기", "득", "실"]
-        has_tradeoff_concept = any(keyword in narrative_lower for keyword in tradeoff_keywords)
+        any(keyword in narrative_lower for keyword in tradeoff_keywords)
         
         # 모든 내러티브가 tradeoff를 명시적으로 언급할 필요는 없지만, 
         # 적어도 상황에 대한 설명은 있어야 함

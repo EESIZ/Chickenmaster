@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_LOW_THRESHOLD, PROBABILITY_HIGH_THRESHOLD
 """
 스토리텔러 서비스 구현체.
 
@@ -7,13 +8,12 @@
 """
 
 import random
-from typing import Dict, List, Optional
 from src.core.ports.container_port import IServiceContainer
 from src.core.ports.event_port import IEventService
 from src.core.domain.game_state import GameState
 from src.storyteller.ports.storyteller_port import IStorytellerService
 from src.storyteller.domain.models import StoryContext, NarrativeResponse, StoryPattern
-from game_constants import Metric, METRIC_RANGES, TRADEOFF_RELATIONSHIPS, UNCERTAINTY_WEIGHTS
+from game_constants import Metric, UNCERTAINTY_WEIGHTS
 
 
 class StorytellerService(IStorytellerService):
@@ -145,13 +145,13 @@ class StorytellerService(IStorytellerService):
                 applied_pattern=applied_pattern
             )
             
-        except Exception as e:
+        except Exception:
             # 예외 발생 시 기본 내러티브 반환 (날짜 정보 포함)
             return NarrativeResponse(
                 narrative=f"{context.day}일차: 치킨집 운영은 예측할 수 없는 여정입니다. 매 순간이 새로운 선택의 기회입니다."
             )
     
-    def suggest_event(self, context: StoryContext) -> Optional[str]:
+    def suggest_event(self, context: StoryContext) -> str | None:
         """
         현재 상황에 적절한 이벤트를 제안합니다.
         
@@ -196,11 +196,11 @@ class StorytellerService(IStorytellerService):
             # uncertainty 원칙에 따라 랜덤 요소 추가
             return random.choice(filtered_event_ids)
             
-        except Exception as e:
+        except Exception:
             # 예외 발생 시 None 반환 (이벤트 제안 없음)
             return None
     
-    def analyze_metrics_trend(self, context: StoryContext) -> Dict[str, float]:
+    def analyze_metrics_trend(self, context: StoryContext) -> dict[str, float]:
         """
         지표 변화 추세를 분석합니다.
         
@@ -241,11 +241,11 @@ class StorytellerService(IStorytellerService):
             
             return trends
             
-        except Exception as e:
+        except Exception:
             # 예외 발생 시 기본 추세 반환 (모든 지표 0.0)
             return {metric.name.lower(): 0.0 for metric in Metric}
     
-    def get_story_patterns(self, context: StoryContext) -> List[StoryPattern]:
+    def get_story_patterns(self, context: StoryContext) -> list[StoryPattern]:
         """
         현재 상황에 적용 가능한 스토리 패턴을 반환합니다.
         
@@ -278,20 +278,20 @@ class StorytellerService(IStorytellerService):
             
             return prioritized_patterns
             
-        except Exception as e:
+        except Exception:
             # 예외 발생 시 빈 리스트 반환
             return []
     
     def _determine_game_phase(self, progression: float) -> str:
         """게임 진행도에 따른 단계 결정"""
-        if progression < 0.3:
+        if progression < PROBABILITY_LOW_THRESHOLD:
             return "early_game"
-        elif progression < 0.7:
+        elif progression < PROBABILITY_HIGH_THRESHOLD:
             return "mid_game"
         else:
             return "late_game"
     
-    def _analyze_situation_tone(self, metrics: Dict[str, float]) -> str:
+    def _analyze_situation_tone(self, metrics: dict[str, float]) -> str:
         """현재 상황의 톤 분석 (positive/negative/neutral)"""
         # 핵심 지표들의 가중 평균으로 상황 판단
         money_score = min(metrics.get("money", 0) / 10000, 1.0)  # 정규화
@@ -308,7 +308,7 @@ class StorytellerService(IStorytellerService):
         else:
             return "neutral"
     
-    def _generate_metric_status_description(self, metrics: Dict[str, float]) -> str:
+    def _generate_metric_status_description(self, metrics: dict[str, float]) -> str:
         """지표 상태에 대한 설명 생성"""
         descriptions = []
         
@@ -375,7 +375,7 @@ class StorytellerService(IStorytellerService):
         # uncertainty 원칙에 따라 랜덤 요소 추가
         return random.choice(available_events)
     
-    def _calculate_linear_trend(self, values: List[float]) -> float:
+    def _calculate_linear_trend(self, values: list[float]) -> float:
         """값들의 선형 추세 계산"""
         if len(values) < 2:
             return 0.0
@@ -394,7 +394,7 @@ class StorytellerService(IStorytellerService):
         slope = (n * xy_sum - x_sum * y_sum) / denominator
         return slope
     
-    def _identify_critical_metrics(self, metrics: Dict[str, float]) -> List[str]:
+    def _identify_critical_metrics(self, metrics: dict[str, float]) -> list[str]:
         """
         현재 지표들을 분석하여 중요한(위험하거나 기회가 되는) 지표들을 식별합니다.
         
@@ -454,8 +454,8 @@ class StorytellerService(IStorytellerService):
             pain_ratio = metrics["pain"] / 100
             
             # 행복과 고통의 불균형 (둘 다 높거나 둘 다 낮은 경우)
-            if (happiness_ratio > 0.7 and pain_ratio > 0.7) or \
-               (happiness_ratio < 0.3 and pain_ratio < 0.3):
+            if (happiness_ratio > PROBABILITY_HIGH_THRESHOLD and pain_ratio > PROBABILITY_HIGH_THRESHOLD) or \
+               (happiness_ratio < PROBABILITY_LOW_THRESHOLD and pain_ratio < PROBABILITY_LOW_THRESHOLD):
                 if "happiness" not in critical_metrics:
                     critical_metrics.append("happiness")
                 if "pain" not in critical_metrics:
@@ -463,7 +463,7 @@ class StorytellerService(IStorytellerService):
         
         return critical_metrics
     
-    def _prioritize_patterns_by_progression(self, patterns: List[StoryPattern], progression: float) -> List[StoryPattern]:
+    def _prioritize_patterns_by_progression(self, patterns: list[StoryPattern], progression: float) -> list[StoryPattern]:
         """
         게임 진행도에 따라 스토리 패턴의 우선순위를 정합니다.
         
@@ -482,32 +482,32 @@ class StorytellerService(IStorytellerService):
         
         # 게임 진행도별 패턴 타입 우선순위 정의
         progression_priorities = {
-            # 초기 게임 (0.0 ~ 0.3): uncertainty 중심
+            # 초기 게임 (0.0 ~ PROBABILITY_LOW_THRESHOLD): uncertainty 중심
             "early": {
                 "uncertainty": 1.0,
-                "tradeoff": 0.7,
+                "tradeoff": PROBABILITY_HIGH_THRESHOLD,
                 "crisis": 0.8,
                 "opportunity_risk": 0.6,
                 "balance": 0.4,
-                "dilemma": 0.3,
+                "dilemma": PROBABILITY_LOW_THRESHOLD,
                 "noRightAnswer": 0.2
             },
-            # 중기 게임 (0.3 ~ 0.7): tradeoff 중심
+            # 중기 게임 (PROBABILITY_LOW_THRESHOLD ~ PROBABILITY_HIGH_THRESHOLD): tradeoff 중심
             "mid": {
                 "tradeoff": 1.0,
                 "crisis": 0.9,
                 "uncertainty": 0.8,
-                "dilemma": 0.7,
+                "dilemma": PROBABILITY_HIGH_THRESHOLD,
                 "opportunity_risk": 0.6,
                 "balance": 0.5,
                 "noRightAnswer": 0.8
             },
-            # 후기 게임 (0.7 ~ 1.0): noRightAnswer 중심
+            # 후기 게임 (PROBABILITY_HIGH_THRESHOLD ~ 1.0): noRightAnswer 중심
             "late": {
                 "noRightAnswer": 1.0,
                 "dilemma": 0.9,
                 "tradeoff": 0.8,
-                "balance": 0.7,
+                "balance": PROBABILITY_HIGH_THRESHOLD,
                 "crisis": 0.6,
                 "opportunity_risk": 0.5,
                 "uncertainty": 0.4
@@ -515,9 +515,9 @@ class StorytellerService(IStorytellerService):
         }
         
         # 현재 진행도에 따른 단계 결정
-        if progression < 0.3:
+        if progression < PROBABILITY_LOW_THRESHOLD:
             current_priorities = progression_priorities["early"]
-        elif progression < 0.7:
+        elif progression < PROBABILITY_HIGH_THRESHOLD:
             current_priorities = progression_priorities["mid"]
         else:
             current_priorities = progression_priorities["late"]

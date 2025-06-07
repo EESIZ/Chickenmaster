@@ -5,7 +5,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Protocol, Tuple, TypeVar
+from typing import TypeVar
 
 from src.cascade.domain.models import CascadeChain, CascadeNode, CascadeResult, PendingEvent
 
@@ -24,7 +24,7 @@ class ICascadeService(ABC):
     """
     
     @abstractmethod
-    def get_cascade_events(self, event_id: str, game_state: GameState) -> List[str]:
+    def get_cascade_events(self, event_id: str, game_state: GameState) -> list[str]:
         """
         트리거 이벤트로 인한 연쇄 이벤트 목록을 반환합니다.
         
@@ -108,7 +108,7 @@ class ICascadeService(ABC):
         pass
     
     @abstractmethod
-    def get_pending_events(self, current_turn: int) -> List[PendingEvent]:
+    def get_pending_events(self, current_turn: int) -> list[PendingEvent]:
         """
         현재 턴에 처리해야 할 지연 이벤트 목록을 반환합니다.
         
@@ -126,7 +126,7 @@ class ICascadeService(ABC):
         parent_event_id: str, 
         child_event_id: str,
         cascade_type: str,
-        trigger_condition: Optional[Dict] = None,
+        trigger_condition: dict | None = None,
         probability: float = 1.0,
         delay_turns: int = 0
     ) -> CascadeNode:
@@ -169,9 +169,9 @@ class ICascadeService(ABC):
     @abstractmethod
     def calculate_metrics_impact(
         self, 
-        triggered_events: List[Event], 
+        triggered_events: list[Event], 
         game_state: GameState
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         트리거된 이벤트들의 지표 영향도를 계산합니다.
         

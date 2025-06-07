@@ -6,7 +6,6 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from ..domain.events import Event
 from ..domain.game_state import GameState
@@ -17,8 +16,8 @@ class IEventService(ABC):
 
     @abstractmethod
     def get_applicable_events(
-        self, game_state: GameState, category: Optional[str] = None
-    ) -> List[Event]:
+        self, game_state: GameState, category: str | None = None
+    ) -> list[Event]:
         """현재 상태에서 발생 가능한 이벤트 목록 반환
 
         Args:
@@ -83,7 +82,7 @@ class IEventService(ABC):
         pass
 
     @abstractmethod
-    def get_event_by_id(self, event_id: str) -> Optional[Event]:
+    def get_event_by_id(self, event_id: str) -> Event | None:
         """ID로 이벤트 조회
 
         Args:

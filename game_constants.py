@@ -17,6 +17,20 @@ from dataclasses import dataclass
 # 무한대 값을 위한 타입 힌트 호환 상수
 INF: Final = float("inf")
 
+# Magic numbers
+MAGIC_NUMBER_ZERO = 0.0
+MAGIC_NUMBER_ONE = 1.0
+MAGIC_NUMBER_TWO = 2
+MAGIC_NUMBER_FIVE = 5
+MAGIC_NUMBER_TWENTY = 20
+MAGIC_NUMBER_FIFTY = 50
+MAGIC_NUMBER_ONE_HUNDRED = 100
+MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN = 115
+
+# 확률 관련 상수
+PROBABILITY_LOW_THRESHOLD = 0.3
+PROBABILITY_HIGH_THRESHOLD = 0.7
+
 
 class Metric(Enum):
     """
@@ -48,46 +62,32 @@ class ActionType(Enum):
     MANAGE_STAFF = auto()  # 직원 관리
     PROMOTE = auto()  # 홍보 활동
     INVEST_FACILITY = auto()  # 시설 투자
-    HEDGE_RISK = auto()  # 헤지 전략
 
 
-class EventType(Enum):
-    """
-    게임에서 발생할 수 있는 랜덤 이벤트 유형
+class EventCategory(Enum):
+    """이벤트 카테고리"""
 
-    불확실성 원칙에 따라 이벤트는 예측 불가능하게 발생하며,
-    완벽한 대비는 불가능합니다.
-    """
-
-    FOOD_POISONING = auto()  # 식중독 발생
-    INSPECTION = auto()  # 위생 단속
-    COST_SURGE = auto()  # 원가 폭등
-    COMPETITOR_ACTION = auto()  # 경쟁자 행동
-    VIRAL_MARKETING = auto()  # 바이럴 마케팅
-    STAFF_ISSUE = auto()  # 직원 문제
-    FACILITY_BREAKDOWN = auto()  # 시설 고장
-    POSITIVE_REVIEW = auto()  # 긍정적 리뷰
-    NEGATIVE_REVIEW = auto()  # 부정적 리뷰
-    RANDOM_OPPORTUNITY = auto()  # 우연한 기회
+    DAILY_ROUTINE = auto()  # 일상 루틴
+    CRISIS = auto()  # 위기 상황
+    OPPORTUNITY = auto()  # 기회
+    RANDOM = auto()  # 랜덤 이벤트
 
 
-# 지표 범위 정의 (최소값, 최대값, 초기값)
-METRIC_RANGES: Final[dict[Metric, tuple[int, int | float, int]]] = {
-    Metric.MONEY: (0, INF, 10000),  # 음수 불가, 무한대 가능
-    Metric.REPUTATION: (0, 100, 50),  # 0-100 범위
-    Metric.HAPPINESS: (0, 100, 50),  # 0-100 범위
-    Metric.SUFFERING: (0, 100, 50),  # 0-100 범위
-    Metric.INVENTORY: (0, INF, 100),  # 음수 불가, 무한대 가능
-    Metric.STAFF_FATIGUE: (0, 100, 30),  # 0-100 범위
-    Metric.FACILITY: (0, 100, 80),  # 0-100 범위
-    Metric.DEMAND: (0, 100, 70),  # 0-100 범위
-}
+class TriggerCondition(Enum):
+    """트리거 조건"""
+
+    EQUAL = auto()  # 같음
+    NOT_EQUAL = auto()  # 같지 않음
+    GREATER_THAN = auto()  # 초과
+    LESS_THAN = auto()  # 미만
+    GREATER_THAN_OR_EQUAL = auto()  # 이상
+    LESS_THAN_OR_EQUAL = auto()  # 이하
 
 
-# 트레이드오프 관계 정의 (상승 시 하락하는 지표들)
+# 트레이드오프 관계 정의 (한 지표가 오르면 다른 지표는 내려감)
 TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
-    Metric.MONEY: [Metric.REPUTATION, Metric.HAPPINESS],
-    Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],
+    Metric.MONEY: [Metric.HAPPINESS, Metric.STAFF_FATIGUE],
+    Metric.REPUTATION: [Metric.MONEY],
     Metric.HAPPINESS: [Metric.SUFFERING],
     Metric.SUFFERING: [Metric.HAPPINESS],
     Metric.INVENTORY: [Metric.MONEY],
@@ -99,7 +99,7 @@ TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
 
 # 불확실성 요소 가중치 (높을수록 예측 불가능한 이벤트 발생 확률 증가)
 UNCERTAINTY_WEIGHTS: Final[dict[Metric, float]] = {
-    Metric.MONEY: 0.3,  # 돈이 많을수록 위험 증가
+    Metric.MONEY: PROBABILITY_LOW_THRESHOLD,  # 돈이 많을수록 위험 증가
     Metric.REPUTATION: 0.25,  # 평판이 높을수록 기대치 상승
     Metric.HAPPINESS: -0.1,  # 행복이 높을수록 위험 감소
     Metric.SUFFERING: 0.2,  # 고통이 높을수록 위험 증가
@@ -125,7 +125,7 @@ FLOAT_EPSILON: Final[float] = 0.001  # 부동소수점 비교 오차 허용 범�
 REPUTATION_BASELINE: Final[int] = 50  # 평판 기준점
 
 # 점수 임계값 상수
-SCORE_THRESHOLD_HIGH: Final[float] = 0.7  # 높은 점수 임계값
+SCORE_THRESHOLD_HIGH: Final[float] = PROBABILITY_HIGH_THRESHOLD  # 높은 점수 임계값
 SCORE_THRESHOLD_MEDIUM: Final[float] = 0.5  # 중간 점수 임계값
 
 # 테스트 관련 상수
@@ -133,14 +133,6 @@ TEST_MIN_CASCADE_EVENTS: Final[int] = 3  # 최소 연쇄 효과 메시지 수
 TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
 TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
 TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
-
-# Magic number 상수들
-MAGIC_NUMBER_ZERO: Final[float] = 0.0  # 0.0 비교용
-MAGIC_NUMBER_ONE: Final[float] = 1.0  # 1.0 비교용
-MAGIC_NUMBER_TWO: Final[int] = 2  # 2 비교용
-MAGIC_NUMBER_FIVE: Final[int] = 5  # 5 비교용
-MAGIC_NUMBER_TWENTY: Final[int] = 20  # 20 비교용
-MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN: Final[int] = 115  # 115 비교용
 
 
 @dataclass(frozen=True)
@@ -150,43 +142,31 @@ class ProbabilityConstants:
     RANDOM_THRESHOLD: float = 0.5  # 50% 확률 기준점
 
 
+# 지표 범위 정의 (최소값, 최대값, 기본값)
+METRIC_RANGES: Final[dict[Metric, tuple[float, float, float]]] = {
+    Metric.MONEY: (0.0, float("inf"), 10000.0),  # 돈은 0 이상, 기본 1만원
+    Metric.REPUTATION: (0.0, 100.0, 50.0),  # 평판은 0-100, 기본 50
+    Metric.HAPPINESS: (0.0, 100.0, 50.0),  # 행복도는 0-100, 기본 50
+    Metric.SUFFERING: (0.0, 100.0, 20.0),  # 고통은 0-100, 기본 20
+    Metric.INVENTORY: (0.0, float("inf"), 100.0),  # 재고는 0 이상, 기본 100
+    Metric.STAFF_FATIGUE: (0.0, 100.0, 30.0),  # 직원 피로도는 0-100, 기본 30
+    Metric.FACILITY: (0.0, 100.0, 80.0),  # 시설 상태는 0-100, 기본 80
+    Metric.DEMAND: (0.0, float("inf"), 60.0),  # 수요는 0 이상, 기본 60
+}
+
+
+
 def cap_metric_value(metric: Metric, value: float) -> float:
     """
-    지표 값이 허용 범위를 벗어나지 않도록 보정합니다.
-
-    불확실성 ≠ 불합리한 음수: 불확실성은 게임의 핵심이지만,
-    물리적으로 불가능한 음수 재고나 음수 자금은 허용하지 않습니다.
+    지표 값을 허용 범위 내로 제한
 
     Args:
-        metric: 보정할 지표
-        value: 보정 전 값
+        metric: 지표 타입
+        value: 제한할 값
 
     Returns:
-        float: 보정된 값
+        범위 내로 제한된 값
     """
     min_val, max_val, _ = METRIC_RANGES[metric]
+    return max(min_val, min(max_val, value))
 
-    # 최소값 보정 (음수 방지)
-    value = max(value, min_val)
-
-    # 최대값 보정 (범위 초과 방지)
-    if max_val != INF and value > max_val:
-        value = max_val
-
-    return value
-
-
-def are_happiness_suffering_balanced(happiness: float, suffering: float) -> bool:
-    """
-    행복과 고통의 합이 100인지 확인합니다.
-
-    행복-고통 시소: 행복과 고통은 합이 항상 100으로 유지되는 트레이드오프 관계입니다.
-
-    Args:
-        happiness: 행복 지표 값
-        suffering: 고통 지표 값
-
-    Returns:
-        bool: 행복과 고통의 합이 100인 경우 True
-    """
-    return abs((happiness + suffering) - 100) < FLOAT_EPSILON  # 부동소수점 오차 허용

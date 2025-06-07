@@ -1,3 +1,4 @@
+from game_constants import PROBABILITY_HIGH_THRESHOLD, PROBABILITY_LOW_THRESHOLD
 """
 Cascade 도메인 모델 테스트.
 
@@ -51,7 +52,7 @@ class MockGameState(GameState):
     day: int = 1
     events_history: tuple = field(default_factory=tuple)
     metrics: dict = field(
-        default_factory=lambda: {"reputation": 0.7, "cash": 1000, "customer_satisfaction": 0.8}
+        default_factory=lambda: {"reputation": PROBABILITY_HIGH_THRESHOLD, "cash": 1000, "customer_satisfaction": 0.8}
     )
 
 
@@ -179,7 +180,7 @@ class TestCascadeNode(unittest.TestCase):
         node2 = CascadeNode(
             event_id="test_event", cascade_type=CascadeType.IMMEDIATE, impact_factor=1.5
         )
-        self.assertEqual(node2.calculate_impact(0.5), 0.75)
+        self.assertEqual(node2.calculate_impact(0.5), PROBABILITY_HIGH_THRESHOLD5)
 
 
 class TestCascadeChain(unittest.TestCase):

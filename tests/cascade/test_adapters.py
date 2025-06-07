@@ -1,3 +1,5 @@
+from game_constants import MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIVE
+from game_constants import MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIVE
 """
 Cascade 모듈 어댑터 테스트.
 
@@ -5,13 +7,10 @@ Cascade 모듈 어댑터 테스트.
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from src.cascade.domain.models import (
-    CascadeChain, CascadeNode, CascadeResult, CascadeType, 
-    PendingEvent, TriggerCondition
+    CascadeType
 )
 from src.cascade.ports.event_port import IEventService
 from src.cascade.adapters.cascade_service import CascadeServiceImpl
@@ -21,14 +20,14 @@ from src.cascade.adapters.cascade_service import CascadeServiceImpl
 @dataclass
 class TestEvent:
     id: str
-    effects: List[Dict]
+    effects: list[dict]
     cooldown: int = 0
 
 
 # 테스트용 게임 상태 클래스
 @dataclass
 class TestGameState:
-    metrics: Dict[str, float]
+    metrics: dict[str, float]
     turn: int = 0
 
 
@@ -88,7 +87,7 @@ class MockEventService(IEventService):
         
         return TestGameState(metrics=new_metrics, turn=game_state.turn)
     
-    def evaluate_trigger_condition(self, condition: Dict, game_state: TestGameState) -> bool:
+    def evaluate_trigger_condition(self, condition: dict, game_state: TestGameState) -> bool:
         expression = condition.get("expression", "")
         
         # 간단한 조건 평가 로직
@@ -101,7 +100,7 @@ class MockEventService(IEventService):
         
         return True  # 기본적으로 조건 충족
     
-    def get_applicable_events(self, game_state: TestGameState) -> List[TestEvent]:
+    def get_applicable_events(self, game_state: TestGameState) -> list[TestEvent]:
         return list(self.events.values())
     
     def check_event_cooldown(self, event_id: str, current_turn: int) -> bool:
@@ -194,7 +193,7 @@ class TestCascadeServiceImpl:
         
         assert node.event_id == "delayed_event"
         assert node.cascade_type == CascadeType.DELAYED
-        assert node.delay_turns == 2
+        assert node.delay_turns == MAGIC_NUMBER_TWO
     
     def test_build_cascade_chain(self, cascade_service):
         """연쇄 체인 구성 테스트."""
@@ -220,7 +219,7 @@ class TestCascadeServiceImpl:
         
         assert chain.root_event_id == "root_event"
         assert len(chain.nodes) == 4  # 루트 + 자식2 + 손자1
-        assert chain.get_max_actual_depth() == 2  # 최대 깊이는 2 (루트=0, 자식=1, 손자=2)
+        assert chain.get_max_actual_depth() == MAGIC_NUMBER_TWO  # 최대 깊이는 2 (루트=0, 자식=1, 손자=2)
     
     def test_get_cascade_events(self, cascade_service, game_state):
         """연쇄 이벤트 목록 조회 테스트."""
@@ -291,7 +290,7 @@ class TestCascadeServiceImpl:
         assert "money" in result.metrics_impact
         assert "reputation" in result.metrics_impact
         assert result.metrics_impact["money"] == -50  # root(-100) + grandchild(+50)
-        assert result.metrics_impact["reputation"] == 5  # child1(+5)
+        assert result.metrics_impact["reputation"] == MAGIC_NUMBER_FIVE  # child1(+5)
     
     def test_get_pending_events(self, cascade_service, event_service, game_state):
         """지연 이벤트 조회 테스트."""
@@ -367,4 +366,4 @@ class TestCascadeServiceImpl:
         assert "money" in impact
         assert "reputation" in impact
         assert impact["money"] == -50  # -100 + 50
-        assert impact["reputation"] == 5
+        assert impact["reputation"] == MAGIC_NUMBER_FIVE

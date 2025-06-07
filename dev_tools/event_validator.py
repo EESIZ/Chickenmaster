@@ -11,673 +11,498 @@ import ast
 import json
 import math
 import tomllib  # Python 3.11+
-from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar
-from fuzzywuzzy import fuzz
-import sys
 
-# 품질 메트릭 임계값
-QUALITY_THRESHOLDS = {
-    "DIVERSITY": 0.8,  # 카테고리 분포의 균등성
-    "TRADEOFF": 0.9,  # 선택지의 트레이드오프 명확성
-    "CULTURAL": 0.7,  # 한국 치킨집 문화 반영도
-    "COVERAGE": 80.0,  # 테스트 커버리지
-}
-
-# 검증 임계값
-VALIDATION_THRESHOLDS = {
-    "MIN_KEYWORDS_MATCH": 2,  # 문화 키워드 최소 매칭 수
-    "NAME_SIMILARITY_THRESHOLD": 80,  # 이름 유사도 임계값
-    "TEXT_SIMILARITY_THRESHOLD": 70,  # 텍스트 유사도 임계값
-    "MIN_CHOICES": 2,  # 최소 선택지 수
-    "MIN_METRICS_DIFFERENCE": 2,  # 최소 메트릭 차이 수
-    "FORMULA_EPSILON": 0.001,  # 수식 계산 오차 허용 범위
-}
-
-
-# 이벤트 타입 열거형
-class EventType(Enum):
-    """이벤트 타입"""
-
-    RANDOM = "RANDOM"
-    THRESHOLD = "THRESHOLD"
-    SCHEDULED = "SCHEDULED"
-    CASCADE = "CASCADE"
-
-
-# 트리거 조건 열거형
-class TriggerCondition(Enum):
-    """트리거 조건"""
-
-    LESS_THAN = "less_than"
-    GREATER_THAN = "greater_than"
-    EQUAL = "equal"
+from game_constants import MAGIC_NUMBER_ZERO, MAGIC_NUMBER_ONE, MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIFTY, MAGIC_NUMBER_ONE_HUNDRED, PROBABILITY_LOW_THRESHOLD, PROBABILITY_HIGH_THRESHOLD
 
 
 class EventValidator:
-    """이벤트 검증기"""
+    """이벤트 데이터 검증 도구"""
 
-    # 한국 치킨집 문화 관련 키워드
-    CULTURAL_KEYWORDS: ClassVar[list[str]] = [
-        "치킨",
-        "후라이드",
-        "양념",
-        "간장",
-        "마늘",
-        "닭강정",
-        "배달",
-        "포장",
-        "회식",
-        "단골",
-        "성수기",
-        "할인",
-        "치맥",
-        "맥주",
-        "소주",
-        "안주",
-        "야식",
-        "주문",
-        # 추가 키워드
-        "신메뉴",
-        "단체주문",
-        "리뷰",
-        "별점",
-        "재료",
-        "원가",
-        "매출",
-        "인건비",
-        "마진",
-        "경쟁",
-        "프랜차이즈",
-        "독립점",
-        "위생",
-        "점검",
-        "식약처",
-        "알바",
-        "직원",
-        "사장",
-        "홀",
-        "주방",
-        "카운터",
-        "배달대행",
-        "배달팁",
-        "콜",
-        "성수기",
-        "비수기",
-        "대학가",
-        "상권",
-        "임대료",
-        "월세",
-    ]
+    # 검증 규칙 정의
+    VALIDATION_RULES: ClassVar[dict[str, dict[str, Any]]] = {
+        "required_fields": {
+            "id": str,
+            "name": str,
+            "description": str,
+            "category": str,
+            "type": str,
+        },
+        "optional_fields": {
+            "name_ko": str,
+            "description_ko": str,
+            "triggers": list,
+            "effects": list,
+            "choices": list,
+            "tags": list,
+            "weight": (int, float),
+            "cooldown": int,
+            "prerequisites": list,
+        },
+        "category_values": ["daily_routine", "crisis", "opportunity", "random"],
+        "type_values": ["triggered", "random", "choice"],
+    }
 
-    # 허용되는 메트릭
-    VALID_METRICS = (
-        "MONEY",  # 현금
-        "REPUTATION",  # 평판
-        "CUSTOMER_SATISFACTION",  # 고객 만족도
-        "HAPPINESS",  # 행복
-        "PAIN",  # 고통
-        "EMPLOYEE_SATISFACTION",  # 직원 만족도
-        "INGREDIENT_QUALITY",  # 재료 품질
-        "EQUIPMENT_CONDITION",  # 장비 상태
-        "STORE_CLEANLINESS",  # 매장 청결도
-        "MENU_DIVERSITY",  # 메뉴 다양성
-    )
+    def __init__(self, input_file: str, output_file: str | None = None):
+        """
+        초기화
 
-    def __init__(self):
-        """초기화"""
-        self.errors: list[str] = []
-        self.warnings: list[str] = []
-        self.event_ids: set[str] = set()
-        self.validated_events: list[dict[str, Any]] = []
+        Args:
+            input_file: 검증할 이벤트 파일 경로
+            output_file: 검증 결과 출력 파일 경로 (선택사항)
+        """
+        self.input_file = Path(input_file)
+        self.output_file = Path(output_file) if output_file else None
+        self.validation_results: dict[str, Any] = {}
 
-    def validate_file(self, file_path: Path) -> bool:
-        """단일 파일 검증"""
-        self.errors = []
-        self.warnings = []
+    def load_events(self) -> dict[str, Any]:
+        """
+        이벤트 파일 로드
+
+        Returns:
+            이벤트 데이터 딕셔너리
+
+        Raises:
+            FileNotFoundError: 파일을 찾을 수 없는 경우
+            ValueError: 파일 형식이 올바르지 않은 경우
+        """
+        if not self.input_file.exists():
+            msg = f"파일을 찾을 수 없습니다: {self.input_file}"
+            raise FileNotFoundError(msg)
 
         try:
-            # 파일 확장자에 따라 로더 선택
-            if file_path.suffix.lower() == ".toml":
-                with open(file_path, "rb") as f:
-                    data = tomllib.load(f)
-            elif file_path.suffix.lower() == ".json":
-                with open(file_path, encoding="utf-8") as f:
-                    data = json.load(f)
+            if self.input_file.suffix.lower() == ".json":
+                with self.input_file.open(encoding="utf-8") as f:
+                    return json.load(f)
+            elif self.input_file.suffix.lower() == ".toml":
+                with self.input_file.open("rb") as f:
+                    return tomllib.load(f)
             else:
-                self.errors.append(f"지원하지 않는 파일 형식: {file_path.suffix}")
-                return False
-
-            # 이벤트 데이터 추출
-            events = data.get("events", [])
-            if not events:
-                self.warnings.append(f"이벤트가 없습니다: {file_path}")
-                return True
-
-            # 각 이벤트 검증
-            for event in events:
-                self._validate_event(event)
-
-            return len(self.errors) == 0
-
+                msg = f"지원하지 않는 파일 형식: {self.input_file.suffix}"
+                raise ValueError(msg)
         except Exception as e:
-            self.errors.append(f"파일 처리 오류: {e!s}")
-            return False
+            msg = f"파일 로드 오류: {e!s}"
+            raise ValueError(msg) from e
 
-    def validate_directory(self, directory_path: Path) -> bool:
-        """디렉토리 내 모든 TOML/JSON 파일 검증"""
-        all_valid = True
-        self.event_ids = set()  # ID 유일성 검사를 위해 초기화
+    def validate_event_structure(self, event: dict[str, Any]) -> list[str]:
+        """
+        이벤트 구조 검증
 
-        # TOML 파일 먼저 처리
-        for file_path in directory_path.glob("**/*.toml"):
-            if not self.validate_file(file_path):
-                all_valid = False
+        Args:
+            event: 검증할 이벤트 데이터
 
-        # JSON 파일 처리
-        for file_path in directory_path.glob("**/*.json"):
-            if not self.validate_file(file_path):
-                all_valid = False
+        Returns:
+            검증 오류 목록
+        """
+        errors = []
 
-        return all_valid
-
-    def validate_event(self, event: dict[str, Any]) -> bool:
-        """단일 이벤트 검증 (공개 메서드)"""
-        # 기존 오류 상태 저장
-        old_errors = self.errors.copy()
-        self.errors = []
-
-        # 내부 검증 메서드 호출
-        result = self._validate_event(event)
-
-        # 오류가 발생했으면 기존 오류 목록에 추가
-        if not result:
-            old_errors.extend(self.errors)
-
-        self.errors = old_errors
-        return result
-
-    def _validate_event(self, event: dict[str, Any]) -> bool:
-        """단일 이벤트 검증"""
-        # 필수 필드 검증 강화
-        required_fields = [
-            "id",
-            "type",
-            "category",
-            "name_ko",
-            "name_en",
-            "text_ko",
-            "text_en",
-            "effects",
-            "choices",
-            "tags",
-        ]
-        for field in required_fields:
+        # 필수 필드 검증
+        for field, expected_type in self.VALIDATION_RULES["required_fields"].items():
             if field not in event:
-                self.errors.append(
-                    f"필수 필드 누락: {field} (이벤트: {event.get('id', 'unknown')})"
-                )
-                return False
+                errors.append(f"필수 필드 누락: {field}")
+            elif not isinstance(event[field], expected_type):
+                errors.append(f"필드 타입 오류: {field} (기대: {expected_type.__name__})")
 
-        # 필드 타입 검증
-        if not isinstance(event.get("effects"), list):
-            self.errors.append(f"effects는 리스트여야 함: {event['id']}")
-            return False
-        if not isinstance(event.get("choices"), list):
-            self.errors.append(f"choices는 리스트여야 함: {event['id']}")
-            return False
-        if not isinstance(event.get("tags"), list):
-            self.errors.append(f"tags는 리스트여야 함: {event['id']}")
-            return False
+        # 선택 필드 타입 검증
+        for field, expected_type in self.VALIDATION_RULES["optional_fields"].items():
+            if field in event and not isinstance(event[field], expected_type):
+                errors.append(f"필드 타입 오류: {field} (기대: {expected_type})")
 
-        # ID 유일성 검증
-        event_id = event["id"]
-        if event_id in self.event_ids:
-            self.errors.append(f"중복된 이벤트 ID: {event_id}")
-            return False
-        self.event_ids.add(event_id)
+        # 카테고리 값 검증
+        if "category" in event and event["category"] not in self.VALIDATION_RULES["category_values"]:
+            errors.append(f"잘못된 카테고리: {event['category']}")
 
-        # 이벤트 타입 검증
+        # 타입 값 검증
+        if "type" in event and event["type"] not in self.VALIDATION_RULES["type_values"]:
+            errors.append(f"잘못된 타입: {event['type']}")
+
+        return errors
+
+    def validate_triggers(self, triggers: list[dict[str, Any]]) -> list[str]:
+        """
+        트리거 검증
+
+        Args:
+            triggers: 트리거 목록
+
+        Returns:
+            검증 오류 목록
+        """
+        errors = []
+
+        for i, trigger in enumerate(triggers):
+            if not isinstance(trigger, dict):
+                errors.append(f"트리거 {i}: 딕셔너리가 아님")
+                continue
+
+            # 필수 필드 검증
+            required_fields = ["metric", "condition", "value"]
+            for field in required_fields:
+                if field not in trigger:
+                    errors.append(f"트리거 {i}: 필수 필드 누락 - {field}")
+
+            # 조건 값 검증
+            if "condition" in trigger:
+                valid_conditions = ["equal", "not_equal", "greater_than", "less_than", "greater_than_or_equal", "less_than_or_equal"]
+                if trigger["condition"] not in valid_conditions:
+                    errors.append(f"트리거 {i}: 잘못된 조건 - {trigger['condition']}")
+
+            # 값 타입 검증
+            if "value" in trigger and not isinstance(trigger["value"], (int, float)):
+                errors.append(f"트리거 {i}: 값이 숫자가 아님")
+
+        return errors
+
+    def validate_effects(self, effects: list[dict[str, Any]]) -> list[str]:
+        """
+        효과 검증
+
+        Args:
+            effects: 효과 목록
+
+        Returns:
+            검증 오류 목록
+        """
+        errors = []
+
+        for i, effect in enumerate(effects):
+            if not isinstance(effect, dict):
+                errors.append(f"효과 {i}: 딕셔너리가 아님")
+                continue
+
+            # 필수 필드 검증
+            required_fields = ["metric", "value"]
+            for field in required_fields:
+                if field not in effect:
+                    errors.append(f"효과 {i}: 필수 필드 누락 - {field}")
+
+            # 값 타입 검증
+            if "value" in effect and not isinstance(effect["value"], (int, float)):
+                errors.append(f"효과 {i}: 값이 숫자가 아님")
+
+            # 값 범위 검증 (합리적인 범위)
+            if "value" in effect:
+                value = effect["value"]
+                if abs(value) > 1000:  # 너무 큰 값
+                    errors.append(f"효과 {i}: 값이 너무 큼 - {value}")
+
+        return errors
+
+    def validate_choices(self, choices: list[dict[str, Any]]) -> list[str]:
+        """
+        선택지 검증
+
+        Args:
+            choices: 선택지 목록
+
+        Returns:
+            검증 오류 목록
+        """
+        errors = []
+
+        for i, choice in enumerate(choices):
+            if not isinstance(choice, dict):
+                errors.append(f"선택지 {i}: 딕셔너리가 아님")
+                continue
+
+            # 필수 필드 검증
+            required_fields = ["id", "text", "effects"]
+            for field in required_fields:
+                if field not in choice:
+                    errors.append(f"선택지 {i}: 필수 필드 누락 - {field}")
+
+            # 효과 검증
+            if "effects" in choice:
+                choice_errors = self.validate_effects(choice["effects"])
+                errors.extend([f"선택지 {i} - {error}" for error in choice_errors])
+
+        return errors
+
+    def validate_balance(self, event: dict[str, Any]) -> list[str]:
+        """
+        게임 밸런스 검증
+
+        Args:
+            event: 검증할 이벤트
+
+        Returns:
+            밸런스 관련 경고 목록
+        """
+        warnings = []
+
+        # 효과 밸런스 검증
+        if "effects" in event:
+            total_positive = sum(
+                effect["value"] for effect in event["effects"]
+                if effect.get("value", 0) > MAGIC_NUMBER_ZERO
+            )
+            total_negative = sum(
+                abs(effect["value"]) for effect in event["effects"]
+                if effect.get("value", 0) < MAGIC_NUMBER_ZERO
+            )
+
+            # 너무 긍정적이거나 부정적인 이벤트 경고
+            if total_positive > total_negative * 2:
+                warnings.append("이벤트가 너무 긍정적임 (트레이드오프 부족)")
+            elif total_negative > total_positive * 2:
+                warnings.append("이벤트가 너무 부정적임 (밸런스 문제)")
+
+        # 선택지 밸런스 검증
+        if "choices" in event and len(event["choices"]) > 1:
+            choice_values = []
+            for choice in event["choices"]:
+                if "effects" in choice:
+                    total_value = sum(effect.get("value", 0) for effect in choice["effects"])
+                    choice_values.append(total_value)
+
+            if choice_values:
+                max_value = max(choice_values)
+                min_value = min(choice_values)
+                if max_value - min_value > MAGIC_NUMBER_FIFTY:  # 차이가 너무 큰 경우
+                    warnings.append("선택지 간 밸런스 차이가 큼")
+
+        return warnings
+
+    def validate_uncertainty_elements(self, event: dict[str, Any]) -> list[str]:
+        """
+        불확실성 요소 검증
+
+        Args:
+            event: 검증할 이벤트
+
+        Returns:
+            불확실성 관련 평가 목록
+        """
+        assessments = []
+
+        # 랜덤 요소 확인
+        if event.get("type") == "random":
+            assessments.append("✓ 랜덤 이벤트 - 불확실성 요소 포함")
+
+        # 확률적 효과 확인
+        if "effects" in event:
+            for effect in event["effects"]:
+                if "probability" in effect:
+                    prob = effect["probability"]
+                    if PROBABILITY_LOW_THRESHOLD <= prob <= PROBABILITY_HIGH_THRESHOLD:
+                        assessments.append("✓ 확률적 효과 - 적절한 불확실성")
+                    else:
+                        assessments.append("⚠ 확률적 효과 - 불확실성 부족")
+
+        # 복잡한 선택지 확인
+        if "choices" in event and len(event["choices"]) >= 3:
+            assessments.append("✓ 다중 선택지 - 결과 예측 어려움")
+
+        return assessments
+
+    def validate_no_right_answer_principle(self, event: dict[str, Any]) -> list[str]:
+        """
+        정답 없음 원칙 검증
+
+        Args:
+            event: 검증할 이벤트
+
+        Returns:
+            정답 없음 원칙 관련 평가 목록
+        """
+        assessments = []
+
+        # 선택지가 있는 경우
+        if "choices" in event and len(event["choices"]) > 1:
+            has_clear_winner = False
+            choice_scores = []
+
+            for choice in event["choices"]:
+                if "effects" in choice:
+                    # 각 선택지의 총 점수 계산 (단순화)
+                    total_score = sum(effect.get("value", 0) for effect in choice["effects"])
+                    choice_scores.append(total_score)
+
+            if choice_scores:
+                max_score = max(choice_scores)
+                min_score = min(choice_scores)
+
+                # 명확한 승자가 있는지 확인
+                if max_score > min_score + MAGIC_NUMBER_TWENTY:
+                    has_clear_winner = True
+
+            if has_clear_winner:
+                assessments.append("⚠ 명확한 최선의 선택지 존재 - 정답 없음 원칙 위배")
+            else:
+                assessments.append("✓ 선택지 간 트레이드오프 존재 - 정답 없음 원칙 준수")
+
+        # 단순 효과만 있는 경우
+        elif "effects" in event:
+            positive_effects = [e for e in event["effects"] if e.get("value", 0) > MAGIC_NUMBER_ZERO]
+            negative_effects = [e for e in event["effects"] if e.get("value", 0) < MAGIC_NUMBER_ZERO]
+
+            if positive_effects and negative_effects:
+                assessments.append("✓ 긍정적/부정적 효과 혼재 - 트레이드오프 존재")
+            elif positive_effects and not negative_effects:
+                assessments.append("⚠ 긍정적 효과만 존재 - 트레이드오프 부족")
+            elif negative_effects and not positive_effects:
+                assessments.append("⚠ 부정적 효과만 존재 - 밸런스 문제")
+
+        return assessments
+
+    def validate_events(self) -> dict[str, Any]:
+        """
+        전체 이벤트 검증 실행
+
+        Returns:
+            검증 결과 딕셔너리
+        """
         try:
-            event_type = EventType(event["type"])
-        except ValueError:
-            self.errors.append(f"유효하지 않은 이벤트 타입: {event['type']} (이벤트: {event_id})")
-            return False
+            data = self.load_events()
+        except (FileNotFoundError, ValueError) as e:
+            return {"error": str(e), "events": []}
 
-        # 타입별 필수 필드 검증
-        if event_type == EventType.RANDOM:
-            if "probability" not in event:
-                self.errors.append(f"RANDOM 이벤트에 probability 필드 누락: {event_id}")
-                return False
-            if not (0.0 <= event["probability"] <= 1.0):
-                self.errors.append(
-                    f"확률 범위 오류 (0.0-1.0): {event['probability']} (이벤트: {event_id})"
-                )
-                return False
+        events = data.get("events", [])
+        if not events:
+            return {"error": "이벤트 데이터가 없습니다", "events": []}
 
-        elif event_type in [EventType.THRESHOLD, EventType.CASCADE]:
-            if "trigger" not in event:
-                self.errors.append(f"{event_type.value} 이벤트에 trigger 필드 누락: {event_id}")
-                return False
-            if not self._validate_trigger(event["trigger"], event_id):
-                return False
-
-        elif event_type == EventType.SCHEDULED:
-            if "schedule" not in event:
-                self.errors.append(f"SCHEDULED 이벤트에 schedule 필드 누락: {event_id}")
-                return False
-            if not isinstance(event["schedule"], int) or event["schedule"] <= 0:
-                self.errors.append(
-                    f"schedule은 양의 정수여야 함: {event['schedule']} (이벤트: {event_id})"
-                )
-                return False
-
-        # 쿨다운 검증
-        if "cooldown" in event and (
-            not isinstance(event["cooldown"], int) or event["cooldown"] < 0
-        ):
-            self.errors.append(
-                f"cooldown은 0 이상의 정수여야 함: {event['cooldown']} (이벤트: {event_id})"
-            )
-            return False
-
-        # 효과 검증
-        if not event["effects"]:
-            self.errors.append(f"effects가 비어 있음: {event_id}")
-            return False
-
-        for idx, effect in enumerate(event["effects"]):
-            if not self._validate_effect(effect, event_id, idx):
-                return False
-
-        # 선택지 검증
-        if not event["choices"]:
-            self.errors.append(f"choices가 비어 있음: {event_id}")
-            return False
-
-        if len(event["choices"]) < VALIDATION_THRESHOLDS["MIN_CHOICES"]:
-            self.errors.append(
-                f"선택지는 최소 {VALIDATION_THRESHOLDS['MIN_CHOICES']}개 이상이어야 함: {event_id}"
-            )
-            return False
-
-        for idx, choice in enumerate(event["choices"]):
-            if not self._validate_choice(choice, event_id, idx):
-                return False
-
-        # 문화적 연관성 검증
-        if not self._validate_cultural_relevance_raw(event):
-            self.warnings.append(f"한국 치킨집 문화 관련 키워드가 부족합니다: {event_id}")
-
-        # 중복 검사
-        if not self._check_duplicate_raw(event):
-            self.warnings.append(f"유사한 이벤트가 존재할 수 있습니다: {event_id}")
-
-        # 검증 통과한 이벤트 저장
-        self.validated_events.append(event)
-
-        return True
-
-    def _validate_trigger(self, trigger: dict[str, Any], event_id: str) -> bool:
-        """트리거 검증"""
-        required_fields = ["metric", "condition", "value"]
-        for field in required_fields:
-            if field not in trigger:
-                self.errors.append(f"트리거 필수 필드 누락: {field} (이벤트: {event_id})")
-                return False
-
-        # 조건 검증
-        try:
-            TriggerCondition(trigger["condition"])
-        except ValueError:
-            self.errors.append(
-                f"유효하지 않은 트리거 조건: {trigger['condition']} (이벤트: {event_id})"
-            )
-            return False
-
-        # value 타입 검증
-        if not isinstance(trigger["value"], int | float):
-            self.errors.append(
-                f"트리거 value는 숫자여야 함: {trigger['value']} (이벤트: {event_id})"
-            )
-            return False
-
-        # metric 검증
-        if trigger["metric"] not in self.VALID_METRICS:
-            self.warnings.append(
-                f"알 수 없는 트리거 metric: {trigger['metric']} (이벤트: {event_id})"
-            )
-
-        return True
-
-    def _validate_effect(self, effect: dict[str, Any], event_id: str, index: int) -> bool:
-        """효과 검증"""
-        required_fields = ["metric", "formula"]
-        for field in required_fields:
-            if field not in effect:
-                self.errors.append(
-                    f"효과 필수 필드 누락: {field} (이벤트: {event_id}, 효과 {index+1})"
-                )
-                return False
-
-        # metric 검증
-        if effect["metric"] not in self.VALID_METRICS:
-            self.warnings.append(
-                f"알 수 없는 metric: {effect['metric']} (이벤트: {event_id}, 효과 {index+1})"
-            )
-
-        # 포뮬러 검증 강화
-        if not self._validate_formula_strict(effect["formula"], event_id, index):
-            return False
-
-        return True
-
-    def _validate_choice(self, choice: dict[str, Any], event_id: str, index: int) -> bool:
-        """선택지 검증"""
-        required_fields = ["text_ko", "text_en", "effects"]
-        for field in required_fields:
-            if field not in choice:
-                self.errors.append(
-                    f"선택지 필수 필드 누락: {field} (이벤트: {event_id}, 선택지 {index+1})"
-                )
-                return False
-
-        # effects 타입 및 트레이드오프 검증
-        if not isinstance(choice["effects"], dict):
-            self.errors.append(
-                f"선택지 effects는 딕셔너리여야 함 (이벤트: {event_id}, 선택지 {index+1})"
-            )
-            return False
-
-        # 트레이드오프 검증
-        positive_effects = 0
-        negative_effects = 0
-        for metric, value in choice["effects"].items():
-            if not isinstance(value, int | float):
-                self.errors.append(
-                    f"effect 값은 숫자여야 함: {metric}={value} (이벤트: {event_id}, 선택지 {index+1})"
-                )
-                return False
-            if value > 0:
-                positive_effects += 1
-            elif value < 0:
-                negative_effects += 1
-
-        if positive_effects == 0 or negative_effects == 0:
-            self.warnings.append(
-                f"선택지는 긍정적/부정적 효과를 모두 포함해야 함 (이벤트: {event_id}, 선택지 {index+1})"
-            )
-
-        # metric 검증
-        for metric in choice["effects"].keys():
-            if metric not in self.VALID_METRICS:
-                self.warnings.append(
-                    f"알 수 없는 metric: {metric} (이벤트: {event_id}, 선택지 {index+1})"
-                )
-
-        return True
-
-    def _validate_formula_strict(self, formula: str, event_id: str, index: int) -> bool:
-        """포뮬러 문자열 엄격한 검증"""
-        original_formula = formula
-
-        # 퍼센트 표기법 처리
-        if formula.endswith("%"):
-            try:
-                # 퍼센트 부분이 유효한 숫자인지 검증
-                float(formula[:-1])
-                return True
-            except ValueError:
-                self.errors.append(
-                    f"잘못된 퍼센트 값: {formula} (이벤트: {event_id}, 효과 {index+1})"
-                )
-                return False
-
-        # 간단한 숫자 리터럴 처리
-        try:
-            float(formula)
-            return True
-        except ValueError:
-            pass
-
-        # 복잡한 수식 검증
-        try:
-            tree = ast.parse(formula, mode="eval")
-
-            # 허용된 노드 타입
-            allowed_nodes = (
-                ast.Expression,
-                ast.BinOp,
-                ast.UnaryOp,
-                ast.Num,
-                ast.Constant,
-                ast.Name,
-                ast.Load,
-                ast.Add,
-                ast.Sub,
-                ast.Mult,
-                ast.Div,
-                ast.USub,
-                ast.UAdd,
-            )
-
-            # 허용된 이름들
-            allowed_names = {"value", "random", "min", "max"}
-
-            for node in ast.walk(tree):
-                if not isinstance(node, allowed_nodes):
-                    if isinstance(node, ast.Call):
-                        # random 함수만 허용
-                        if isinstance(node.func, ast.Name) and node.func.id in [
-                            "random",
-                            "min",
-                            "max",
-                        ]:
-                            continue
-                    self.errors.append(
-                        f"허용되지 않은 수식 구조: {type(node).__name__} "
-                        f"(이벤트: {event_id}, 효과 {index+1}, 수식: {original_formula})"
-                    )
-                    return False
-
-                if isinstance(node, ast.Name) and node.id not in allowed_names:
-                    self.errors.append(
-                        f"허용되지 않은 변수명: {node.id} "
-                        f"(이벤트: {event_id}, 효과 {index+1}, 수식: {original_formula})"
-                    )
-                    return False
-
-            return True
-
-        except SyntaxError as e:
-            self.errors.append(
-                f"포뮬러 구문 오류: {original_formula} "
-                f"(이벤트: {event_id}, 효과 {index+1}, 오류: {e})"
-            )
-            return False
-
-    def _validate_cultural_relevance_raw(self, event: dict[str, Any]) -> bool:
-        """문화적 연관성 검증"""
-        text = f"{event['name_ko']} {event['text_ko']}"
-        matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
-
-        if matched_keywords < VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"]:
-            return False
-
-        return True
-
-    def _check_duplicate_raw(self, event: dict[str, Any]) -> bool:
-        """중복 검사"""
-        for validated in self.validated_events:
-            name_similarity = fuzz.ratio(event["name_ko"], validated["name_ko"])
-            text_similarity = fuzz.ratio(event["text_ko"], validated["text_ko"])
-
-            if (
-                name_similarity > VALIDATION_THRESHOLDS["NAME_SIMILARITY_THRESHOLD"]
-                or text_similarity > VALIDATION_THRESHOLDS["TEXT_SIMILARITY_THRESHOLD"]
-            ):
-                return False
-
-        return True
-
-    def calculate_quality_metrics(self, events: list[dict[str, Any]]) -> dict[str, float]:
-        """품질 메트릭 계산"""
-        metrics = {
-            "diversity_score": self._calculate_diversity_score(events),
-            "tradeoff_clarity": self._calculate_tradeoff_clarity(events),
-            "cultural_authenticity": self._calculate_cultural_authenticity(events),
-            "replayability": self._calculate_replayability(events),
+        results = {
+            "total_events": len(events),
+            "valid_events": 0,
+            "events": [],
+            "summary": {
+                "structure_errors": 0,
+                "balance_warnings": 0,
+                "uncertainty_assessments": 0,
+                "no_right_answer_assessments": 0,
+            },
         }
 
-        return metrics
+        for i, event in enumerate(events):
+            event_result = {
+                "index": i,
+                "id": event.get("id", f"event_{i}"),
+                "structure_errors": [],
+                "balance_warnings": [],
+                "uncertainty_assessments": [],
+                "no_right_answer_assessments": [],
+            }
 
-    def _calculate_diversity_score(self, events: list[dict[str, Any]]) -> float:
-        """카테고리 분포의 균등성 (Shannon Entropy 기반)"""
-        categories: dict[str, int] = {}
-        for event in events:
-            category = event.get("category", "unknown")
-            categories[category] = categories.get(category, 0) + 1
+            # 구조 검증
+            structure_errors = self.validate_event_structure(event)
+            event_result["structure_errors"] = structure_errors
 
-        if not categories:
-            return 0.0
+            # 트리거 검증
+            if "triggers" in event:
+                trigger_errors = self.validate_triggers(event["triggers"])
+                event_result["structure_errors"].extend(trigger_errors)
 
-        total = sum(categories.values())
-        entropy = 0.0
-        for count in categories.values():
-            p = count / total
-            entropy -= p * math.log(p)
+            # 효과 검증
+            if "effects" in event:
+                effect_errors = self.validate_effects(event["effects"])
+                event_result["structure_errors"].extend(effect_errors)
 
-        max_entropy = math.log(len(categories))
-        if max_entropy == 0:
-            return 0.0
+            # 선택지 검증
+            if "choices" in event:
+                choice_errors = self.validate_choices(event["choices"])
+                event_result["structure_errors"].extend(choice_errors)
 
-        return entropy / max_entropy
+            # 밸런스 검증
+            balance_warnings = self.validate_balance(event)
+            event_result["balance_warnings"] = balance_warnings
 
-    def _calculate_tradeoff_clarity(self, events: list[dict[str, Any]]) -> float:
-        """각 선택지가 명확한 득실을 가지는지"""
-        if not events:
-            return 0.0
+            # 불확실성 검증
+            uncertainty_assessments = self.validate_uncertainty_elements(event)
+            event_result["uncertainty_assessments"] = uncertainty_assessments
 
-        events_with_tradeoffs = 0
-        for event in events:
-            choices = event.get("choices", [])
-            if self._has_clear_tradeoffs(choices):
-                events_with_tradeoffs += 1
+            # 정답 없음 원칙 검증
+            no_right_answer_assessments = self.validate_no_right_answer_principle(event)
+            event_result["no_right_answer_assessments"] = no_right_answer_assessments
 
-        return events_with_tradeoffs / len(events)
+            # 통계 업데이트
+            if not event_result["structure_errors"]:
+                results["valid_events"] += 1
 
-    def _has_clear_tradeoffs(self, choices: list[dict[str, Any]]) -> bool:
-        """선택지들이 명확한 트레이드오프를 가지는지"""
-        if len(choices) < VALIDATION_THRESHOLDS["MIN_CHOICES"]:
-            return False
+            results["summary"]["structure_errors"] += len(event_result["structure_errors"])
+            results["summary"]["balance_warnings"] += len(event_result["balance_warnings"])
+            results["summary"]["uncertainty_assessments"] += len(event_result["uncertainty_assessments"])
+            results["summary"]["no_right_answer_assessments"] += len(event_result["no_right_answer_assessments"])
 
-        # 각 선택지의 효과 분석
-        effects_by_choice: list[dict[str, float]] = []
-        for choice in choices:
-            effects = choice.get("effects", {})
-            if not effects:
-                return False
-            effects_by_choice.append(effects)
+            results["events"].append(event_result)
 
-        # 선택지 간 차이 분석
-        metrics_with_differences = set()
-        for i in range(len(effects_by_choice)):
-            for j in range(i + 1, len(effects_by_choice)):
-                for metric in set(effects_by_choice[i]) | set(effects_by_choice[j]):
-                    val_i = effects_by_choice[i].get(metric, 0)
-                    val_j = effects_by_choice[j].get(metric, 0)
-                    if abs(val_i - val_j) > VALIDATION_THRESHOLDS["FORMULA_EPSILON"]:
-                        metrics_with_differences.add(metric)
+        self.validation_results = results
+        return results
 
-        # 최소 2개 이상의 메트릭에서 차이가 있어야 함
-        return len(metrics_with_differences) >= VALIDATION_THRESHOLDS["MIN_METRICS_DIFFERENCE"]
+    def save_results(self, results: dict[str, Any]) -> None:
+        """
+        검증 결과 저장
 
-    def _calculate_cultural_authenticity(self, events: list[dict[str, Any]]) -> float:
-        """한국 치킨집 문화 반영도"""
-        if not events:
-            return 0.0
+        Args:
+            results: 검증 결과
+        """
+        if not self.output_file:
+            return
 
-        cultural_score = 0.0
-        for event in events:
-            text = f"{event.get('name_ko', '')} {event.get('text_ko', '')}"
-            matched_keywords = sum(1 for keyword in self.CULTURAL_KEYWORDS if keyword in text)
+        try:
+            with self.output_file.open("w", encoding="utf-8") as f:
+                json.dump(results, f, ensure_ascii=False, indent=2)
+            print(f"✅ 검증 결과가 {self.output_file}에 저장되었습니다.")
+        except Exception as e:
+            print(f"❌ 결과 저장 오류: {e!s}")
 
-            # 키워드 매칭 점수 (0.0 ~ 1.0)
-            event_score = min(matched_keywords / VALIDATION_THRESHOLDS["MIN_KEYWORDS_MATCH"], 1.0)
-            cultural_score += event_score
+    def print_summary(self, results: dict[str, Any]) -> None:
+        """
+        검증 결과 요약 출력
 
-        return cultural_score / len(events)
+        Args:
+            results: 검증 결과
+        """
+        if "error" in results:
+            print(f"❌ 검증 오류: {results['error']}")
+            return
 
-    def _calculate_replayability(self, events: list[dict[str, Any]]) -> float:
-        """재플레이 가치 (이벤트 다양성 + 선택지 다양성)"""
-        if not events:
-            return 0.0
+        print(f"\n📊 이벤트 검증 결과 요약")
+        print(f"총 이벤트 수: {results['total_events']}")
+        print(f"유효한 이벤트 수: {results['valid_events']}")
+        print(f"성공률: {results['valid_events'] / results['total_events'] * 100:.1f}%")
 
-        # 이벤트 타입 다양성
-        event_types = {}
-        for event in events:
-            event_type = event.get("type", "unknown")
-            event_types[event_type] = event_types.get(event_type, 0) + 1
+        summary = results["summary"]
+        print(f"\n📈 검증 통계:")
+        print(f"  구조 오류: {summary['structure_errors']}개")
+        print(f"  밸런스 경고: {summary['balance_warnings']}개")
+        print(f"  불확실성 평가: {summary['uncertainty_assessments']}개")
+        print(f"  정답 없음 평가: {summary['no_right_answer_assessments']}개")
 
-        type_diversity = 0.0
-        if event_types:
-            type_diversity = len(event_types) / 4.0  # 4가지 이벤트 타입 기준
+        # 주요 문제 이벤트 출력
+        problem_events = [
+            event for event in results["events"]
+            if event["structure_errors"] or len(event["balance_warnings"]) > 2
+        ]
 
-        # 선택지 다양성
-        avg_choices = sum(len(event.get("choices", [])) for event in events) / len(events)
-        choice_diversity = min(avg_choices / 3.0, 1.0)  # 평균 3개 선택지 기준
+        if problem_events:
+            print(f"\n⚠️ 주요 문제 이벤트 ({len(problem_events)}개):")
+            for event in problem_events[:5]:  # 최대 5개만 출력
+                print(f"  - {event['id']}: {len(event['structure_errors'])}개 오류")
 
-        # 가중 평균
-        return 0.6 * type_diversity + 0.4 * choice_diversity
+    def process(self) -> None:
+        """검증 프로세스 실행"""
+        print(f"🔍 이벤트 검증 시작: {self.input_file}")
+
+        results = self.validate_events()
+        self.print_summary(results)
+
+        if self.output_file:
+            self.save_results(results)
 
 
-def main() -> int:
+def main() -> None:
     """메인 함수"""
     parser = argparse.ArgumentParser(description="이벤트 데이터 검증 도구")
-    parser.add_argument("path", help="검증할 파일 또는 디렉토리 경로")
-    parser.add_argument("--quality", action="store_true", help="품질 메트릭 계산")
+    parser.add_argument("input", help="검증할 이벤트 파일 경로")
+    parser.add_argument("--output", help="검증 결과 출력 파일 경로")
+
     args = parser.parse_args()
 
-    path = Path(args.path)
-    validator = EventValidator()
-
-    if path.is_file():
-        success = validator.validate_file(path)
-    elif path.is_dir():
-        success = validator.validate_directory(path)
-    else:
-        print(f"오류: 경로가 존재하지 않습니다: {path}")
-        return 1
-
-    # 오류 및 경고 출력
-    if validator.errors:
-        print("\n🚫 오류:")
-        for error in validator.errors:
-            print(f"  - {error}")
-
-    if validator.warnings:
-        print("\n⚠️ 경고:")
-        for warning in validator.warnings:
-            print(f"  - {warning}")
-
-    # 결과 출력
-    if success:
-        print(f"\n✅ 검증 성공: {len(validator.validated_events)}개 이벤트")
-    else:
-        print(f"\n❌ 검증 실패: {len(validator.errors)}개 오류")
-
-    # 품질 메트릭 계산 (요청 시)
-    if args.quality and validator.validated_events:
-        print("\n📊 품질 메트릭:")
-        metrics = validator.calculate_quality_metrics(validator.validated_events)
-        for name, value in metrics.items():
-            threshold = QUALITY_THRESHOLDS.get(name.upper(), 0.0)
-            status = "✓" if value >= threshold else "✗"
-            print(f"  {name}: {value:.2f} {status}")
-
-    return 0 if success else 1
+    validator = EventValidator(args.input, args.output)
+    validator.process()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
+

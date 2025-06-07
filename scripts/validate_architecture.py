@@ -5,12 +5,11 @@
 """
 
 import os
-import re
 import sys
 import ast
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Dict, Set, Tuple, cast
+from typing import cast
 
 
 @dataclass(frozen=True)
@@ -27,8 +26,8 @@ class ValidationResult:
     """검증 결과"""
 
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
+    errors: list[str]
+    warnings: list[str]
 
 
 class HexagonalArchitectureValidator:
@@ -65,17 +64,17 @@ class HexagonalArchitectureValidator:
             "경제": ["도메인"],  # 경제는 도메인에만 의존
         }
 
-    def _get_layer(self, module_name: str) -> Optional[str]:
+    def _get_layer(self, module_name: str) -> str | None:
         """모듈 이름으로 레이어 반환"""
         for layer_prefix, layer_name in self.layers.items():
             if module_name.startswith(layer_prefix):
                 return layer_name
         return None
 
-    def extract_imports(self, file_path: Path) -> List[ImportInfo]:
+    def extract_imports(self, file_path: Path) -> list[ImportInfo]:
         """파일에서 임포트 정보 추출"""
         imports = []
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             try:
                 tree = ast.parse(f.read())
             except SyntaxError:
@@ -114,7 +113,7 @@ class HexagonalArchitectureValidator:
             module_path = module_path[:-3]
         return module_path
 
-    def collect_all_imports(self) -> List[ImportInfo]:
+    def collect_all_imports(self) -> list[ImportInfo]:
         """모든 임포트 정보 수집"""
         all_imports = []
 
@@ -129,8 +128,8 @@ class HexagonalArchitectureValidator:
 
     def validate_dependencies(self) -> ValidationResult:
         """의존성 방향 검증"""
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         imports = self.collect_all_imports()
 
@@ -142,7 +141,7 @@ class HexagonalArchitectureValidator:
             if source_layer and imported_layer:
                 allowed_deps = self.allowed_dependencies.get(source_layer, [])
                 # typing.cast를 사용하여 타입 명시
-                allowed_deps_typed = cast(List[str], allowed_deps)
+                allowed_deps_typed = cast(list[str], allowed_deps)
                 if (
                     imported_layer not in allowed_deps_typed
                     and source_layer != imported_layer
@@ -156,8 +155,8 @@ class HexagonalArchitectureValidator:
 
     def validate_freeze_tags(self) -> ValidationResult:
         """Freeze Tag 검증"""
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         # 포트 인터페이스 파일 검사
         ports_dir = self.core_dir / "ports"
@@ -166,7 +165,7 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
 
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
                     if "@freeze" not in content:
                         warnings.append(
@@ -179,8 +178,8 @@ class HexagonalArchitectureValidator:
 
     def validate_domain_immutability(self) -> ValidationResult:
         """도메인 객체 불변성 검증"""
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         domain_dir = self.core_dir / "domain"
         if domain_dir.exists() and domain_dir.is_dir():
@@ -188,7 +187,7 @@ class HexagonalArchitectureValidator:
                 if file_path.name == "__init__.py":
                     continue
 
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
                     if "@dataclass" in content and "frozen=True" not in content:
                         errors.append(
@@ -197,7 +196,7 @@ class HexagonalArchitectureValidator:
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
 
-    def validate_all(self) -> List[ValidationResult]:
+    def validate_all(self) -> list[ValidationResult]:
         """모든 검증 실행"""
         results = []
 
@@ -215,7 +214,7 @@ class HexagonalArchitectureValidator:
         return results
 
 
-def print_validation_results(results: List[ValidationResult]) -> None:
+def print_validation_results(results: list[ValidationResult]) -> None:
     """검증 결과 출력"""
     all_valid = True
 
