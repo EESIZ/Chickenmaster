@@ -6,8 +6,7 @@
 """
 
 from enum import Enum, auto
-from typing import Final, NamedTuple, Dict, Tuple
-from dataclasses import dataclass
+from typing import Final, NamedTuple
 
 class Metric(Enum):
     """
@@ -28,6 +27,10 @@ class MetricRange(NamedTuple):
     max_value: float
     default_value: float
 
+# 게임 단계 관련 상수
+EARLY_GAME_THRESHOLD: Final[int] = 180  # 초기 게임 단계 임계값 (약 6개월)
+MID_GAME_THRESHOLD: Final[int] = 545   # 중반 게임 단계 임계값 (약 1년 6개월)
+
 # 확률 관련 상수 (상단에 위치)
 PROBABILITY_LOW_THRESHOLD = 0.3
 PROBABILITY_HIGH_THRESHOLD = 0.7
@@ -41,8 +44,8 @@ GAME_DURATION_YEARS = 2  # 게임 진행 기간 (년)
 TOTAL_GAME_DAYS = DAYS_PER_YEAR * GAME_DURATION_YEARS  # 총 게임 일수 (730일)
 
 # 게임 단계 구분
-EARLY_GAME_END = 180  # 초기 단계 종료 (약 6개월)
-MID_GAME_END = 545   # 중반 단계 종료 (약 1년 6개월)
+EARLY_GAME_END = EARLY_GAME_THRESHOLD  # 초기 단계 종료 (약 6개월)
+MID_GAME_END = MID_GAME_THRESHOLD   # 중반 단계 종료 (약 1년 6개월)
 
 # 게임 진행 관련 상수
 INITIAL_HEALTH = 100  # 초기 체력
@@ -76,7 +79,7 @@ FACILITY_IMPACT_FACTOR = 40
 MONEY_IMPACT_FACTOR = 1000
 
 # Metric 기반 트레이드오프 관계 (한 지표가 오르면 반대 지표는 내려감)
-TRADEOFF_RELATIONSHIPS = {
+TRADEOFF_RELATIONSHIPS: dict[Metric, list[Metric]] = {
     Metric.MONEY: [Metric.REPUTATION, Metric.HAPPINESS],
     Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],
     Metric.HAPPINESS: [Metric.SUFFERING, Metric.STAFF_FATIGUE],
@@ -88,7 +91,7 @@ TRADEOFF_RELATIONSHIPS = {
 }
 
 # Metric 기반 불확실성 가중치 (지표별로 예측 불가능성 정도를 다르게 적용)
-UNCERTAINTY_WEIGHTS = {
+UNCERTAINTY_WEIGHTS: dict[Metric, float] = {
     Metric.MONEY: 0.2,           # 돈은 경제적 변수로 변동성 높음
     Metric.REPUTATION: 0.15,    # 평판은 소문 등으로 변동성 있음
     Metric.HAPPINESS: 0.1,      # 행복도는 비교적 안정적
@@ -140,7 +143,7 @@ TEST_ASSERT_50: Final[int] = 50
 TEST_ASSERT_70: Final[int] = 70
 
 # 지표 범위 정의
-METRIC_RANGES = {
+METRIC_RANGES: dict[Metric, MetricRange] = {
     Metric.MONEY: MetricRange(0.0, 1000000.0, 10000.0),
     Metric.REPUTATION: MetricRange(0.0, 100.0, 50.0),
     Metric.HAPPINESS: MetricRange(0.0, 100.0, 50.0),
@@ -181,8 +184,8 @@ DEFAULT_STARTING_FACILITY: Final[float] = 50.0
 DEFAULT_STARTING_DEMAND: Final[float] = 50.0
 
 # 게임 단계 구분
-EARLY_GAME_DAYS: Final[int] = 180
-MID_GAME_DAYS: Final[int] = 545
+EARLY_GAME_DAYS: Final[int] = EARLY_GAME_THRESHOLD
+MID_GAME_DAYS: Final[int] = MID_GAME_THRESHOLD
 
 # 경고 임계값
 WARNING_THRESHOLD: Final[float] = 0.2  # 20% 이하/이상 시 경고
