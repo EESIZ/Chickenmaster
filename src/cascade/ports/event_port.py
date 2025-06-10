@@ -21,7 +21,7 @@ class IEventService(ABC):
     """
 
     @abstractmethod
-    def get_event_by_id(self, event_id: str) -> Event:
+    def get_event_by_id(self, event_id: str) -> Any:
         """
         ID로 이벤트를 조회합니다.
 
