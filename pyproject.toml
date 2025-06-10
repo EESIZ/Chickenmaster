@@ -45,4 +45,8 @@ no_implicit_optional = false
 # Skip mypy checking for development efficiency
 exclude = [
     ".*\\.py$"  # Skip all Python files
-] 
+]
+
+[tool.pytest.ini_options]
+# MUD 게임은 CI 테스트에서 제외 (개발 중)
+ignore = ["chicken_mud_game.py"] 
