@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: This file defines the testing and quality assurance rules.
+---
+
+# 테스트 규칙
+
+## 테스트 커버리지
+- 전체 코드 커버리지 80% 이상 유지
+- 핵심 도메인 로직 90% 이상 커버
+- pytest-cov 사용하여 측정
+
+## 테스트 구조
+- tests/unit: 단위 테스트
+- tests/integration: 통합 테스트
+- tests/fixtures: 공통 fixture
+
+## 테스트 작성
+- 각 테스트는 하나의 동작만 검증
+- 명확한 테스트 이름 사용
+- Given-When-Then 패턴 준수
+
+## Fixture 사용
+- 공통 fixture는 conftest.py에 정의
+- fixture는 재사용 가능하게 설계
+- 임시 파일/디렉토리는 자동 정리
+
+## 테스트 데이터
+- 테스트용 상수는 game_constants.py에 정의
+- 매직 넘버 사용 금지
+- 테스트 데이터는 명확한 의미 전달
+
+## 테스트 실행
+- pytest 사용
+- -v 옵션으로 상세 출력
+- 실패 시 전체 스택트레이스 확인
+

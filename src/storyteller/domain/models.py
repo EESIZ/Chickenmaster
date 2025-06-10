@@ -13,7 +13,7 @@ from uuid import UUID, uuid4
 @dataclass(frozen=True)
 class MetricsHistory:
     """지표 변화 히스토리."""
-    
+
     day: int
     metrics: dict[str, float]
     timestamp: datetime = field(default_factory=datetime.now)
@@ -22,7 +22,7 @@ class MetricsHistory:
 @dataclass(frozen=True)
 class RecentEvent:
     """최근 발생한 이벤트 정보."""
-    
+
     day: int
     event_id: str
     severity: float
@@ -32,18 +32,18 @@ class RecentEvent:
 @dataclass(frozen=True)
 class StoryContext:
     """스토리 생성을 위한 컨텍스트."""
-    
+
     day: int
     game_progression: float  # 0.0 ~ 1.0
     metrics_history: list[MetricsHistory]
     recent_events: list[RecentEvent]
     context_id: UUID = field(default_factory=uuid4)
-    
+
     def __post_init__(self) -> None:
         """값 검증."""
         if not 0.0 <= self.game_progression <= 1.0:
             raise ValueError("게임 진행도는 0.0에서 1.0 사이여야 합니다.")
-        
+
         if self.day < 1:
             raise ValueError("게임 일차는 1 이상이어야 합니다.")
 
@@ -51,14 +51,14 @@ class StoryContext:
 @dataclass(frozen=True)
 class StoryPattern:
     """스토리 패턴 정의."""
-    
+
     pattern_id: str
     name: str
     trigger_conditions: dict[str, float]  # 지표명: 임계값
     related_events: list[str]  # 연관 이벤트 ID 목록
     narrative_template: str
     pattern_type: str = "default"
-    
+
     def matches(self, metrics: dict[str, float]) -> bool:
         """현재 지표가 패턴의 트리거 조건과 일치하는지 확인."""
         for metric, threshold in self.trigger_conditions.items():
@@ -68,19 +68,18 @@ class StoryPattern:
                 # 위기/트레이드오프 패턴: 임계값 이하일 때 매칭
                 if current_value >= threshold:
                     return False
-            else:
-                # 기본 패턴: 임계값 이상일 때 매칭
-                if current_value < threshold:
-                    return False
+            # 기본 패턴: 임계값 이상일 때 매칭
+            elif current_value < threshold:
+                return False
         return True
 
 
 @dataclass(frozen=True)
 class NarrativeResponse:
     """스토리텔러의 응답."""
-    
+
     narrative: str
     suggested_event: str | None = None  # 제안된 이벤트 ID
     applied_pattern: StoryPattern | None = None
     response_id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=datetime.now) 
+    created_at: datetime = field(default_factory=datetime.now)

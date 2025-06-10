@@ -8,4 +8,4 @@ and suggesting appropriate events through the M-3 Random Event Engine.
 from .domain.models import NarrativeResponse, StoryContext
 from .adapters.storyteller_service import StorytellerService
 
-__all__ = ["StorytellerService", "StoryContext", "NarrativeResponse"]
+__all__ = ["NarrativeResponse", "StoryContext", "StorytellerService"]

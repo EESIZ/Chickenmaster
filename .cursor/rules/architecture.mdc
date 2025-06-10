@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: This file defines the architecture rules for the project.
+globs: 
+alwaysApply: ture
+---
+
+# 아키텍처 규칙
+
+## 헥사고널 아키텍처
+- core/domain: 핵심 도메인 로직 (불변)
+- core/ports: 인터페이스 정의
+- adapters: 외부 시스템 연결
+- application: 응용 서비스
+
+## 의존성 규칙
+- core/domain은 다른 레이어에 의존하지 않음
+- adapters는 core/domain에만 의존
+- application은 모든 레이어에 의존 가능
+
+## 도메인 객체
+- 모든 도메인 객체는 불변(immutable)
+- @dataclass(frozen=True) 사용
+- 값 객체는 불변 컬렉션 사용
+
+## 포트 인터페이스
+- 모든 포트는 @freeze 태그 사용
+- 명확한 인터페이스 정의
+- 구현 세부사항 숨김
+
+## 이벤트 엔진
+- 이벤트는 불변 객체
+- 이벤트 효과는 트레이드오프 관계
+- 연쇄 효과는 예측 가능하게 구현
+
+## 경제 시스템
+- 가격, 수요, 원가 계산은 도메인 서비스
+- 재고 관리는 불변 객체
+- 손익 계산은 순수 함수

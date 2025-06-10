@@ -138,6 +138,28 @@ TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
 TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
 TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
 
+# 스토리텔러 관련 상수
+MIN_METRICS_HISTORY_FOR_TREND: Final[int] = 2  # 추세 분석을 위한 최소 히스토리 개수
+RECENT_HISTORY_WINDOW: Final[int] = 3  # 최근 히스토리 분석 윈도우 크기
+
+# 상황 톤 분석 임계값
+SITUATION_POSITIVE_THRESHOLD: Final[float] = 0.6  # 긍정적 상황 판단 임계값
+SITUATION_NEGATIVE_THRESHOLD: Final[float] = 0.4  # 부정적 상황 판단 임계값
+
+# 지표 임계값들 (스토리텔러용)
+MONEY_LOW_THRESHOLD: Final[int] = 3000   # 자금 부족 기준
+MONEY_HIGH_THRESHOLD: Final[int] = 15000  # 자금 풍부 기준
+REPUTATION_LOW_THRESHOLD: Final[int] = 30  # 평판 위험 기준
+REPUTATION_HIGH_THRESHOLD: Final[int] = 70  # 평판 우수 기준
+HAPPINESS_LOW_THRESHOLD: Final[int] = 30   # 행복 위험 기준
+HAPPINESS_HIGH_THRESHOLD: Final[int] = 70  # 행복 우수 기준
+
+# 패턴 우선순위 관련 상수
+TRADEOFF_BALANCE_THRESHOLD: Final[float] = 0.5  # 트레이드오프 불균형 감지 임계값
+GAME_PROGRESSION_MID_POINT: Final[float] = 0.5  # 게임 진행도 중간점
+PATTERN_SCORE_TOLERANCE: Final[float] = 0.1     # 패턴 점수 허용 오차
+COMPLEXITY_BONUS_MULTIPLIER: Final[float] = 0.1  # 복잡성 보너스 배수
+
 
 @dataclass(frozen=True)
 class ProbabilityConstants:

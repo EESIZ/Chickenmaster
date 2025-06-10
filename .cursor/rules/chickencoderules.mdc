@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: This file defines the exclusive rules for the Chickenmaster project.
+globs: 
+alwaysApply: ture
+---
+
+프로젝트의 코드 작성 규칙을 정리해드리겠습니다:
+코드 스타일 및 포맷팅
+Black 포맷터 사용
+Ruff 린터 사용
+Python 3.12+ 버전 사용
+타입 힌트 100% 적용
+코드 구조
+헥사고날 아키텍처(Hexagonal Architecture) 기반
+도메인 중심 설계(DDD) 원칙 준수
+단일 책임 원칙(SRP) 준수
+의존성 역전 원칙(DIP) 준수
+코딩 표준
+매직 넘버는 game_constants.py에 상수로 정의
+Frozen Dataclass 패턴 사용
+명확한 네이밍 컨벤션:
+함수/변수: snake_case
+클래스: PascalCase
+상수: UPPER_SNAKE_CASE
+모듈: snake_case
+패키지: lowercase
+테스트 요구사항
+테스트 커버리지 80% 이상 유지
+단위 테스트 필수
+통합 테스트 구현
+테스트 코드도 매직 넘버 상수화
+문서화
+독스트링 필수 (Args, Returns, Raises 포함)
+API 문서 유지
+아키텍처 결정 문서화(ADR)
+코드 주석은 "왜"에 초점
+품질 지표
+순환 복잡도: 최대 10
+인지 복잡도: 최대 15
+유지보수성 지수: 최소 65
+중복 코드: 최대 5%
+응답 시간: 평균 100ms 이하
+버전 관리
+의미있는 커밋 메시지 작성
+작은 단위의 PR 생성 (500줄 이하 권장)
+브랜치 전략 준수:
+main: 안정 버전
+develop: 개발 브랜치
+feature/: 기능 개발
+bugfix/: 버그 수정
+release/: 릴리즈 준비
+보안
+API 키 관리
+민감 정보 처리
+접근 제어
+
+로깅

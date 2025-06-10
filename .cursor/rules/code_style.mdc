@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: This file defines the code style and formatting rules.
+globs:
+alwaysApply: true
+---
+
+# 코드 스타일 규칙
+
+## 포맷팅
+- Black 포맷터 사용 (line-length = 100)
+- Ruff 린터 사용 (Python 3.12 타겟)
+- 모든 코드는 PEP 8 스타일 가이드 준수
+
+## 타입 힌트
+- 모든 함수와 메서드에 타입 힌트 필수
+- Mypy strict 모드 준수
+- Pydantic 모델 사용 시 타입 검증 필수
+
+## 네이밍 컨벤션
+- 함수/변수: snake_case
+- 클래스: PascalCase
+- 상수: UPPER_SNAKE_CASE
+- 모듈: snake_case
+- 패키지: lowercase
+
+## 매직 넘버
+- 모든 매직 넘버는 game_constants.py에 상수로 정의
+- 상수는 의미 있는 이름과 주석 필수
+- Frozen Dataclass 패턴 사용하여 관련 상수 그룹화
+
+## 주석
+- 함수/클래스에 독스트링 필수
+- 복잡한 로직에 인라인 주석 추가
+- TODO, FIXME 등의 태그 사용 시 담당자 명시
+
+## 임포트
+- 표준 라이브러리
+- 서드파티 라이브러리
+- 로컬 모듈
+순서로 정렬
+- isort 사용하여 자동 정렬

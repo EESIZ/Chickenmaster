@@ -84,3 +84,35 @@ class TestConstants:
 **참고 사항**:
 - 이 설계 결정은 [리팩토링 가이드라인](REFACTORING_GUIDELINES.md)의 매직 넘버 처리 원칙과 연계됨
 - 모든 개발자는 새로운 코드 작성 시 매직 넘버 대신 상수를 사용해야 함
+
+## 결정 3: StorytellerService 매직 넘버 상수화 (2025-01-06)
+
+### 배경
+StorytellerService 구현 과정에서 다수의 매직 넘버가 발견되어 코드 가독성과 유지보수성이 저하되었습니다.
+
+### 결정 내용
+모든 매직 넘버를 `game_constants.py`에 의미 있는 상수로 정의하였습니다:
+
+```python
+# 스토리텔러 관련 상수
+MIN_METRICS_HISTORY_FOR_TREND: Final[int] = 2
+RECENT_HISTORY_WINDOW: Final[int] = 3
+SITUATION_POSITIVE_THRESHOLD: Final[float] = 0.6
+SITUATION_NEGATIVE_THRESHOLD: Final[float] = 0.4
+MONEY_LOW_THRESHOLD: Final[int] = 3000
+MONEY_HIGH_THRESHOLD: Final[int] = 15000
+REPUTATION_LOW_THRESHOLD: Final[int] = 30
+REPUTATION_HIGH_THRESHOLD: Final[int] = 70
+HAPPINESS_LOW_THRESHOLD: Final[int] = 30
+HAPPINESS_HIGH_THRESHOLD: Final[int] = 70
+TRADEOFF_BALANCE_THRESHOLD: Final[float] = 0.5
+GAME_PROGRESSION_MID_POINT: Final[float] = 0.5
+PATTERN_SCORE_TOLERANCE: Final[float] = 0.1
+COMPLEXITY_BONUS_MULTIPLIER: Final[float] = 0.1
+```
+
+### 영향
+- 코드 가독성 향상
+- Ruff 린터 PLR2004 규칙 준수
+- 유지보수성 개선
+- 일관된 임계값 관리
