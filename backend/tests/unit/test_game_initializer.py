@@ -2,14 +2,24 @@
 GameInitializer 테스트
 """
 
-import pytest
 from app.core.domain.game_initializer import GameInitializer, GameSettings
-from app.core.domain.game_state import GameState
 from app.core.game_constants import (
-    DEFAULT_MONEY, DEFAULT_REPUTATION, DEFAULT_HAPPINESS, DEFAULT_SUFFERING,
-    DEFAULT_INVENTORY, DEFAULT_STAFF_FATIGUE, DEFAULT_FACILITY, DEFAULT_DEMAND,
-    TEST_MONEY, TEST_REPUTATION, TEST_HAPPINESS, TEST_SUFFERING,
-    TEST_INVENTORY, TEST_STAFF_FATIGUE, TEST_FACILITY, TEST_DEMAND,
+    DEFAULT_MONEY,
+    DEFAULT_REPUTATION,
+    DEFAULT_HAPPINESS,
+    DEFAULT_SUFFERING,
+    DEFAULT_INVENTORY,
+    DEFAULT_STAFF_FATIGUE,
+    DEFAULT_FACILITY,
+    DEFAULT_DEMAND,
+    TEST_MONEY,
+    TEST_REPUTATION,
+    TEST_HAPPINESS,
+    TEST_SUFFERING,
+    TEST_INVENTORY,
+    TEST_STAFF_FATIGUE,
+    TEST_FACILITY,
+    TEST_DEMAND,
 )
 from typing import Final
 
@@ -24,6 +34,7 @@ TEST_SAVE_FACILITY: Final[float] = 60.0
 TEST_SAVE_DEMAND: Final[float] = 55.0
 TEST_SAVE_DAY: Final[int] = 10
 TEST_SAVE_EVENTS_COUNT: Final[int] = 2
+
 
 def test_game_initializer_default_settings():
     """기본 설정으로 게임 초기화 테스트"""
@@ -113,4 +124,4 @@ def test_load_saved_game_partial_data():
     assert game_state.inventory == initializer.settings.starting_inventory
     assert game_state.staff_fatigue == initializer.settings.starting_staff_fatigue
     assert game_state.facility == initializer.settings.starting_facility
-    assert game_state.demand == initializer.settings.starting_demand 
+    assert game_state.demand == initializer.settings.starting_demand

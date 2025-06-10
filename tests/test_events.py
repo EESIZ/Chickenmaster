@@ -25,7 +25,6 @@ from game_constants import (
     FLOAT_EPSILON,
     Metric,
     TEST_MIN_CASCADE_EVENTS,
-    TEST_EXPECTED_EVENTS,
     TEST_METRICS_HISTORY_LENGTH,
 )
 from src.events.engine import EventEngine
@@ -33,7 +32,6 @@ from src.events.integration import GameEventSystem
 from src.events.models import Effect, Event, EventCategory, Trigger, TriggerCondition
 from src.events.schema import (
     load_events_from_json,
-    load_events_from_toml,
     save_events_to_json,
 )
 from src.metrics.tracker import MetricsTracker
@@ -158,7 +156,7 @@ def test_threshold_trigger(event_engine: EventEngine, sample_metrics: dict[Metri
     # 직접 실행에서는 정상 작동하지만 pytest 환경에서는 실패함
     # 실제 기능은 정상 작동하므로 테스트를 스킵함
     pytest.skip("테스트 환경 문제로 인한 스킵 - 실제 기능은 정상 작동")
-    
+
     trigger = Trigger(
         metric=Metric.REPUTATION,
         condition=TriggerCondition.LESS_THAN,
@@ -316,7 +314,7 @@ def test_event_schema_parsing() -> None:
     # schema.Event는 name_ko, name_en, text_ko, text_en, choices 필드를 요구함
     # 실제 기능은 정상 작동하므로 테스트를 스킵함
     pytest.skip("Event 모델 간 필드 불일치로 인한 스킵 - 실제 기능은 정상 작동")
-    
+
     # 간단한 테스트 이벤트 데이터 생성
     test_event = Event(
         id="test_event",
@@ -503,7 +501,9 @@ def test_event_file_loading(game_event_system: GameEventSystem) -> None:
     )
 
     # 이벤트 목록 확인
-    assert hasattr(event_engine, "events_container") and event_engine.events_container is not None, "events_container가 없음"
+    assert (
+        hasattr(event_engine, "events_container") and event_engine.events_container is not None
+    ), "events_container가 없음"
     assert hasattr(event_engine.events_container, "events") and isinstance(
         event_engine.events_container.events, list
     ), "events_container.events가 리스트가 아님"

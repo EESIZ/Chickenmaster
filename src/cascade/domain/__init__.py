@@ -11,14 +11,14 @@ from src.cascade.domain.models import (
     CascadeResult,
     CascadeType,
     TriggerCondition,
-    PendingEvent
+    PendingEvent,
 )
 
 __all__ = [
-    'CascadeChain',
-    'CascadeNode',
-    'CascadeResult',
-    'CascadeType',
-    'TriggerCondition',
-    'PendingEvent'
+    "CascadeChain",
+    "CascadeNode",
+    "CascadeResult",
+    "CascadeType",
+    "PendingEvent",
+    "TriggerCondition",
 ]

@@ -1,4 +1,5 @@
-from game_constants import PROBABILITY_HIGH_THRESHOLD, PROBABILITY_LOW_THRESHOLD, PROBABILITY_HIGH_THRESHOLD5
+from game_constants import PROBABILITY_HIGH_THRESHOLD, PROBABILITY_HIGH_THRESHOLD5
+
 """
 Cascade 도메인 모델 테스트.
 
@@ -52,7 +53,11 @@ class MockGameState(GameState):
     day: int = 1
     events_history: tuple = field(default_factory=tuple)
     metrics: dict = field(
-        default_factory=lambda: {"reputation": PROBABILITY_HIGH_THRESHOLD, "cash": 1000, "customer_satisfaction": 0.8}
+        default_factory=lambda: {
+            "reputation": PROBABILITY_HIGH_THRESHOLD,
+            "cash": 1000,
+            "customer_satisfaction": 0.8,
+        }
     )
 
 

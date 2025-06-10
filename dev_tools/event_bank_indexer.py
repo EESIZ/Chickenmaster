@@ -183,7 +183,7 @@ class EventBankIndexer:
         events = self.load_events()
         metadata = self.update_metadata(events)
         self.save_metadata(metadata)
-        
+
         # 시뮬레이터 객체 모방
         class MockSimulator:
             def __init__(self, events_data: list[dict[str, Any]], metadata_data: dict[str, Any]):
@@ -192,23 +192,21 @@ class EventBankIndexer:
                 for event in events_data:
                     event_id = event.get("id", f"event_{len(self.events)}")
                     self.events[event_id] = {"data": event}
-                
+
                 # 메타데이터 통계 생성
-                self.metadata = {
-                    "total_events": len(events_data),
-                    "categories": {},
-                    "tags": {}
-                }
-                
+                self.metadata = {"total_events": len(events_data), "categories": {}, "tags": {}}
+
                 # 카테고리별 통계
                 for event in events_data:
                     category = event.get("category", "unknown")
-                    self.metadata["categories"][category] = self.metadata["categories"].get(category, 0) + 1
-                    
+                    self.metadata["categories"][category] = (
+                        self.metadata["categories"].get(category, 0) + 1
+                    )
+
                     # 태그별 통계
                     for tag in event.get("tags", []):
                         self.metadata["tags"][tag] = self.metadata["tags"].get(tag, 0) + 1
-        
+
         return MockSimulator(events, metadata)
 
     def process_no_right_answer(self) -> None:
@@ -233,4 +231,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -25,7 +25,9 @@ lint.ignore = ["E501","PLR0912","RUF001","PLR0915","PLR0913","PLR0911","B007"
 lint.select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/mass_event_generation.py" = ["E402"]  # sys.path 수정 후 import가 필요한 경우 
+"scripts/mass_event_generation.py" = ["E402"]  # sys.path 수정 후 import가 필요한 경우
+"tests/**/*.py" = ["PLR2004", "E402", "F841"]  # 테스트 파일에서는 매직 넘버, import 순서, 사용안하는 변수 허용
+"backend/tests/**/*.py" = ["PLR2004", "B017", "E402", "F841", "F821"]  # 백엔드 테스트 파일에서는 추가로 정의되지 않은 이름 허용 
 
 [tool.black]
 line-length = 100

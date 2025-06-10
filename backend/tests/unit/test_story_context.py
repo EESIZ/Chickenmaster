@@ -27,7 +27,7 @@ def sample_metric_snapshot(sample_metrics):
         timestamp=datetime.now(),
         metrics=sample_metrics,
         events=["event1", "event2"],
-        modifier="SimpleSeesawModifier"
+        modifier="SimpleSeesawModifier",
     )
 
 
@@ -41,7 +41,7 @@ def sample_game_event():
         name_ko="테스트 이벤트",
         name_en="Test Event",
         text_ko="테스트 이벤트 설명",
-        text_en="Test event description"
+        text_en="Test event description",
     )
 
 
@@ -53,7 +53,7 @@ def story_context(sample_metrics, sample_metric_snapshot, sample_game_event):
         current_metrics=sample_metrics,
         metrics_history=[sample_metric_snapshot],
         recent_events=[sample_game_event],
-        story_patterns=["pattern1", "pattern2"]
+        story_patterns=["pattern1", "pattern2"],
     )
 
 
@@ -69,7 +69,7 @@ def test_story_context_creation(story_context, sample_metrics):
 
 def test_game_progression(story_context):
     """게임 진행률 계산 테스트"""
-    assert story_context.game_progression == pytest.approx(1/730)
+    assert story_context.game_progression == pytest.approx(1 / 730)
 
 
 def test_game_stages(story_context):
@@ -90,7 +90,7 @@ def test_metric_trend(story_context):
         timestamp=datetime.now(),
         metrics={MetricEnum.MONEY: 1100.0},  # 100 증가
         events=[],
-        modifier=None
+        modifier=None,
     )
     context_with_trend = StoryContext(
         current_day=2,
@@ -98,7 +98,7 @@ def test_metric_trend(story_context):
         current_metrics={MetricEnum.MONEY: 1100.0},
         metrics_history=[story_context.metrics_history[0], new_snapshot],
         recent_events=[],
-        story_patterns=[]
+        story_patterns=[],
     )
     assert context_with_trend.get_metric_trend(MetricEnum.MONEY) == pytest.approx(100.0)
 
@@ -124,4 +124,4 @@ def test_metric_history(story_context, sample_metrics):
 def test_immutability(story_context):
     """불변성 테스트"""
     with pytest.raises(dataclasses.FrozenInstanceError):
-        story_context.current_day = 2 
+        story_context.current_day = 2

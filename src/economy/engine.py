@@ -1,8 +1,8 @@
-from game_constants import PROBABILITY_LOW_THRESHOLD
+#!/usr/bin/env python3
 """
-경제 엔진
+Economy Engine
 
-게임의 핵심 경제 로직을 처리하는 엔진입니다.
+게임의 경제 시스템을 관리하는 핵심 엔진입니다.
 """
 
 from typing import Any
@@ -10,8 +10,8 @@ from typing import Any
 from game_constants import (
     ActionType,
     Metric,
+    PROBABILITY_LOW_THRESHOLD,
     cap_metric_value,
-    MAGIC_NUMBER_ONE_HUNDRED,
 )
 
 # 경제 모델 함수 가져오기

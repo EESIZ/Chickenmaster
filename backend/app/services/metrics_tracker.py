@@ -14,6 +14,7 @@ from app.core.game_constants import (
     TIMEOUT_SECONDS,
 )
 
+
 class MetricsTracker:
     """게임 메트릭을 추적하고 관리하는 클래스"""
 
@@ -53,4 +54,4 @@ class MetricsTracker:
 
     def get_history(self) -> list[dict[str, float]]:
         """메트릭 히스토리를 반환합니다."""
-        return self._history.copy() 
+        return self._history.copy()

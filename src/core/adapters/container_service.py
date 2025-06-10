@@ -10,7 +10,7 @@ from collections.abc import Callable
 
 from src.core.ports.container_port import IServiceContainer
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
@@ -31,34 +31,26 @@ class ServiceContainer(IServiceContainer):
         self._registrations: dict[type[Any], ServiceRegistration] = {}
 
     def register_singleton(
-        self, 
-        interface: type[T], 
-        implementation: Callable[[IServiceContainer], T]
+        self, interface: type[T], implementation: Callable[[IServiceContainer], T]
     ) -> None:
         """싱글톤 서비스를 등록합니다."""
         if self.has(interface):
             raise ValueError(f"서비스 '{interface.__name__}'가 이미 등록되어 있습니다.")
 
         registration = ServiceRegistration(
-            service_type=interface,
-            implementation_factory=implementation,
-            is_singleton=True
+            service_type=interface, implementation_factory=implementation, is_singleton=True
         )
         self._registrations[interface] = registration
 
     def register_transient(
-        self, 
-        interface: type[T], 
-        implementation: Callable[[IServiceContainer], T]
+        self, interface: type[T], implementation: Callable[[IServiceContainer], T]
     ) -> None:
         """트랜지언트 서비스를 등록합니다."""
         if self.has(interface):
             raise ValueError(f"서비스 '{interface.__name__}'가 이미 등록되어 있습니다.")
 
         registration = ServiceRegistration(
-            service_type=interface,
-            implementation_factory=implementation,
-            is_singleton=False
+            service_type=interface, implementation_factory=implementation, is_singleton=False
         )
         self._registrations[interface] = registration
 
@@ -76,11 +68,11 @@ class ServiceContainer(IServiceContainer):
         # 팩토리 함수로 인스턴스 생성
         if registration.implementation_factory is not None:
             instance = registration.implementation_factory(self)
-            
+
             # 싱글톤이면 인스턴스 저장
             if registration.is_singleton:
                 registration.instance = instance
-            
+
             return instance
 
         raise ValueError(f"서비스 '{interface.__name__}'의 구현체가 없습니다.")
@@ -105,7 +97,6 @@ class ServiceContainer(IServiceContainer):
         """서비스 인스턴스를 생성합니다."""
         if registration.implementation_factory is None:
             raise ValueError("구현체 팩토리가 없습니다.")
-        
+
         # 생성자 호출 시 컨테이너 자체를 전달
         return registration.implementation_factory(self)
-

@@ -7,14 +7,21 @@
 from __future__ import annotations
 
 import argparse
-import ast
 import json
-import math
 import tomllib  # Python 3.11+
 from pathlib import Path
 from typing import Any, ClassVar
 
-from game_constants import MAGIC_NUMBER_ZERO, MAGIC_NUMBER_ONE, MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIFTY, MAGIC_NUMBER_ONE_HUNDRED, PROBABILITY_LOW_THRESHOLD, PROBABILITY_HIGH_THRESHOLD
+from game_constants import (
+    MAGIC_NUMBER_ZERO,
+    MAGIC_NUMBER_TWO,
+    MAGIC_NUMBER_THREE,
+    MAGIC_NUMBER_FIFTY,
+    MAGIC_NUMBER_TWENTY,
+    MAGIC_NUMBER_ONE_THOUSAND,
+    PROBABILITY_LOW_THRESHOLD,
+    PROBABILITY_HIGH_THRESHOLD,
+)
 
 
 class EventValidator:
@@ -110,7 +117,10 @@ class EventValidator:
                 errors.append(f"필드 타입 오류: {field} (기대: {expected_type})")
 
         # 카테고리 값 검증
-        if "category" in event and event["category"] not in self.VALIDATION_RULES["category_values"]:
+        if (
+            "category" in event
+            and event["category"] not in self.VALIDATION_RULES["category_values"]
+        ):
             errors.append(f"잘못된 카테고리: {event['category']}")
 
         # 타입 값 검증
@@ -144,12 +154,19 @@ class EventValidator:
 
             # 조건 값 검증
             if "condition" in trigger:
-                valid_conditions = ["equal", "not_equal", "greater_than", "less_than", "greater_than_or_equal", "less_than_or_equal"]
+                valid_conditions = [
+                    "equal",
+                    "not_equal",
+                    "greater_than",
+                    "less_than",
+                    "greater_than_or_equal",
+                    "less_than_or_equal",
+                ]
                 if trigger["condition"] not in valid_conditions:
                     errors.append(f"트리거 {i}: 잘못된 조건 - {trigger['condition']}")
 
             # 값 타입 검증
-            if "value" in trigger and not isinstance(trigger["value"], (int, float)):
+            if "value" in trigger and not isinstance(trigger["value"], int | float):
                 errors.append(f"트리거 {i}: 값이 숫자가 아님")
 
         return errors
@@ -178,13 +195,13 @@ class EventValidator:
                     errors.append(f"효과 {i}: 필수 필드 누락 - {field}")
 
             # 값 타입 검증
-            if "value" in effect and not isinstance(effect["value"], (int, float)):
+            if "value" in effect and not isinstance(effect["value"], int | float):
                 errors.append(f"효과 {i}: 값이 숫자가 아님")
 
             # 값 범위 검증 (합리적인 범위)
             if "value" in effect:
                 value = effect["value"]
-                if abs(value) > 1000:  # 너무 큰 값
+                if abs(value) > MAGIC_NUMBER_ONE_THOUSAND:  # 너무 큰 값
                     errors.append(f"효과 {i}: 값이 너무 큼 - {value}")
 
         return errors
@@ -234,11 +251,13 @@ class EventValidator:
         # 효과 밸런스 검증
         if "effects" in event:
             total_positive = sum(
-                effect["value"] for effect in event["effects"]
+                effect["value"]
+                for effect in event["effects"]
                 if effect.get("value", 0) > MAGIC_NUMBER_ZERO
             )
             total_negative = sum(
-                abs(effect["value"]) for effect in event["effects"]
+                abs(effect["value"])
+                for effect in event["effects"]
                 if effect.get("value", 0) < MAGIC_NUMBER_ZERO
             )
 
@@ -291,7 +310,7 @@ class EventValidator:
                         assessments.append("⚠ 확률적 효과 - 불확실성 부족")
 
         # 복잡한 선택지 확인
-        if "choices" in event and len(event["choices"]) >= 3:
+        if "choices" in event and len(event["choices"]) >= MAGIC_NUMBER_THREE:
             assessments.append("✓ 다중 선택지 - 결과 예측 어려움")
 
         return assessments
@@ -334,8 +353,12 @@ class EventValidator:
 
         # 단순 효과만 있는 경우
         elif "effects" in event:
-            positive_effects = [e for e in event["effects"] if e.get("value", 0) > MAGIC_NUMBER_ZERO]
-            negative_effects = [e for e in event["effects"] if e.get("value", 0) < MAGIC_NUMBER_ZERO]
+            positive_effects = [
+                e for e in event["effects"] if e.get("value", 0) > MAGIC_NUMBER_ZERO
+            ]
+            negative_effects = [
+                e for e in event["effects"] if e.get("value", 0) < MAGIC_NUMBER_ZERO
+            ]
 
             if positive_effects and negative_effects:
                 assessments.append("✓ 긍정적/부정적 효과 혼재 - 트레이드오프 존재")
@@ -421,8 +444,12 @@ class EventValidator:
 
             results["summary"]["structure_errors"] += len(event_result["structure_errors"])
             results["summary"]["balance_warnings"] += len(event_result["balance_warnings"])
-            results["summary"]["uncertainty_assessments"] += len(event_result["uncertainty_assessments"])
-            results["summary"]["no_right_answer_assessments"] += len(event_result["no_right_answer_assessments"])
+            results["summary"]["uncertainty_assessments"] += len(
+                event_result["uncertainty_assessments"]
+            )
+            results["summary"]["no_right_answer_assessments"] += len(
+                event_result["no_right_answer_assessments"]
+            )
 
             results["events"].append(event_result)
 
@@ -457,13 +484,13 @@ class EventValidator:
             print(f"❌ 검증 오류: {results['error']}")
             return
 
-        print(f"\n📊 이벤트 검증 결과 요약")
+        print("\n📊 이벤트 검증 결과 요약")
         print(f"총 이벤트 수: {results['total_events']}")
         print(f"유효한 이벤트 수: {results['valid_events']}")
         print(f"성공률: {results['valid_events'] / results['total_events'] * 100:.1f}%")
 
         summary = results["summary"]
-        print(f"\n📈 검증 통계:")
+        print("\n📈 검증 통계:")
         print(f"  구조 오류: {summary['structure_errors']}개")
         print(f"  밸런스 경고: {summary['balance_warnings']}개")
         print(f"  불확실성 평가: {summary['uncertainty_assessments']}개")
@@ -471,8 +498,9 @@ class EventValidator:
 
         # 주요 문제 이벤트 출력
         problem_events = [
-            event for event in results["events"]
-            if event["structure_errors"] or len(event["balance_warnings"]) > 2
+            event
+            for event in results["events"]
+            if event["structure_errors"] or len(event["balance_warnings"]) > MAGIC_NUMBER_TWO
         ]
 
         if problem_events:
@@ -565,4 +593,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -8,7 +8,4 @@ Cascade 모듈의 어댑터 레이어.
 from src.cascade.adapters.cascade_service import CascadeServiceImpl
 from src.cascade.adapters.event_adapter import EventServiceAdapter
 
-__all__ = [
-    'CascadeServiceImpl',
-    'EventServiceAdapter'
-]
+__all__ = ["CascadeServiceImpl", "EventServiceAdapter"]

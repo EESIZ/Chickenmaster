@@ -4,7 +4,6 @@
 """
 
 from dataclasses import dataclass
-from typing import Dict, Optional
 
 from .game_state import GameState
 from ..game_constants import (
@@ -22,6 +21,7 @@ from ..game_constants import (
 @dataclass(frozen=True)
 class GameSettings:
     """게임 초기 설정 - 불변 객체"""
+
     starting_money: float = DEFAULT_STARTING_MONEY
     starting_reputation: float = DEFAULT_STARTING_REPUTATION
     starting_happiness: float = DEFAULT_STARTING_HAPPINESS
@@ -35,7 +35,7 @@ class GameSettings:
 class GameInitializer:
     """게임 초기화 시스템"""
 
-    def __init__(self, settings: Optional[GameSettings] = None):
+    def __init__(self, settings: GameSettings | None = None):
         """
         Args:
             settings: 게임 초기 설정. None인 경우 기본값 사용
@@ -61,7 +61,7 @@ class GameInitializer:
             events_history=(),
         )
 
-    def load_saved_game(self, save_data: Dict) -> GameState:
+    def load_saved_game(self, save_data: dict) -> GameState:
         """저장된 게임 상태를 로드합니다.
 
         Args:
@@ -81,4 +81,4 @@ class GameInitializer:
             demand=save_data.get("demand", self.settings.starting_demand),
             current_day=save_data.get("current_day", 1),
             events_history=tuple(save_data.get("events_history", [])),
-        ) 
+        )

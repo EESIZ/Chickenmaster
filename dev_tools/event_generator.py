@@ -1,10 +1,7 @@
-from game_constants import PROBABILITY_HIGH_THRESHOLD
 #!/usr/bin/env python3
 """
 파일: dev_tools/event_generator.py
-설명: 이벤트 생성기
-작성자: Manus
-날짜: 2025-05-27
+목적: 이벤트 생성 도구
 """
 
 import json
@@ -12,20 +9,11 @@ import re
 from typing import Any
 
 try:
-    import anthropic  # type: ignore
-
-    ANTHROPIC_AVAILABLE = True
+    from anthropic import Anthropic
 except ImportError:
-    ANTHROPIC_AVAILABLE = False
-    print("WARNING: anthropic 라이브러리를 찾을 수 없습니다. API 호출이 비활성화됩니다.")
+    Anthropic = None  # type: ignore
 
-    # mypy를 위한 더미 모듈 정의
-    class AnthropicDummy:  # type: ignore
-        """더미 Anthropic 클래스"""
-
-        class Anthropic:
-            def __init__(self, api_key: str) -> None:
-                pass
+from game_constants import PROBABILITY_HIGH_THRESHOLD
 
 
 class EventGenerator:
@@ -39,7 +27,7 @@ class EventGenerator:
             api_key: Anthropic API 키
         """
         self.api_key = api_key
-        self.client = anthropic.Anthropic(api_key=api_key) if ANTHROPIC_AVAILABLE else None
+        self.client = Anthropic(api_key=api_key) if Anthropic else None
 
     def _call_claude_api(self, prompt: str) -> dict[str, Any]:
         """
@@ -51,7 +39,7 @@ class EventGenerator:
         Returns:
             API 응답 데이터
         """
-        if not ANTHROPIC_AVAILABLE or not self.client:
+        if not Anthropic or not self.client:
             print("[ERROR] anthropic 라이브러리가 설치되지 않았습니다.")
             return {}
 
@@ -185,7 +173,7 @@ class EventGenerator:
         extracted_data = self._extract_json_from_response(response["messages"])
         if extracted_data and "events" in extracted_data and extracted_data["events"]:
             return extracted_data["events"][0]  # 첫 번째 이벤트 반환
-        
+
         return extracted_data  # events 키가 없으면 전체 데이터 반환
 
     def _extract_json_from_response(self, response_text: str) -> dict[str, Any] | None:

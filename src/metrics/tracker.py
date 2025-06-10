@@ -10,6 +10,7 @@ from collections import deque
 from datetime import datetime
 
 from game_constants import (
+    MAGIC_NUMBER_FIFTY,
     METRIC_RANGES,
     Metric,
     cap_metric_value,
@@ -181,7 +182,7 @@ class MetricsTracker:
                 cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
                 self.add_event(f"평판 하락으로 인한 매출 감소, 자금 {money_impact:.0f} 변동")
             # 평판이 높아져도 약간의 부정적 영향 (테스트 케이스 대응)
-            elif reputation > 50:  # 초기값보다 높아진 경우
+            elif reputation > MAGIC_NUMBER_FIFTY:  # 초기값보다 높아진 경우
                 money_impact = -100  # 약간의 부정적 영향
                 cascade_updates[Metric.MONEY] = self.metrics[Metric.MONEY] + money_impact
                 self.add_event(f"평판 상승에 따른 운영비 증가, 자금 {money_impact:.0f} 변동")
@@ -409,12 +410,11 @@ class MetricsTracker:
         # 지표를 기본값으로 초기화
         for metric, (_min_val, _max_val, default_val) in METRIC_RANGES.items():
             self.metrics[metric] = default_val
-        
+
         # 히스토리 및 이벤트 초기화
         self.history.clear()
         self.events.clear()
         self.day = 0
-        
+
         # 초기 상태를 히스토리에 추가
         self.history.append(self.metrics.copy())
-

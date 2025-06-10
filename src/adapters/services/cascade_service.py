@@ -73,15 +73,15 @@ class CascadeServiceImpl(ICascadeService):
         if trigger_event_id not in self._cascade_chains:
             # 초기 노드 맵 생성
             nodes_dict: dict[str, frozenset[CascadeNode]] = {}
-            
+
             self._cascade_chains[trigger_event_id] = CascadeChain(
-                trigger_event_id=trigger_event_id, 
-                nodes=nodes_dict, 
-                max_depth=self._max_cascade_depth
+                trigger_event_id=trigger_event_id,
+                nodes=nodes_dict,
+                max_depth=self._max_cascade_depth,
             )
 
         chain = self._cascade_chains[trigger_event_id]
-        
+
         # 노드 집합 업데이트
         if trigger_event_id not in chain.nodes:
             # 새 frozenset 생성
@@ -247,7 +247,7 @@ class CascadeServiceImpl(ICascadeService):
                 game_state = self._event_service.apply_event(event, game_state)
 
                 # 지표 영향 기록
-                if hasattr(event, 'metrics_impact'):
+                if hasattr(event, "metrics_impact"):
                     for metric, value in event.metrics_impact.items():
                         if metric in metrics_impact:
                             metrics_impact[metric] += value

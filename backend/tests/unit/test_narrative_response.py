@@ -13,10 +13,7 @@ from app.core.domain.narrative_response import (
 @pytest.fixture
 def sample_metric_change():
     return MetricChange(
-        metric=MetricEnum.MONEY,
-        change=1000.0,
-        reason_ko="매출 증가",
-        reason_en="Revenue increase"
+        metric=MetricEnum.MONEY, change=1000.0, reason_ko="매출 증가", reason_en="Revenue increase"
     )
 
 
@@ -32,7 +29,7 @@ def sample_suggested_event():
         text_en="Test event description",
         probability=0.3,
         conditions=["money > 1000"],
-        tags=["test", "routine"]
+        tags=["test", "routine"],
     )
 
 
@@ -46,7 +43,7 @@ def sample_story_pattern():
         description_en="Test pattern description",
         severity=0.5,
         related_metrics=[MetricEnum.MONEY, MetricEnum.REPUTATION],
-        tags=["test", "pattern"]
+        tags=["test", "pattern"],
     )
 
 
@@ -59,11 +56,13 @@ def narrative_response(sample_metric_change, sample_suggested_event, sample_stor
         story_pattern=sample_story_pattern,
         metric_changes=[sample_metric_change],
         severity=0.5,
-        tags=["test", "narrative"]
+        tags=["test", "narrative"],
     )
 
 
-def test_narrative_response_creation(narrative_response, sample_metric_change, sample_suggested_event, sample_story_pattern):
+def test_narrative_response_creation(
+    narrative_response, sample_metric_change, sample_suggested_event, sample_story_pattern
+):
     """NarrativeResponse 생성 테스트"""
     assert narrative_response.narrative_ko == "테스트 내러티브"
     assert narrative_response.narrative_en == "Test narrative"
@@ -80,9 +79,7 @@ def test_has_suggested_event(narrative_response):
 
     # 제안된 이벤트가 없는 경우
     response_without_event = NarrativeResponse(
-        narrative_ko="테스트",
-        narrative_en="Test",
-        suggested_event=None
+        narrative_ko="테스트", narrative_en="Test", suggested_event=None
     )
     assert not response_without_event.has_suggested_event
 
@@ -93,9 +90,7 @@ def test_has_story_pattern(narrative_response):
 
     # 스토리 패턴이 없는 경우
     response_without_pattern = NarrativeResponse(
-        narrative_ko="테스트",
-        narrative_en="Test",
-        story_pattern=None
+        narrative_ko="테스트", narrative_en="Test", story_pattern=None
     )
     assert not response_without_pattern.has_story_pattern
 
@@ -124,4 +119,4 @@ def test_get_total_metric_change(narrative_response):
 def test_immutability(narrative_response):
     """불변성 테스트"""
     with pytest.raises(dataclasses.FrozenInstanceError):
-        narrative_response.narrative_ko = "새로운 내러티브" 
+        narrative_response.narrative_ko = "새로운 내러티브"

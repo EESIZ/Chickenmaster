@@ -6,7 +6,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set, Tuple
 
 from .game_state import GameState
 from ..game_constants import (
@@ -14,14 +13,12 @@ from ..game_constants import (
     MAX_EVENTS_PER_DAY,
     EVENT_COOLDOWN_DAYS,
     MAX_CASCADE_DEPTH,
-    PROBABILITY_HIGH_THRESHOLD,
-    PROBABILITY_MEDIUM_THRESHOLD,
-    PROBABILITY_LOW_THRESHOLD,
 )
 
 
 class EventType(Enum):
     """이벤트 타입"""
+
     RANDOM = auto()  # 무작위 발생
     THRESHOLD = auto()  # 특정 조건 달성 시 발생
     SCHEDULED = auto()  # 예정된 시점에 발생
@@ -30,6 +27,7 @@ class EventType(Enum):
 
 class EventSeverity(Enum):
     """이벤트 심각도"""
+
     LOW = auto()
     MEDIUM = auto()
     HIGH = auto()
@@ -39,6 +37,7 @@ class EventSeverity(Enum):
 @dataclass(frozen=True)
 class EventEffect:
     """이벤트 효과"""
+
     metric: Metric
     value: float
     is_percentage: bool = False
@@ -47,6 +46,7 @@ class EventEffect:
 @dataclass(frozen=True)
 class EventTrigger:
     """이벤트 발생 조건"""
+
     metric: Metric
     threshold: float
     is_greater_than: bool = True
@@ -55,6 +55,7 @@ class EventTrigger:
 @dataclass(frozen=True)
 class Event:
     """이벤트"""
+
     id: str
     name_ko: str
     name_en: str
@@ -64,9 +65,9 @@ class Event:
     severity: EventSeverity
     probability: float
     cooldown: int = EVENT_COOLDOWN_DAYS
-    triggers: Tuple[EventTrigger, ...] = field(default_factory=tuple)
-    effects: Tuple[EventEffect, ...] = field(default_factory=tuple)
-    cascade_events: Tuple[str, ...] = field(default_factory=tuple)  # 연쇄 이벤트 ID 목록
+    triggers: tuple[EventTrigger, ...] = field(default_factory=tuple)
+    effects: tuple[EventEffect, ...] = field(default_factory=tuple)
+    cascade_events: tuple[str, ...] = field(default_factory=tuple)  # 연쇄 이벤트 ID 목록
 
 
 class EventSystem:
@@ -78,8 +79,8 @@ class EventSystem:
             game_state: 현재 게임 상태
         """
         self.game_state = game_state
-        self.events: Dict[str, Event] = {}
-        self.event_history: List[Tuple[str, datetime]] = []  # (이벤트 ID, 발생 시간)
+        self.events: dict[str, Event] = {}
+        self.event_history: list[tuple[str, datetime]] = []  # (이벤트 ID, 발생 시간)
         self.cascade_depth = 0
 
     def register_event(self, event: Event) -> None:
@@ -90,7 +91,7 @@ class EventSystem:
         """
         self.events[event.id] = event
 
-    def get_applicable_events(self) -> List[Event]:
+    def get_applicable_events(self) -> list[Event]:
         """현재 상태에서 발생 가능한 이벤트 목록을 반환합니다.
 
         Returns:
@@ -121,9 +122,8 @@ class EventSystem:
             if trigger.is_greater_than:
                 if current_value <= trigger.threshold:
                     return False
-            else:
-                if current_value >= trigger.threshold:
-                    return False
+            elif current_value >= trigger.threshold:
+                return False
 
         return True
 
@@ -153,7 +153,7 @@ class EventSystem:
         """
         return self.game_state.metrics[metric]
 
-    def process_turn(self) -> List[Event]:
+    def process_turn(self) -> list[Event]:
         """현재 턴의 이벤트를 처리합니다.
 
         Returns:
@@ -180,7 +180,7 @@ class EventSystem:
 
         return triggered_events
 
-    def _select_event(self, events: List[Event]) -> Optional[Event]:
+    def _select_event(self, events: list[Event]) -> Event | None:
         """이벤트 목록에서 하나를 선택합니다.
 
         Args:
@@ -216,4 +216,4 @@ class EventSystem:
                 cascade_event = self.events[cascade_event_id]
                 if self._is_event_applicable(cascade_event):
                     self._apply_event(cascade_event)
-                    self._process_cascade_events(cascade_event) 
+                    self._process_cascade_events(cascade_event)

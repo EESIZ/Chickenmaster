@@ -1,22 +1,20 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 from src.core.domain.cascade import CascadeNode
-from src.core.domain.events import Event
 
 
 class ICascadeStrategy(ABC):
     """연쇄 효과 처리 전략 인터페이스"""
-    
+
     @abstractmethod
     def process(self, node: CascadeNode) -> bool:
         """연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -25,13 +23,13 @@ class ICascadeStrategy(ABC):
 
 class DefaultCascadeStrategy(ICascadeStrategy):
     """기본 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """기본 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -40,13 +38,13 @@ class DefaultCascadeStrategy(ICascadeStrategy):
 
 class EconomicCascadeStrategy(ICascadeStrategy):
     """경제 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """경제 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -56,13 +54,13 @@ class EconomicCascadeStrategy(ICascadeStrategy):
 
 class SocialCascadeStrategy(ICascadeStrategy):
     """사회 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """사회 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -72,13 +70,13 @@ class SocialCascadeStrategy(ICascadeStrategy):
 
 class CulturalCascadeStrategy(ICascadeStrategy):
     """문화 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """문화 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -88,13 +86,13 @@ class CulturalCascadeStrategy(ICascadeStrategy):
 
 class TechnologicalCascadeStrategy(ICascadeStrategy):
     """기술 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """기술 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
@@ -104,15 +102,15 @@ class TechnologicalCascadeStrategy(ICascadeStrategy):
 
 class EnvironmentalCascadeStrategy(ICascadeStrategy):
     """환경 연쇄 효과 처리 전략"""
-    
+
     def process(self, node: CascadeNode) -> bool:
         """환경 연쇄 효과 처리
-        
+
         Args:
             node: 처리할 연쇄 노드
-            
+
         Returns:
             bool: 처리 성공 여부
         """
         # TODO: 환경 효과 처리 로직 구현
-        return True 
+        return True

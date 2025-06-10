@@ -58,7 +58,11 @@ class HexagonalArchitectureValidator:
             "도메인": [],  # 도메인은 어떤 레이어에도 의존하지 않음
             "포트": ["도메인"],  # 포트는 도메인에만 의존
             "애플리케이션": ["도메인", "포트"],  # 애플리케이션은 도메인과 포트에 의존
-            "어댑터": ["도메인", "포트", "애플리케이션"],  # 어댑터는 도메인, 포트, 애플리케이션에 의존
+            "어댑터": [
+                "도메인",
+                "포트",
+                "애플리케이션",
+            ],  # 어댑터는 도메인, 포트, 애플리케이션에 의존
             "이벤트": ["도메인"],  # 이벤트는 도메인에만 의존
             "지표": ["도메인"],  # 지표는 도메인에만 의존
             "경제": ["도메인"],  # 경제는 도메인에만 의존
@@ -142,10 +146,7 @@ class HexagonalArchitectureValidator:
                 allowed_deps = self.allowed_dependencies.get(source_layer, [])
                 # typing.cast를 사용하여 타입 명시
                 allowed_deps_typed = cast(list[str], allowed_deps)
-                if (
-                    imported_layer not in allowed_deps_typed
-                    and source_layer != imported_layer
-                ):
+                if imported_layer not in allowed_deps_typed and source_layer != imported_layer:
                     errors.append(
                         f"의존성 방향 위반: {import_info.source_module} -> {import_info.imported_module} "
                         f"(라인 {import_info.line_number})"
@@ -245,7 +246,7 @@ if __name__ == "__main__":
     validator = HexagonalArchitectureValidator(project_root)
     results = validator.validate_all()
     print_validation_results(results)
-    
+
     # 성공 여부 직접 계산
     all_valid = all(result.is_valid for result in results)
     sys.exit(0 if all_valid else 1)

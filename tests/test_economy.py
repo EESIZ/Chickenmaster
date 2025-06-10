@@ -16,7 +16,13 @@ from typing import Any, cast
 
 import pytest
 
-from game_constants import Metric, cap_metric_value, MAGIC_NUMBER_ONE_HUNDRED
+from game_constants import (
+    Metric,
+    cap_metric_value,
+    MAGIC_NUMBER_ONE_HUNDRED,
+    PROBABILITY_LOW_THRESHOLD,
+    PROBABILITY_HIGH_THRESHOLD,
+)
 from src.economy.engine import (
     compute_profit_no_right_answer,
     uncertainty_adjust_inventory,
@@ -132,9 +138,7 @@ def test_compute_profit_no_right_answer() -> None:
 
     # 이익 = 수익 - 비용 = (판매량 * 가격) - (판매량 * 단위비용 + 고정비용)
     expected_profit = (units_sold * price) - (units_sold * unit_cost + fixed_cost)
-    actual_profit = compute_profit_no_right_answer(
-        units_sold, unit_cost, price, fixed_cost
-    )
+    actual_profit = compute_profit_no_right_answer(units_sold, unit_cost, price, fixed_cost)
 
     assert actual_profit == expected_profit
 
@@ -152,4 +156,3 @@ def test_cap_metric_value() -> None:
     # 범위 내 값은 그대로 유지
     assert cap_metric_value(Metric.MONEY, 5000) == 5000
     assert cap_metric_value(Metric.REPUTATION, 75) == 75
-

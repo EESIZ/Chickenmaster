@@ -110,7 +110,11 @@ def load_events_from_toml(file_path: Path) -> EventContainer[Event]:
 
 
 def save_events_to_json(
-    events: EventContainer[Event] | list[Event], file_path: Path, *, indent: int = 2, ensure_ascii: bool = False
+    events: EventContainer[Event] | list[Event],
+    file_path: Path,
+    *,
+    indent: int = 2,
+    ensure_ascii: bool = False,
 ) -> None:
     """이벤트를 JSON 파일로 저장"""
     import json
@@ -126,7 +130,19 @@ def save_events_to_json(
         if isinstance(events, list):
             # 리스트인 경우 EventContainer로 감싸기
             container = EventContainer(events=events)
-            json.dump(container.model_dump(), f, indent=indent, ensure_ascii=ensure_ascii, default=enum_serializer)
+            json.dump(
+                container.model_dump(),
+                f,
+                indent=indent,
+                ensure_ascii=ensure_ascii,
+                default=enum_serializer,
+            )
         else:
             # 이미 EventContainer인 경우
-            json.dump(events.model_dump(), f, indent=indent, ensure_ascii=ensure_ascii, default=enum_serializer)
+            json.dump(
+                events.model_dump(),
+                f,
+                indent=indent,
+                ensure_ascii=ensure_ascii,
+                default=enum_serializer,
+            )

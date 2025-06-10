@@ -19,7 +19,7 @@ from game_constants import FLOAT_EPSILON, Metric as MetricEnum, EventCategory
 from src.events.models import Alert, TriggerCondition, Trigger  # Trigger import 추가
 from src.events.schema import Event as PydanticEvent  # PydanticEvent alias 사용
 from src.events.schema import EventContainer  # EventContainer import 추가
-from src.events.schema import EventTrigger, load_events_from_json, load_events_from_toml
+from src.events.schema import load_events_from_json, load_events_from_toml
 from src.metrics.tracker import MetricsTracker
 
 # 상수 정의
@@ -34,9 +34,9 @@ class EventEngine:
     이벤트 평가, 트리거, 효과 적용 및 연쇄 효과 처리를 담당합니다.
     """
 
-    events: EventContainer[
-        PydanticEvent
-    ] | list  # self.events 타입을 EventContainer 또는 비어있을 경우 list로 명시
+    events: (
+        EventContainer[PydanticEvent] | list
+    )  # self.events 타입을 EventContainer 또는 비어있을 경우 list로 명시
     event_queue: deque[PydanticEvent]  # event_queue 타입을 deque[PydanticEvent]로 명시
 
     def __init__(
@@ -99,7 +99,7 @@ class EventEngine:
             self.events_container = load_events_from_json(filepath)
         else:
             raise ValueError(f"지원되지 않는 파일 형식: {filepath}")
-            
+
         # EventContainer에서 events 리스트로 변환
         if self.events_container and hasattr(self.events_container, "events"):
             self.events = list(self.events_container.events)
@@ -163,7 +163,9 @@ class EventEngine:
                 ):
                     triggered_events.append(event_data)
                     # Event 객체의 속성에 따라 적절한 이름 사용
-                    event_name = getattr(event_data, 'name_ko', getattr(event_data, 'name', event_data.id))
+                    event_name = getattr(
+                        event_data, "name_ko", getattr(event_data, "name", event_data.id)
+                    )
                     self.metrics_tracker.add_event(
                         f"Polled THRESHOLD: {event_data.id} - {event_name}"
                     )
@@ -171,10 +173,10 @@ class EventEngine:
                 if self.rng.random() < event_data.probability:
                     triggered_events.append(event_data)
                     # Event 객체의 속성에 따라 적절한 이름 사용
-                    event_name = getattr(event_data, 'name_ko', getattr(event_data, 'name', event_data.id))
-                    self.metrics_tracker.add_event(
-                        f"Polled RANDOM: {event_data.id} - {event_name}"
+                    event_name = getattr(
+                        event_data, "name_ko", getattr(event_data, "name", event_data.id)
                     )
+                    self.metrics_tracker.add_event(f"Polled RANDOM: {event_data.id} - {event_name}")
             # TODO: SCHEDULED, CASCADE 타입 처리
 
         # 우선순위에 따라 정렬 (Event에 priority가 있으므로 사용 가능)
@@ -194,7 +196,7 @@ class EventEngine:
             metric_enum = trigger.metric
         else:
             metric_enum = getattr(MetricEnum, trigger.metric.upper(), None)
-        
+
         if not metric_enum or metric_enum not in current_metrics:
             print(f"[Debug] Metric {trigger.metric} not found in current_metrics or MetricEnum")
             return False
@@ -299,7 +301,7 @@ class EventEngine:
                         # 문자열인 경우 기존 로직 사용
                         metric_name = effect_data.metric.upper()
                         metric_enum = getattr(MetricEnum, metric_name, None)
-                    
+
                     if metric_enum and metric_enum in current_metrics:
                         current_value = current_metrics[metric_enum]
                         new_value = current_value
@@ -337,7 +339,7 @@ class EventEngine:
                     # 캐스케이드 효과 처리
                     self._process_cascade_effects(set(updates.keys()), 0)
                 # Event 객체의 속성에 따라 적절한 이름 사용
-                event_name = getattr(event, 'name_ko', getattr(event, 'name', event.id))
+                event_name = getattr(event, "name_ko", getattr(event, "name", event.id))
                 self.metrics_tracker.add_event(f"Applied event: {event.id} - {event_name}")
             else:
                 self.metrics_tracker.add_event(

@@ -1,9 +1,3 @@
-from game_constants import PROBABILITY_HIGH_THRESHOLD
-"""
-파일: dev_tools/event_bank_manager.py
-목적: 대형 이벤트 뱅크 구축 및 관리 도구
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -19,7 +13,12 @@ from typing import Any, ClassVar
 from tqdm import tqdm
 
 from dev_tools.config import EVENT_CATEGORIES
-from game_constants import SCORE_THRESHOLD_HIGH, SCORE_THRESHOLD_MEDIUM
+from game_constants import PROBABILITY_HIGH_THRESHOLD, SCORE_THRESHOLD_HIGH, SCORE_THRESHOLD_MEDIUM
+
+"""
+파일: dev_tools/event_bank_manager.py
+목적: 대형 이벤트 뱅크 구축 및 관리 도구
+"""
 
 # 프로젝트 루트 경로 설정 (절대 경로 사용)
 # 이 파일의 위치를 기준으로 프로젝트 루트를 추정합니다.

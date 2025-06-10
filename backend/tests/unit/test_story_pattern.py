@@ -12,11 +12,7 @@ from app.core.domain.story_pattern import (
 
 @pytest.fixture
 def sample_trigger():
-    return PatternTrigger(
-        metric=MetricEnum.MONEY,
-        condition="greater_than",
-        value=1000.0
-    )
+    return PatternTrigger(metric=MetricEnum.MONEY, condition="greater_than", value=1000.0)
 
 
 @pytest.fixture
@@ -25,7 +21,7 @@ def sample_effect():
         metric=MetricEnum.REPUTATION,
         formula="value + 10",
         message_ko="평판이 증가했습니다",
-        message_en="Reputation increased"
+        message_en="Reputation increased",
     )
 
 
@@ -44,7 +40,7 @@ def story_pattern(sample_trigger, sample_effect):
         related_metrics=[MetricEnum.MONEY, MetricEnum.REPUTATION],
         tags=["test", "pattern"],
         cooldown=5,
-        probability=0.8
+        probability=0.8,
     )
 
 
@@ -76,21 +72,14 @@ def test_is_triggered(story_pattern):
     assert not story_pattern.is_triggered(500.0)  # 1000.0보다 작음
 
     # less_than 조건
-    trigger_less = PatternTrigger(
-        metric=MetricEnum.MONEY,
-        condition="less_than",
-        value=1000.0
-    )
+    trigger_less = PatternTrigger(metric=MetricEnum.MONEY, condition="less_than", value=1000.0)
     pattern_less = dataclasses.replace(story_pattern, trigger=trigger_less)
     assert pattern_less.is_triggered(500.0)  # 1000.0보다 작음
     assert not pattern_less.is_triggered(1500.0)  # 1000.0보다 큼
 
     # between 조건
     trigger_between = PatternTrigger(
-        metric=MetricEnum.MONEY,
-        condition="between",
-        value=1000.0,
-        secondary_value=2000.0
+        metric=MetricEnum.MONEY, condition="between", value=1000.0, secondary_value=2000.0
     )
     pattern_between = dataclasses.replace(story_pattern, trigger=trigger_between)
     assert pattern_between.is_triggered(1500.0)  # 1000.0과 2000.0 사이
@@ -108,7 +97,7 @@ def test_get_effect_value(story_pattern, sample_effect):
         metric=MetricEnum.REPUTATION,
         formula="value - 10",
         message_ko="평판이 감소했습니다",
-        message_en="Reputation decreased"
+        message_en="Reputation decreased",
     )
     assert story_pattern.get_effect_value(effect_subtract, 50.0) == 40.0
 
@@ -117,7 +106,7 @@ def test_get_effect_value(story_pattern, sample_effect):
         metric=MetricEnum.REPUTATION,
         formula="value * 2",
         message_ko="평판이 변화했습니다",
-        message_en="Reputation changed"
+        message_en="Reputation changed",
     )
     assert story_pattern.get_effect_value(effect_invalid, 50.0) == 50.0
 
@@ -125,4 +114,4 @@ def test_get_effect_value(story_pattern, sample_effect):
 def test_immutability(story_pattern):
     """불변성 테스트"""
     with pytest.raises(dataclasses.FrozenInstanceError):
-        story_pattern.name_ko = "새로운 패턴" 
+        story_pattern.name_ko = "새로운 패턴"

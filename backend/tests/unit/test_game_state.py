@@ -101,9 +101,9 @@ def test_apply_effects(initial_game_state):
         Metric.REPUTATION: -10.0,
         Metric.HAPPINESS: 5.0,
     }
-    
+
     new_state = initial_game_state.apply_effects(effects)
-    
+
     assert new_state.money == 11000.0
     assert new_state.reputation == 40.0
     assert new_state.happiness == 55.0
@@ -117,7 +117,7 @@ def test_apply_effects(initial_game_state):
 def test_add_event_to_history(initial_game_state):
     """이벤트 히스토리 추가 테스트"""
     new_state = initial_game_state.add_event_to_history("test_event")
-    
+
     assert new_state.events_history == ("test_event",)
     assert new_state.money == initial_game_state.money  # 다른 속성은 변경되지 않음
 
@@ -143,7 +143,7 @@ def test_is_metric_in_warning_zone(initial_game_state):
         current_day=1,
     )
     assert low_money_state.is_metric_in_warning_zone(Metric.MONEY)
-    
+
     # 평판이 20 미만인 경우
     low_reputation_state = GameState(
         money=10000.0,
@@ -157,7 +157,7 @@ def test_is_metric_in_warning_zone(initial_game_state):
         current_day=1,
     )
     assert low_reputation_state.is_metric_in_warning_zone(Metric.REPUTATION)
-    
+
     # 직원 피로도가 80 초과인 경우
     high_fatigue_state = GameState(
         money=10000.0,
@@ -171,7 +171,7 @@ def test_is_metric_in_warning_zone(initial_game_state):
         current_day=1,
     )
     assert high_fatigue_state.is_metric_in_warning_zone(Metric.STAFF_FATIGUE)
-    
+
     # 시설 상태가 30 미만인 경우
     low_facility_state = GameState(
         money=10000.0,
@@ -190,4 +190,4 @@ def test_is_metric_in_warning_zone(initial_game_state):
 def test_immutability(initial_game_state):
     """불변성 테스트"""
     with pytest.raises(dataclasses.FrozenInstanceError):
-        initial_game_state.money = 20000.0 
+        initial_game_state.money = 20000.0

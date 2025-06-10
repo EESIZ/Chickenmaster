@@ -139,29 +139,31 @@ class GameEventSystem:
         """
         self.event_engine.set_seed(seed)
 
-    def reset(self, seed: int | None = None, initial_metrics: dict[Metric, float] | None = None) -> None:
+    def reset(
+        self, seed: int | None = None, initial_metrics: dict[Metric, float] | None = None
+    ) -> None:
         """
         게임 이벤트 시스템을 초기 상태로 리셋합니다.
-        
+
         Args:
             seed: 난수 생성 시드 (기본값: None)
             initial_metrics: 초기 지표 설정 (기본값: None)
         """
         # 일수 초기화
         self.day = 0
-        
+
         # 지표 추적기 리셋
         self.metrics_tracker.reset()
-        
+
         # 초기 지표 설정
         if initial_metrics:
             for metric, value in initial_metrics.items():
                 self.metrics_tracker.update_metric(metric, value)
-        
+
         # 시드 설정
         if seed is not None:
             self.set_seed(seed)
-        
+
         # 이벤트 엔진 큐 초기화
         self.event_engine.event_queue.clear()
         self.event_engine.alert_queue.clear()

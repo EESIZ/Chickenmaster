@@ -8,10 +8,12 @@
 from enum import Enum, auto
 from typing import Final, NamedTuple
 
+
 class Metric(Enum):
     """
     게임의 핵심 지표를 정의하는 열거형
     """
+
     MONEY = auto()
     REPUTATION = auto()
     HAPPINESS = auto()
@@ -21,15 +23,17 @@ class Metric(Enum):
     FACILITY = auto()
     DEMAND = auto()
 
+
 # MetricRange 클래스를 Metric 바로 아래에 선언
 class MetricRange(NamedTuple):
     min_value: float
     max_value: float
     default_value: float
 
+
 # 게임 단계 관련 상수
 EARLY_GAME_THRESHOLD: Final[int] = 180  # 초기 게임 단계 임계값 (약 6개월)
-MID_GAME_THRESHOLD: Final[int] = 545   # 중반 게임 단계 임계값 (약 1년 6개월)
+MID_GAME_THRESHOLD: Final[int] = 545  # 중반 게임 단계 임계값 (약 1년 6개월)
 
 # 확률 관련 상수 (상단에 위치)
 PROBABILITY_LOW_THRESHOLD = 0.3
@@ -45,25 +49,25 @@ TOTAL_GAME_DAYS = DAYS_PER_YEAR * GAME_DURATION_YEARS  # 총 게임 일수 (730�
 
 # 게임 단계 구분
 EARLY_GAME_END = EARLY_GAME_THRESHOLD  # 초기 단계 종료 (약 6개월)
-MID_GAME_END = MID_GAME_THRESHOLD   # 중반 단계 종료 (약 1년 6개월)
+MID_GAME_END = MID_GAME_THRESHOLD  # 중반 단계 종료 (약 1년 6개월)
 
 # 게임 진행 관련 상수
 INITIAL_HEALTH = 100  # 초기 체력
-MAX_HEALTH = 100      # 최대 체력
-MIN_HEALTH = 0        # 최소 체력
+MAX_HEALTH = 100  # 최대 체력
+MIN_HEALTH = 0  # 최소 체력
 
 # 전투 관련 상수
-BASE_DAMAGE = 10      # 기본 데미지
+BASE_DAMAGE = 10  # 기본 데미지
 CRITICAL_MULTIPLIER = 2.0  # 치명타 데미지 배율
-DODGE_CHANCE = 0.2    # 회피 확률
+DODGE_CHANCE = 0.2  # 회피 확률
 
 # 아이템 관련 상수
 MAX_INVENTORY_SIZE = 10  # 최대 인벤토리 크기
-MAX_ITEM_QUANTITY = 99   # 최대 아이템 수량
+MAX_ITEM_QUANTITY = 99  # 최대 아이템 수량
 
 # 스토리텔링 관련 상수
 MAX_STORY_LENGTH = 1000  # 최대 스토리 길이
-MIN_STORY_LENGTH = 100   # 최소 스토리 길이
+MIN_STORY_LENGTH = 100  # 최소 스토리 길이
 
 # 임계값 상수
 REPUTATION_THRESHOLD_LOW = 20
@@ -92,14 +96,14 @@ TRADEOFF_RELATIONSHIPS: dict[Metric, list[Metric]] = {
 
 # Metric 기반 불확실성 가중치 (지표별로 예측 불가능성 정도를 다르게 적용)
 UNCERTAINTY_WEIGHTS: dict[Metric, float] = {
-    Metric.MONEY: 0.2,           # 돈은 경제적 변수로 변동성 높음
-    Metric.REPUTATION: 0.15,    # 평판은 소문 등으로 변동성 있음
-    Metric.HAPPINESS: 0.1,      # 행복도는 비교적 안정적
-    Metric.SUFFERING: 0.1,      # 고통도는 비교적 안정적
-    Metric.DEMAND: 0.18,        # 수요는 시장 상황에 따라 변동
-    Metric.INVENTORY: 0.12,     # 재고는 예측 가능성이 높음
-    Metric.STAFF_FATIGUE: 0.16, # 피로도는 업무량에 따라 변동
-    Metric.FACILITY: 0.08,      # 시설 상태는 비교적 안정적
+    Metric.MONEY: 0.2,  # 돈은 경제적 변수로 변동성 높음
+    Metric.REPUTATION: 0.15,  # 평판은 소문 등으로 변동성 있음
+    Metric.HAPPINESS: 0.1,  # 행복도는 비교적 안정적
+    Metric.SUFFERING: 0.1,  # 고통도는 비교적 안정적
+    Metric.DEMAND: 0.18,  # 수요는 시장 상황에 따라 변동
+    Metric.INVENTORY: 0.12,  # 재고는 예측 가능성이 높음
+    Metric.STAFF_FATIGUE: 0.16,  # 피로도는 업무량에 따라 변동
+    Metric.FACILITY: 0.08,  # 시설 상태는 비교적 안정적
 }
 
 # 시소 불변식
@@ -154,6 +158,7 @@ METRIC_RANGES: dict[Metric, MetricRange] = {
     Metric.FACILITY: MetricRange(0.0, 100.0, 50.0),
 }
 
+
 def cap_metric_value(metric: Metric, value: float) -> float:
     """
     지표 값을 허용 범위 내로 제한합니다.
@@ -165,6 +170,7 @@ def cap_metric_value(metric: Metric, value: float) -> float:
     """
     min_val, max_val, _ = METRIC_RANGES[metric]
     return max(min_val, min(value, max_val))
+
 
 # 재시도 관련 상수
 MAX_RETRY_ATTEMPTS: Final[int] = 3  # 최대 재시도 횟수
@@ -268,27 +274,34 @@ TRADEOFF_RELATIONSHIPS: Final[dict[Metric, tuple[Metric, ...]]] = {
     Metric.DEMAND: (Metric.INVENTORY, Metric.FACILITY),
 }
 
+
 # 게임 단계 정의
 class GamePhase(Enum):
     """게임 단계"""
+
     EARLY = auto()
     MID = auto()
     LATE = auto()
 
+
 # 이벤트 심각도 정의
 class EventSeverity(Enum):
     """이벤트 심각도"""
+
     LOW = auto()
     MEDIUM = auto()
     HIGH = auto()
     CRITICAL = auto()
 
+
 # 이벤트 타입 정의
 class EventType(Enum):
     """이벤트 타입"""
+
     STORY = auto()
     RANDOM = auto()
     CASCADE = auto()
+
 
 # 경고 임계값
 WARNING_THRESHOLDS: Final[dict[Metric, tuple[float, float]]] = {
@@ -300,4 +313,4 @@ WARNING_THRESHOLDS: Final[dict[Metric, tuple[float, float]]] = {
     Metric.STAFF_FATIGUE: (80.0, 20.0),
     Metric.FACILITY: (20.0, 80.0),
     Metric.DEMAND: (20.0, 80.0),
-} 
+}

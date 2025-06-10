@@ -1,8 +1,9 @@
-from game_constants import PROBABILITY_LOW_THRESHOLD
+#!/usr/bin/env python3
 """
-경제 시스템 모델
+경제 모델
 
-게임의 경제 시스템을 구성하는 핵심 모델들을 정의합니다.
+게임의 경제 시뮬레이션을 위한 모델과 함수들을 정의합니다.
+각 함수는 완전히 독립적이며, 단위 테스트가 가능합니다.
 """
 
 # import math  # 향후 수학 함수 사용을 위해 준비 (현재 미사용)
@@ -11,7 +12,7 @@ import json
 import os
 from typing import Any, cast
 
-from game_constants import REPUTATION_BASELINE
+from game_constants import PROBABILITY_LOW_THRESHOLD, REPUTATION_BASELINE
 
 
 def load_economy_config() -> dict[str, Any]:
@@ -80,7 +81,7 @@ def tradeoff_compute_demand(price: int, reputation: float, config: dict[str, Any
     if optimal_price > 0 and price != optimal_price:
         # 가격 변화에 따른 수요 변화 계산
         price_factor = 1 + price_elasticity * (price - optimal_price) / optimal_price
-    
+
     # 평판 효과 적용 (평판이 높을수록 수요 증가)
     reputation_factor = 1.0
     if reputation != REPUTATION_BASELINE:

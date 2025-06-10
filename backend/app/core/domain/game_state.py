@@ -5,7 +5,6 @@
 """
 
 from dataclasses import dataclass, field
-from typing import Final
 
 from app.core.domain.metrics import MetricEnum, validate_metric_value
 from app.core.game_constants import (
@@ -19,14 +18,16 @@ from app.core.game_constants import (
     DEFAULT_STARTING_DEMAND,
 )
 
+
 @dataclass(frozen=True)
 class GameState:
     """
     게임의 현재 상태를 나타내는 불변 데이터 클래스
-    
+
     이 클래스는 게임의 모든 핵심 지표와 상태를 관리합니다.
     모든 속성은 불변이며, 상태 변경은 새로운 인스턴스를 생성하여 이루어집니다.
     """
+
     current_day: int
     money: float = DEFAULT_STARTING_MONEY
     reputation: float = DEFAULT_STARTING_REPUTATION
@@ -42,7 +43,7 @@ class GameState:
     def metrics(self) -> dict[MetricEnum, float]:
         """
         모든 지표의 현재 값을 딕셔너리로 반환합니다.
-        
+
         Returns:
             dict[MetricEnum, float]: 지표 이름을 키로, 현재 값을 값으로 하는 딕셔너리
         """
@@ -60,10 +61,10 @@ class GameState:
     def apply_effects(self, effects: dict[MetricEnum, float]) -> "GameState":
         """
         주어진 효과를 현재 상태에 적용한 새로운 상태를 반환합니다.
-        
+
         Args:
             effects: 적용할 효과를 나타내는 딕셔너리
-            
+
         Returns:
             GameState: 효과가 적용된 새로운 게임 상태
         """
@@ -72,7 +73,7 @@ class GameState:
             current_value = new_metrics[metric]
             new_value = validate_metric_value(metric, current_value + value)
             new_metrics[metric] = new_value
-        
+
         return GameState(
             current_day=self.current_day,
             money=new_metrics[MetricEnum.MONEY],
@@ -89,14 +90,14 @@ class GameState:
     def add_event(self, event_id: str) -> "GameState":
         """
         새로운 이벤트를 히스토리에 추가한 새로운 상태를 반환합니다.
-        
+
         Args:
             event_id: 추가할 이벤트의 ID
-            
+
         Returns:
             GameState: 이벤트가 추가된 새로운 게임 상태
         """
-        new_history = self.events_history + (event_id,)
+        new_history = (*self.events_history, event_id)
         return GameState(
             current_day=self.current_day,
             money=self.money,
@@ -113,7 +114,7 @@ class GameState:
     def to_dict(self) -> dict:
         """
         게임 상태를 딕셔너리로 변환합니다.
-        
+
         Returns:
             dict: 게임 상태를 나타내는 딕셔너리
         """
@@ -127,10 +128,10 @@ class GameState:
     def from_dict(cls, data: dict) -> "GameState":
         """
         딕셔너리로부터 게임 상태를 생성합니다.
-        
+
         Args:
             data: 게임 상태를 나타내는 딕셔너리
-            
+
         Returns:
             GameState: 생성된 게임 상태
         """
@@ -142,8 +143,10 @@ class GameState:
             happiness=metrics.get(MetricEnum.HAPPINESS.value, DEFAULT_STARTING_HAPPINESS),
             suffering=metrics.get(MetricEnum.SUFFERING.value, DEFAULT_STARTING_SUFFERING),
             inventory=metrics.get(MetricEnum.INVENTORY.value, DEFAULT_STARTING_INVENTORY),
-            staff_fatigue=metrics.get(MetricEnum.STAFF_FATIGUE.value, DEFAULT_STARTING_STAFF_FATIGUE),
+            staff_fatigue=metrics.get(
+                MetricEnum.STAFF_FATIGUE.value, DEFAULT_STARTING_STAFF_FATIGUE
+            ),
             facility=metrics.get(MetricEnum.FACILITY.value, DEFAULT_STARTING_FACILITY),
             demand=metrics.get(MetricEnum.DEMAND.value, DEFAULT_STARTING_DEMAND),
             events_history=tuple(data.get("events_history", [])),
-        ) 
+        )

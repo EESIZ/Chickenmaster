@@ -141,13 +141,13 @@ class EventConditionFixer:
         """
         data = self.load_events()
         events = data.get("events", [])
-        
+
         # 트리거 조건 수정
         fixed_events = self.fix_trigger_conditions(events)
-        
+
         # 수정된 이벤트 저장
         self.save_events(fixed_events)
-        
+
         return fixed_events
 
     def process_no_right_answer(self) -> list[dict[str, Any]]:
@@ -159,13 +159,13 @@ class EventConditionFixer:
         """
         data = self.load_events()
         events = data.get("events", [])
-        
+
         # 트리거 조건 수정
         fixed_events = self.fix_trigger_conditions(events)
-        
+
         # 수정된 이벤트 저장
         self.save_events(fixed_events)
-        
+
         return fixed_events
 
 
@@ -182,4 +182,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

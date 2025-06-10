@@ -3,14 +3,26 @@
 """
 
 import pytest
-from app.core.domain.event_system import EventSystem, Event, EventType, EventSeverity, EventEffect, EventTrigger
+from app.core.domain.event_system import (
+    EventSystem,
+    Event,
+    EventType,
+    EventSeverity,
+    EventEffect,
+    EventTrigger,
+)
 from app.core.domain.game_state import GameState
 from app.core.game_constants import (
-    DEFAULT_MONEY, DEFAULT_REPUTATION, DEFAULT_HAPPINESS, DEFAULT_SUFFERING,
-    DEFAULT_INVENTORY, DEFAULT_STAFF_FATIGUE, DEFAULT_FACILITY, DEFAULT_DEMAND,
-    TEST_MONEY, TEST_REPUTATION, TEST_HAPPINESS, TEST_SUFFERING,
-    TEST_INVENTORY, TEST_STAFF_FATIGUE, TEST_FACILITY, TEST_DEMAND,
-    EVENT_COOLDOWN_DAYS, MAX_CASCADE_DEPTH
+    DEFAULT_MONEY,
+    DEFAULT_REPUTATION,
+    DEFAULT_HAPPINESS,
+    DEFAULT_SUFFERING,
+    DEFAULT_INVENTORY,
+    DEFAULT_STAFF_FATIGUE,
+    DEFAULT_FACILITY,
+    DEFAULT_DEMAND,
+    TEST_MONEY,
+    EVENT_COOLDOWN_DAYS,
 )
 
 
@@ -27,7 +39,7 @@ def game_state():
         facility=DEFAULT_FACILITY,
         demand=DEFAULT_DEMAND,
         current_day=1,
-        events_history=[]
+        events_history=[],
     )
 
 
@@ -47,21 +59,9 @@ def sample_event():
         type=EventType.STORY,
         severity=EventSeverity.NORMAL,
         probability=0.5,
-        triggers=[
-            EventTrigger(
-                metric="money",
-                condition=">",
-                value=TEST_MONEY
-            )
-        ],
-        effects=[
-            EventEffect(
-                metric="reputation",
-                value=10.0,
-                is_percentage=False
-            )
-        ],
-        cascade_events=[]
+        triggers=[EventTrigger(metric="money", condition=">", value=TEST_MONEY)],
+        effects=[EventEffect(metric="reputation", value=10.0, is_percentage=False)],
+        cascade_events=[],
     )
 
 
@@ -104,16 +104,10 @@ def test_cascade_events(event_system, sample_event):
         severity=EventSeverity.NORMAL,
         probability=1.0,
         triggers=[],
-        effects=[
-            EventEffect(
-                metric="happiness",
-                value=5.0,
-                is_percentage=False
-            )
-        ],
-        cascade_events=[]
+        effects=[EventEffect(metric="happiness", value=5.0, is_percentage=False)],
+        cascade_events=[],
     )
     sample_event.cascade_events.append(cascade_event)
     event_system.register_event(sample_event)
     event_system.process_turn()
-    assert len(event_system.game_state.events_history) == 2 
+    assert len(event_system.game_state.events_history) == 2

@@ -21,11 +21,16 @@ INF: Final = float("inf")
 MAGIC_NUMBER_ZERO = 0.0
 MAGIC_NUMBER_ONE = 1.0
 MAGIC_NUMBER_TWO = 2
+MAGIC_NUMBER_THREE = 3
 MAGIC_NUMBER_FIVE = 5
 MAGIC_NUMBER_TWENTY = 20
 MAGIC_NUMBER_FIFTY = 50
 MAGIC_NUMBER_ONE_HUNDRED = 100
 MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN = 115
+MAGIC_NUMBER_ONE_THOUSAND = 1000
+
+# 추가 상수들
+MAX_CASCADE_NODES = 100  # 최대 연쇄 노드 수
 
 # 확률 관련 상수
 PROBABILITY_LOW_THRESHOLD = 0.3
@@ -91,7 +96,10 @@ class TriggerCondition(Enum):
 # 트레이드오프 관계 정의 (한 지표가 오르면 다른 지표는 내려감)
 TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
     Metric.MONEY: [Metric.HAPPINESS, Metric.STAFF_FATIGUE],
-    Metric.REPUTATION: [Metric.MONEY, Metric.STAFF_FATIGUE],  # 평판 상승 시 직원 피로도 증가 (손님 증가로 인한)
+    Metric.REPUTATION: [
+        Metric.MONEY,
+        Metric.STAFF_FATIGUE,
+    ],  # 평판 상승 시 직원 피로도 증가 (손님 증가로 인한)
     Metric.HAPPINESS: [Metric.SUFFERING],
     Metric.SUFFERING: [Metric.HAPPINESS],
     Metric.INVENTORY: [Metric.MONEY],
@@ -138,26 +146,34 @@ TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
 TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
 TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
 
+# 게임 기본값 상수
+DEFAULT_TOTAL_DAYS: Final[int] = 730  # 기본 게임 총 일수 (2년)
+DEFAULT_STORY_PATTERNS_COUNT: Final[int] = 2  # 기본 스토리 패턴 수
+DEFAULT_COOLDOWN_DAYS: Final[int] = 5  # 기본 쿨다운 일수
+DEFAULT_PROBABILITY: Final[float] = 0.8  # 기본 확률값
+DEFAULT_SEVERITY: Final[float] = 0.5  # 기본 심각도
+
 # 스토리텔러 관련 상수
 MIN_METRICS_HISTORY_FOR_TREND: Final[int] = 2  # 추세 분석을 위한 최소 히스토리 개수
 RECENT_HISTORY_WINDOW: Final[int] = 3  # 최근 히스토리 분석 윈도우 크기
+MINIMUM_TREND_POINTS: Final[int] = 2  # 트렌드 분석에 필요한 최소 데이터 포인트
 
 # 상황 톤 분석 임계값
 SITUATION_POSITIVE_THRESHOLD: Final[float] = 0.6  # 긍정적 상황 판단 임계값
 SITUATION_NEGATIVE_THRESHOLD: Final[float] = 0.4  # 부정적 상황 판단 임계값
 
 # 지표 임계값들 (스토리텔러용)
-MONEY_LOW_THRESHOLD: Final[int] = 3000   # 자금 부족 기준
+MONEY_LOW_THRESHOLD: Final[int] = 3000  # 자금 부족 기준
 MONEY_HIGH_THRESHOLD: Final[int] = 15000  # 자금 풍부 기준
 REPUTATION_LOW_THRESHOLD: Final[int] = 30  # 평판 위험 기준
 REPUTATION_HIGH_THRESHOLD: Final[int] = 70  # 평판 우수 기준
-HAPPINESS_LOW_THRESHOLD: Final[int] = 30   # 행복 위험 기준
+HAPPINESS_LOW_THRESHOLD: Final[int] = 30  # 행복 위험 기준
 HAPPINESS_HIGH_THRESHOLD: Final[int] = 70  # 행복 우수 기준
 
 # 패턴 우선순위 관련 상수
 TRADEOFF_BALANCE_THRESHOLD: Final[float] = 0.5  # 트레이드오프 불균형 감지 임계값
 GAME_PROGRESSION_MID_POINT: Final[float] = 0.5  # 게임 진행도 중간점
-PATTERN_SCORE_TOLERANCE: Final[float] = 0.1     # 패턴 점수 허용 오차
+PATTERN_SCORE_TOLERANCE: Final[float] = 0.1  # 패턴 점수 허용 오차
 COMPLEXITY_BONUS_MULTIPLIER: Final[float] = 0.1  # 복잡성 보너스 배수
 
 
@@ -181,7 +197,6 @@ METRIC_RANGES: Final[dict[Metric, tuple[float, float, float]]] = {
 }
 
 
-
 def cap_metric_value(metric: Metric, value: float) -> float:
     """
     지표 값을 허용 범위 내로 제한
@@ -195,7 +210,3 @@ def cap_metric_value(metric: Metric, value: float) -> float:
     """
     min_val, max_val, _ = METRIC_RANGES[metric]
     return max(min_val, min(max_val, value))
-
-
-    THRESHOLD = auto()  # 임계값 기반 이벤트
-

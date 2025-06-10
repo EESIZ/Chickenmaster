@@ -1,4 +1,3 @@
-from game_constants import MAGIC_NUMBER_ZERO, MAGIC_NUMBER_ONE, MAGIC_NUMBER_TWO, MAGIC_NUMBER_FIFTY, MAGIC_NUMBER_ONE_HUNDRED, PROBABILITY_LOW_THRESHOLD, PROBABILITY_HIGH_THRESHOLD
 #!/usr/bin/env python3
 """
 파일: dev_tools/balance_simulator.py
@@ -12,7 +11,12 @@ import json
 import random
 from typing import Any
 
-from src.core.domain.game_state import GameState
+from game_constants import (
+    MAGIC_NUMBER_ZERO,
+    MAGIC_NUMBER_ONE_HUNDRED,
+    PROBABILITY_LOW_THRESHOLD,
+    PROBABILITY_HIGH_THRESHOLD,
+)
 from src.economy.engine import EconomyEngine
 from src.events.engine import EventEngine
 from src.metrics.tracker import MetricsTracker
@@ -93,9 +97,7 @@ class BalanceSimulator:
         seed = config["random_seed"]
 
         # 시나리오 설정 찾기
-        scenario_config = next(
-            (s for s in self.config["scenarios"] if s["name"] == scenario), None
-        )
+        scenario_config = next((s for s in self.config["scenarios"] if s["name"] == scenario), None)
         if not scenario_config:
             print(f"⚠️ 시나리오를 찾을 수 없습니다: {scenario}")
             scenario_config = self.config["scenarios"][1]  # 기본값: balanced
@@ -204,7 +206,9 @@ class BalanceSimulator:
             분석 결과
         """
         total_iterations = len(results)
-        successful_runs = [r for r in results if r["days_survived"] >= self.config["simulation"]["days"]]
+        successful_runs = [
+            r for r in results if r["days_survived"] >= self.config["simulation"]["days"]
+        ]
         success_rate = len(successful_runs) / total_iterations
 
         # 평균 생존 일수
@@ -279,4 +283,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

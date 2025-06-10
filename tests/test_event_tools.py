@@ -43,7 +43,7 @@ class TestEventConditionFixer(unittest.TestCase):
                     "effects": [{"metric": "money", "formula": "-500"}],
                 },
                 {
-                    "id": "test_event_2", 
+                    "id": "test_event_2",
                     "trigger": {"condition": ">"},
                     "effects": [{"metric": "reputation", "formula": "+10"}],
                 },
@@ -107,7 +107,7 @@ class TestEventBankIndexer(unittest.TestCase):
             {
                 "id": "cascade_event_1",
                 "name": "연쇄 이벤트",
-                "category": "daily_routine", 
+                "category": "daily_routine",
                 "tags": ["돈"],
                 "choices": [
                     {"text": "선택 1", "effects": []},
