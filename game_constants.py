@@ -184,6 +184,25 @@ class ProbabilityConstants:
     RANDOM_THRESHOLD: float = 0.5  # 50% 확률 기준점
 
 
+@dataclass(frozen=True)
+class StorytellerConstants:
+    """스토리텔러 관련 상수"""
+    
+    # 점수 임계값
+    SCORE_THRESHOLD_HIGH: float = 0.7  # 높은 점수 임계값
+    SCORE_THRESHOLD_LOW: float = 0.3   # 낮은 점수 임계값
+    
+    # 추세 분석 관련
+    TREND_MIN_HISTORY: int = 2  # 최소 히스토리 개수
+    
+    # 게임 진행도 관련
+    PROGRESSION_THRESHOLD: float = 0.5  # 진행도 임계값
+    COMPLEXITY_BONUS_THRESHOLD: float = 0.2  # 복잡성 보너스 임계값
+    
+    # 패턴 선택 관련
+    PATTERN_SCORE_SIMILARITY: float = 0.1  # 패턴 점수 유사성 허용 범위
+
+
 # 지표 범위 정의 (최소값, 최대값, 기본값)
 METRIC_RANGES: Final[dict[Metric, tuple[float, float, float]]] = {
     Metric.MONEY: (0.0, float("inf"), 10000.0),  # 돈은 0 이상, 기본 1만원

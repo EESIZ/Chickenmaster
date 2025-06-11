@@ -2,6 +2,7 @@
 연쇄 이벤트 서비스 구현체.
 
 이 모듈은 ICascadeService 인터페이스를 구현하여 연쇄 이벤트 처리 로직을 제공합니다.
+전략 패턴을 통해 다양한 cascade 타입별 처리 로직을 분리하여 관리합니다.
 """
 
 import random
@@ -18,6 +19,10 @@ from src.cascade.domain.models import (
 )
 from src.cascade.ports.cascade_port import ICascadeService
 from src.cascade.ports.event_port import IEventService
+from src.cascade.domain.strategies.strategy_factory import (
+    CascadeStrategyFactory,
+    get_cascade_strategy_factory,
+)
 
 
 class CascadeServiceImpl(ICascadeService):
@@ -25,16 +30,19 @@ class CascadeServiceImpl(ICascadeService):
     ICascadeService 인터페이스 구현체.
 
     연쇄 이벤트 처리 로직을 구현합니다.
+    전략 패턴을 통해 cascade 타입별 처리를 위임합니다.
     """
 
-    def __init__(self, event_service: IEventService):
+    def __init__(self, event_service: IEventService, strategy_factory: CascadeStrategyFactory | None = None):
         """
         CascadeServiceImpl 생성자.
 
         Args:
             event_service: 이벤트 서비스 인스턴스
+            strategy_factory: cascade 전략 팩토리 (의존성 주입)
         """
         self._event_service = event_service
+        self._strategy_factory = strategy_factory or get_cascade_strategy_factory()
         self._cascade_relations: dict[str, list[CascadeNode]] = (
             {}
         )  # 부모 이벤트 ID -> 자식 노드 목록
@@ -201,13 +209,21 @@ class CascadeServiceImpl(ICascadeService):
                         processed.add(node.event_id)  # 지연 이벤트도 처리된 것으로 표시
                         continue
 
-                    # 이벤트 효과 적용
-                    event = self._event_service.get_event_by_id(node.event_id)
-                    current_state = self._event_service.apply_event_effects(event, current_state)
-                    triggered_events.append(node.event_id)
-                    triggered_event_objects.append(event)
-                    processed.add(node.event_id)
-                    queue.append(node.event_id)  # 다음 레벨 처리를 위해 큐에 추가
+                    # 전략 패턴을 통한 cascade 처리
+                    strategy = self._strategy_factory.get_strategy(node.cascade_type)
+                    
+                    # 전략을 통해 노드 처리 여부 결정
+                    if strategy.process(node):
+                        # 이벤트 효과 적용
+                        event = self._event_service.get_event_by_id(node.event_id)
+                        current_state = self._event_service.apply_event_effects(event, current_state)
+                        triggered_events.append(node.event_id)
+                        triggered_event_objects.append(event)
+                        processed.add(node.event_id)
+                        queue.append(node.event_id)  # 다음 레벨 처리를 위해 큐에 추가
+                    else:
+                        # 전략에서 처리 거부한 경우 스킵
+                        processed.add(node.event_id)  # 처리 완료로 표시하여 무한 루프 방지
 
         # 지표 영향도 계산
         metrics_impact = self.calculate_metrics_impact(triggered_event_objects, game_state)

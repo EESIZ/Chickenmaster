@@ -14,6 +14,11 @@ from src.core.ports.event_port import IEventService
 from src.core.domain.game_state import GameState
 from src.storyteller.ports.storyteller_port import IStorytellerService
 from src.storyteller.domain.models import StoryContext, NarrativeResponse, StoryPattern
+from src.storyteller.domain.strategy_factory import (
+    StorytellerStrategyFactory,
+    StorytellerStrategyBundle,
+    get_storyteller_strategy_factory,
+)
 from game_constants import (
     Metric,
     UNCERTAINTY_WEIGHTS,
@@ -96,15 +101,24 @@ class StorytellerService(IStorytellerService):
         },
     ]
 
-    def __init__(self, container: IServiceContainer):
+    def __init__(self, container: IServiceContainer, strategy_bundle: StorytellerStrategyBundle | None = None):
         """
         스토리텔러 서비스를 초기화합니다.
 
         Args:
             container: 의존성 주입 컨테이너
+            strategy_bundle: 스토리텔러 전략 번들 (의존성 주입)
         """
         self._container = container
         self._event_service = container.get(IEventService)
+        
+        # 전략 패턴 의존성 주입
+        self._strategy_bundle = strategy_bundle or StorytellerStrategyBundle.create_default_bundle()
+        
+        # 편의를 위한 전략 참조
+        self._state_evaluator = self._strategy_bundle.state_evaluator
+        self._trend_analyzer = self._strategy_bundle.trend_analyzer  
+        self._pattern_selector = self._strategy_bundle.pattern_selector
 
         # 스토리 패턴 초기화 - 설정 기반으로 생성
         self._story_patterns = [
@@ -236,32 +250,29 @@ class StorytellerService(IStorytellerService):
             raise ValueError("추세 분석을 위해서는 최소 2개의 지표 히스토리가 필요합니다.")
 
         try:
-            trends = {}
-            recent_history = context.metrics_history[
-                -RECENT_HISTORY_WINDOW:
-            ]  # 최근 3개 데이터 포인트 사용
+            # 전략 패턴을 통한 추세 분석
+            trends = self._trend_analyzer.analyze(context)
 
-            for metric in Metric:
-                metric_name = metric.name.lower()
-
-                # 지표별 변화율 계산
-                values = [history.metrics.get(metric_name, 0) for history in recent_history]
-
-                if len(values) >= MIN_METRICS_HISTORY_FOR_TREND:
-                    # 선형 추세 계산
-                    trend_rate = self._calculate_linear_trend(values)
-
-                    # uncertainty 가중치 적용
-                    uncertainty_factor = UNCERTAINTY_WEIGHTS.get(metric, 0.0)
+            # uncertainty 가중치 적용 (기존 로직 유지)
+            adjusted_trends = {}
+            for metric_name, trend_rate in trends.items():
+                # Metric enum에서 해당 metric 찾기
+                metric_enum = None
+                for metric in Metric:
+                    if metric.name.lower() == metric_name.lower():
+                        metric_enum = metric
+                        break
+                
+                if metric_enum:
+                    uncertainty_factor = UNCERTAINTY_WEIGHTS.get(metric_enum, 0.0)
                     adjusted_trend = trend_rate * (
                         1 + uncertainty_factor * random.uniform(-0.5, 0.5)
                     )
-
-                    trends[metric_name] = round(adjusted_trend, 3)
+                    adjusted_trends[metric_name] = round(adjusted_trend, 3)
                 else:
-                    trends[metric_name] = 0.0
+                    adjusted_trends[metric_name] = round(trend_rate, 3)
 
-            return trends
+            return adjusted_trends
 
         except Exception:
             # 예외 발생 시 기본 추세 반환 (모든 지표 0.0)
@@ -292,12 +303,14 @@ class StorytellerService(IStorytellerService):
                 if pattern.matches(current_metrics):
                     applicable_patterns.append(pattern)
 
-            # 게임 진행도에 따른 우선순위 적용
-            prioritized_patterns = self._prioritize_patterns_by_progression(
-                applicable_patterns, context.game_progression
-            )
+            # 전략 패턴을 통한 패턴 우선순위 결정
+            if applicable_patterns:
+                # 여러 패턴 중 가장 적합한 패턴들을 전략으로 선택 후 리스트로 반환
+                top_pattern = self._pattern_selector.select(context, applicable_patterns)
+                if top_pattern:
+                    return [top_pattern]
 
-            return prioritized_patterns
+            return applicable_patterns[:5]  # 최대 5개의 패턴 반환
 
         except Exception:
             # 예외 발생 시 빈 리스트 반환
@@ -313,21 +326,8 @@ class StorytellerService(IStorytellerService):
             return "late_game"
 
     def _analyze_situation_tone(self, metrics: dict[str, float]) -> str:
-        """현재 상황의 톤 분석 (positive/negative/neutral)"""
-        # 핵심 지표들의 가중 평균으로 상황 판단
-        money_score = min(metrics.get("money", 0) / 10000, 1.0)  # 정규화
-        reputation_score = metrics.get("reputation", 0) / 100
-        happiness_score = metrics.get("happiness", 0) / 100
-        pain_score = 1 - (metrics.get("pain", 0) / 100)  # 고통은 역산
-
-        overall_score = (money_score + reputation_score + happiness_score + pain_score) / 4
-
-        if overall_score > SITUATION_POSITIVE_THRESHOLD:
-            return "positive"
-        elif overall_score < SITUATION_NEGATIVE_THRESHOLD:
-            return "negative"
-        else:
-            return "neutral"
+        """현재 상황의 톤 분석 (positive/negative/neutral) - 전략 패턴 사용"""
+        return self._state_evaluator.evaluate(metrics)
 
     def _generate_metric_status_description(self, metrics: dict[str, float]) -> str:
         """지표 상태에 대한 설명 생성"""
