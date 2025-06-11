@@ -16,7 +16,7 @@ class EventServiceAdapter(IEventService):
     실제 이벤트 서비스와의 통합을 담당합니다.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         EventServiceAdapter 생성자.
         """

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 
 from src.core.domain.cascade import CascadeNode
-from src.core.domain.strategies.cascade_strategy import ICascadeStrategy
-from src.core.constants.game_constants import (
+from src.cascade.domain.strategies.cascade_strategy import ICascadeStrategy
+from game_constants import (
     MAGIC_NUMBER_ONE_HUNDRED,
     MAGIC_NUMBER_FIFTY,
     MAGIC_NUMBER_TWENTY,

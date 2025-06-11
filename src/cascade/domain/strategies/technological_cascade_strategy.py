@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from src.core.domain.cascade import CascadeNode
-from src.core.domain.strategies.cascade_strategy import ICascadeStrategy
+from src.cascade.domain.strategies.cascade_strategy import ICascadeStrategy
 
 
 class TechnologicalCascadeStrategy(ICascadeStrategy):

@@ -116,3 +116,104 @@ COMPLEXITY_BONUS_MULTIPLIER: Final[float] = 0.1
 - Ruff 린터 PLR2004 규칙 준수
 - 유지보수성 개선
 - 일관된 임계값 관리
+
+## 결정 4: 전략 패턴 구현 및 의존성 주입 (2025-01-06)
+
+### 배경
+Cascade 및 Storyteller 모듈에서 전략 패턴이 정의되어 있었으나 실제로 사용되지 않고, 서비스에서 직접 if-else로 로직을 구현하는 문제가 발견되었습니다. 
+
+**문제점:**
+- 정의된 전략 인터페이스가 실제로 사용되지 않음
+- Import 경로 오류로 전략 구현체들이 제대로 동작하지 않음
+- 서비스 클래스에서 직접 구현한 로직으로 인한 단일 책임 원칙 위배
+
+### 결정 내용
+헥사고널 아키텍처의 의존성 역전 원칙에 따라 전략 패턴을 완전히 구현하였습니다:
+
+#### 1. Cascade 전략 패턴 구현
+- **전략 팩토리**: `CascadeStrategyFactory` 구현으로 전략 의존성 주입 지원
+- **Import 경로 수정**: 모든 cascade 전략의 잘못된 import 경로를 올바르게 수정
+- **서비스 통합**: `CascadeServiceImpl`에서 직접 if-else 로직 대신 전략 패턴 사용
+
+```python
+# 기존: 직접 구현
+def process_cascade_chain(self, ...):
+    # if cascade_type == "ECONOMIC":
+    #     # 직접 처리 로직
+    pass
+
+# 개선: 전략 패턴
+def process_cascade_chain(self, ...):
+    strategy = self._strategy_factory.get_strategy(node.cascade_type)
+    if strategy.process(node):
+        # 전략에 위임
+        pass
+```
+
+#### 2. Storyteller 전략 패턴 구현
+- **전략 팩토리**: `StorytellerStrategyFactory` 및 `StorytellerStrategyBundle` 구현
+- **서비스 메서드 위임**: 기존 직접 구현 메서드들을 전략으로 위임
+
+```python
+# 기존: 직접 구현
+def _analyze_situation_tone(self, metrics):
+    # 복잡한 점수 계산 로직 직접 구현
+    pass
+
+# 개선: 전략 위임
+def _analyze_situation_tone(self, metrics):
+    return self._state_evaluator.evaluate(metrics)
+```
+
+#### 3. 의존성 주입 시스템
+- **생성자 주입**: 서비스 생성 시 전략 팩토리나 번들을 주입받을 수 있음
+- **기본값 지원**: 주입되지 않은 경우 전역 팩토리 인스턴스 사용
+- **확장성**: 새로운 전략 구현체를 쉽게 등록하고 교체 가능
+
+```python
+class CascadeServiceImpl(ICascadeService):
+    def __init__(self, event_service: IEventService, strategy_factory: CascadeStrategyFactory | None = None):
+        self._strategy_factory = strategy_factory or get_cascade_strategy_factory()
+```
+
+#### 4. 전략 카테고리 자동 매핑
+이벤트 카테고리에 따라 적절한 전략을 자동으로 선택하는 기능 구현:
+
+```python
+def get_strategy_by_event_category(self, event_category: str) -> ICascadeStrategy:
+    category_mappings = {
+        "economy": "ECONOMIC",
+        "social": "SOCIAL",
+        "cultural": "CULTURAL",
+        "tech": "TECHNOLOGICAL",
+        "environment": "ENVIRONMENTAL",
+    }
+```
+
+### 기술적 구현
+1. **팩토리 패턴**: 전략 인스턴스 생성 및 관리
+2. **싱글톤**: 전역 팩토리 인스턴스로 메모리 효율성 확보
+3. **Protocol 기반**: Python의 구조적 타입 시스템 활용
+4. **타입 안전성**: 완전한 타입 힌트 지원
+
+### 테스트 검증
+전략 패턴 구현의 정확성을 검증하는 테스트 스크립트 작성:
+- 팩토리 인스턴스 생성 테스트
+- 전략 선택 및 획득 테스트
+- 의존성 주입 동작 확인
+- **결과**: 100% 테스트 통과 ✅
+
+### 영향 및 이점
+- **아키텍처 일관성**: 정의된 인터페이스가 실제로 사용됨
+- **확장성**: 새로운 전략 추가가 용이함
+- **테스트 가능성**: 전략 Mock을 통한 단위 테스트 개선
+- **의존성 역전**: 고수준 모듈이 저수준 구현에 의존하지 않음
+- **단일 책임**: 각 전략이 특정 도메인 로직에만 집중
+- **유지보수성**: 전략별로 독립적인 수정 가능
+
+### 관련 파일
+- `src/cascade/domain/strategies/strategy_factory.py`: Cascade 전략 팩토리
+- `src/storyteller/domain/strategy_factory.py`: Storyteller 전략 팩토리  
+- `src/cascade/adapters/cascade_service.py`: 전략 패턴 적용된 서비스
+- `src/storyteller/adapters/storyteller_service.py`: 전략 패턴 적용된 서비스
+- `test_strategy_patterns.py`: 전략 패턴 구현 검증 테스트
