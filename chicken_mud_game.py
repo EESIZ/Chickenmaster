@@ -238,6 +238,13 @@ class ChickenMudGame:
         print(f"\n6. 😴 개인 휴식")
         print("   하루 쉬면서 컨디션 회복")
         
+        print(f"\n7. 🧪 연구개발 (R&D)")
+        if money >= 80000:
+            print("   80,000원으로 신메뉴/소스 개발 (성공 확률 65%)")
+            print("   💡 성공 시: 혁신적 효과, 실패 시: 돈만 날림")
+        else:
+            print("   ❌ 자금 부족 (80,000원 필요)")
+        
         print(f"\n'action [번호]'로 행동을 선택하세요 (예: action 1)")
         
     def execute_action(self, action_num: int):
@@ -254,6 +261,8 @@ class ChickenMudGame:
             self.action_facility_upgrade()
         elif action_num == 6:
             self.action_personal_rest()
+        elif action_num == 7:
+            self.action_research_development()
         else:
             print("❓ 잘못된 행동 번호입니다.")
             
@@ -449,6 +458,98 @@ class ChickenMudGame:
                 print("취소되었습니다.")
         except (EOFError, KeyboardInterrupt):
             print("❌ 취소되었습니다.")
+            
+    def action_research_development(self):
+        """연구개발(R&D) 행동 - 불확실성과 트레이드오프의 핵심"""
+        if self.game_state.money < 80000:
+            print("❌ 자금이 부족합니다. (80,000원 필요)")
+            return
+            
+        print(f"\n{'='*20} 🧪 연구개발 (R&D) {'='*20}")
+        print("🎲 신메뉴/소스 개발 프로젝트를 시작합니다!")
+        print("💰 투자금: 80,000원")
+        print("🎯 성공 확률: 65%")
+        print("")
+        print("📈 성공 시: 혁신적 메뉴로 수요+30, 평판+25")
+        print("📉 실패 시: 개발비만 날림, 스트레스+10")
+        print("")
+        print("⚠️  이것은 도박입니다! 정말 진행하시겠습니까? (y/n)")
+        
+        try:
+            choice = input().strip().lower()
+            if choice in ['y', 'yes', 'ㅇ']:
+                # 일단 개발비 지출
+                self.game_state = self.game_state.apply_effects({"money": -80000})
+                
+                print("\n🔬 연구개발 진행 중...")
+                time.sleep(1.5)
+                print("⏳ 실험실에서 열심히 개발 중...")
+                time.sleep(1.0)
+                
+                # 성공/실패 판정 (65% 성공 확률)
+                import random
+                success = random.random() < 0.65
+                
+                if success:
+                    # 성공! 혁신적 효과
+                    new_menu_types = [
+                        "매콤달콤 허니갈릭 치킨",
+                        "크리스피 치즈더스트 치킨", 
+                        "시그니처 비밀양념 치킨",
+                        "프리미엄 트러플 치킨",
+                        "화끈한 불닭소스 치킨"
+                    ]
+                    new_menu = random.choice(new_menu_types)
+                    
+                    print(f"\n🎉🎉🎉 대성공! 🎉🎉🎉")
+                    print(f"🍗 '{new_menu}' 개발 완료!")
+                    
+                    # 혁신적 효과 적용
+                    self.game_state = self.game_state.apply_effects({
+                        "reputation": 25,
+                        "happiness": 15
+                    })
+                    
+                    self.metrics_snapshot = self.metrics_snapshot.apply_effects({
+                        "demand": 30
+                    })
+                    
+                    self.game_state = self.game_state.add_event_to_history(
+                        f"R&D 성공: '{new_menu}' 개발로 대박!"
+                    )
+                    print("💡 고객들이 새로운 메뉴에 열광하고 있습니다!")
+                    print("📈 수요와 평판이 크게 상승했습니다!")
+                    
+                else:
+                    # 실패... 돈만 날림
+                    failure_reasons = [
+                        "양념 배합이 실패해서 먹을 수 없는 맛이 됨",
+                        "새로운 조리법이 너무 복잡해서 실용성 부족", 
+                        "고객 테스트에서 혹평... '기존이 더 나았다'",
+                        "재료비가 너무 비싸서 수익성 없음",
+                        "조리시간이 너무 오래 걸려서 포기"
+                    ]
+                    failure_reason = random.choice(failure_reasons)
+                    
+                    print(f"\n💥💥💥 실패... 💥💥💥")
+                    print(f"😞 실패 사유: {failure_reason}")
+                    
+                    # 실패 페널티
+                    self.game_state = self.game_state.apply_effects({
+                        "pain": 10,
+                        "happiness": -5
+                    })
+                    
+                    self.game_state = self.game_state.add_event_to_history(
+                        f"R&D 실패: 개발비 8만원 손실"
+                    )
+                    print("💸 개발비 80,000원이 허공으로 사라졌습니다...")
+                    print("😰 스트레스가 증가했습니다.")
+                    
+            else:
+                print("연구개발이 취소되었습니다.")
+        except (EOFError, KeyboardInterrupt):
+            print("❌ 연구개발이 취소되었습니다.")
             
     def process_turn(self):
         """턴 진행 - 실제 도메인 모델 사용"""
