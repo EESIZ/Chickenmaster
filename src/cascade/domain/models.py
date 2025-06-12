@@ -184,7 +184,7 @@ class CascadeChain:
     def _check_cycle_from_node(self, start_node: CascadeNode) -> bool:
         """특정 노드에서 시작하여 사이클이 있는지 확인."""
         visited_event_ids = set()
-        current_id = start_node.event_id
+        current_id: str | None = start_node.event_id
 
         while current_id:
             if current_id in visited_event_ids:

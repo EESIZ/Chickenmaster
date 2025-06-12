@@ -46,9 +46,10 @@ class DefaultStateEvaluator:
 
         overall_score = (money_score + reputation_score + happiness_score + pain_score) / 4
 
-        if overall_score > StorytellerConstants.SCORE_THRESHOLD_HIGH:
+        storyteller_constants = StorytellerConstants()
+        if overall_score > storyteller_constants.SCORE_THRESHOLD_HIGH:
             return "positive"
-        elif overall_score < StorytellerConstants.SCORE_THRESHOLD_LOW:
+        elif overall_score < storyteller_constants.SCORE_THRESHOLD_LOW:
             return "negative"
         else:
             return "neutral"
@@ -63,17 +64,18 @@ class LinearTrendAnalyzer:
                 "메트릭 히스토리가 비어있습니다. 추세 분석을 위해서는 최소 1개의 히스토리가 필요합니다."
             )
 
-        if len(context.metrics_history) < StorytellerConstants.TREND_MIN_HISTORY:
+        storyteller_constants = StorytellerConstants()
+        if len(context.metrics_history) < storyteller_constants.TREND_MIN_HISTORY:
             raise ValueError("추세 분석을 위해서는 최소 2개의 지표 히스토리가 필요합니다.")
 
         trends = {}
         for metric in Metric:
             values = [
                 history.get(metric, 0)
-                for history in context.metrics_history[-StorytellerConstants.TREND_MIN_HISTORY :]
+                for history in context.metrics_history[-storyteller_constants.TREND_MIN_HISTORY :]
             ]
 
-            if len(values) >= StorytellerConstants.TREND_MIN_HISTORY:
+            if len(values) >= storyteller_constants.TREND_MIN_HISTORY:
                 trend_rate = self._calculate_linear_trend(values)
                 trends[metric] = trend_rate
 
@@ -81,7 +83,8 @@ class LinearTrendAnalyzer:
 
     def _calculate_linear_trend(self, values: list[float]) -> float:
         """값들의 선형 추세 계산"""
-        if len(values) < StorytellerConstants.TREND_MIN_HISTORY:
+        storyteller_constants = StorytellerConstants()
+        if len(values) < storyteller_constants.TREND_MIN_HISTORY:
             return 0.0
 
         x = list(range(len(values)))
@@ -107,6 +110,8 @@ class WeightedPatternSelector:
         if not patterns:
             return None
 
+        storyteller_constants = StorytellerConstants()
+        
         # 진행도 계산 (0~1 사이 값)
         progression = min(1.0, len(context.metrics_history) / 100)
 
@@ -126,9 +131,9 @@ class WeightedPatternSelector:
 
             # 진행도에 따른 복잡성 보너스
             complexity_bonus = 0.0
-            if progression > StorytellerConstants.PROGRESSION_THRESHOLD:
+            if progression > storyteller_constants.PROGRESSION_THRESHOLD:
                 if pattern["pattern_type"] in ["dilemma", "noRightAnswer"]:
-                    complexity_bonus = StorytellerConstants.COMPLEXITY_BONUS_THRESHOLD * progression
+                    complexity_bonus = storyteller_constants.COMPLEXITY_BONUS_THRESHOLD * progression
             score += complexity_bonus
 
             scored_patterns.append((pattern, score))
@@ -144,7 +149,7 @@ class WeightedPatternSelector:
         for pattern, score in scored_patterns:
             if (
                 current_score is None
-                or abs(score - current_score) < StorytellerConstants.PATTERN_SCORE_SIMILARITY
+                or abs(score - current_score) < storyteller_constants.PATTERN_SCORE_SIMILARITY
             ):
                 current_score_group.append(pattern)
             else:

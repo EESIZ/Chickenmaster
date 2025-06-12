@@ -5,7 +5,7 @@
 """
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from collections.abc import Callable
 
 from src.core.ports.container_port import IServiceContainer
@@ -63,7 +63,7 @@ class ServiceContainer(IServiceContainer):
 
         # 싱글톤이고 이미 인스턴스가 있으면 반환
         if registration.is_singleton and registration.instance is not None:
-            return registration.instance
+            return cast(T, registration.instance)
 
         # 팩토리 함수로 인스턴스 생성
         if registration.implementation_factory is not None:
@@ -73,7 +73,7 @@ class ServiceContainer(IServiceContainer):
             if registration.is_singleton:
                 registration.instance = instance
 
-            return instance
+            return cast(T, instance)
 
         raise ValueError(f"서비스 '{interface.__name__}'의 구현체가 없습니다.")
 
