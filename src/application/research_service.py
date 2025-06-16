@@ -6,7 +6,8 @@
 """
 
 import random
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Any
+from dataclasses import dataclass
 
 from ..core.ports.research_port import IResearchService, IResearchRepository
 from ..core.domain.research import (
@@ -18,7 +19,7 @@ from ..core.domain.research import (
     PRESET_RESEARCH_PROJECTS
 )
 from ..core.domain.game_state import GameState
-from ..core.domain.metrics import MetricsSnapshot
+from ..core.domain.metrics import MetricsSnapshot, MetricEnum
 
 
 class ResearchApplicationService(IResearchService):

@@ -7,11 +7,13 @@
 """
 
 import random
-from typing import ClassVar
+from typing import ClassVar, Dict, Any, Optional
+from dataclasses import dataclass
 
 from src.core.ports.container_port import IServiceContainer
 from src.core.ports.event_port import IEventService
 from src.core.domain.game_state import GameState
+from src.core.domain.metrics import MetricEnum
 from src.storyteller.ports.storyteller_port import IStorytellerService
 from src.storyteller.domain.models import StoryContext, NarrativeResponse, StoryPattern
 from src.storyteller.domain.strategy_factory import (

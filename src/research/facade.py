@@ -5,7 +5,8 @@
 @freeze v0.1.0
 """
 
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Any
+from dataclasses import dataclass
 
 from ..core.ports.research_port import IResearchService, IResearchRepository
 from ..core.domain.research import (
@@ -15,7 +16,7 @@ from ..core.domain.research import (
     ResearchConfiguration
 )
 from ..core.domain.game_state import GameState
-from ..core.domain.metrics import MetricsSnapshot
+from ..core.domain.metrics import MetricsSnapshot, MetricEnum
 
 
 class ResearchFacade:

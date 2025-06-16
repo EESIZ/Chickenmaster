@@ -10,6 +10,7 @@ import unittest
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 from dataclasses import dataclass, field
+from typing import Dict, Any
 
 from src.core.domain.cascade import (
     CascadeType,
@@ -21,6 +22,11 @@ from src.core.domain.cascade import (
 )
 from src.core.domain.events import Event
 from src.core.domain.game_state import GameState
+from src.core.domain.metrics import MetricEnum
+from src.cascade.domain.models import (
+    CascadeEffect,
+    CascadeStrategy,
+)
 
 
 @dataclass(frozen=True)
@@ -46,17 +52,21 @@ class MockEvent(Event):
 class MockGameState(GameState):
     """테스트용 게임 상태 목 객체"""
 
-    money: int = 1000
-    reputation: int = 70
-    happiness: int = 80
-    pain: int = 20
-    day: int = 1
+    current_day: int = 1
+    money: float = 1000
+    reputation: float = 70
+    happiness: float = 80
+    suffering: float = 20
+    inventory: float = 50
+    staff_fatigue: float = 30
+    facility: float = 80
+    demand: float = 50
     events_history: tuple = field(default_factory=tuple)
     metrics: dict = field(
         default_factory=lambda: {
-            "reputation": PROBABILITY_HIGH_THRESHOLD,
-            "cash": 1000,
-            "customer_satisfaction": 0.8,
+            MetricEnum.REPUTATION: PROBABILITY_HIGH_THRESHOLD,
+            MetricEnum.MONEY: 1000,
+            MetricEnum.HAPPINESS: 0.8,
         }
     )
 

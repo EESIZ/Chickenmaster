@@ -6,6 +6,8 @@
 
 from datetime import datetime, timedelta
 import random
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
 
 from ...core.ports.cascade_port import ICascadeService
 from ...core.ports.event_port import IEventService
@@ -19,6 +21,7 @@ from ...core.domain.cascade import (
     CascadeResult,
     TriggerCondition,
 )
+from ...core.domain.metrics import MetricEnum
 
 
 class CascadeServiceImpl(ICascadeService):

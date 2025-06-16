@@ -18,8 +18,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # 실제 헥사고널 아키텍처 백엔드 import
-from src.core.domain.game_state import GameState, GameSettings
-from src.core.domain.metrics import MetricsSnapshot, Metric
+from src.core.domain.game_state import GameState
+from src.core.domain.game_settings import GameSettings
+from src.core.domain.metrics import MetricEnum
 from game_constants import Metric as GameMetric, METRIC_RANGES
 
 
@@ -35,12 +36,14 @@ class ChickenMudGame:
         
         # GameSettings를 사용한 초기화
         self.settings = GameSettings(
-            starting_money=int(METRIC_RANGES[GameMetric.MONEY][2]),      # 10000
-            starting_reputation=int(METRIC_RANGES[GameMetric.REPUTATION][2]),  # 50
-            starting_happiness=int(METRIC_RANGES[GameMetric.HAPPINESS][2]),    # 50
-            starting_pain=int(METRIC_RANGES[GameMetric.SUFFERING][2]),         # 20
-            max_cascade_depth=5,
-            bankruptcy_threshold=0
+            starting_money=5000000,  # 500만원
+            starting_reputation=50,  # 평판 50
+            starting_happiness=50,  # 행복도 50
+            starting_suffering=20,  # 고통 20
+            starting_inventory=100,  # 재고 100
+            starting_staff_fatigue=30,  # 피로도 30
+            starting_facility=80,  # 시설 80
+            starting_demand=60  # 수요 60
         )
         
         # 실제 GameState 생성
@@ -112,7 +115,7 @@ class ChickenMudGame:
         
         def format_change(current, previous, suffix=""):
             """변화량을 포맷팅하는 헬퍼 함수"""
-            if self.game_state.day == 1:
+            if self.game_state.current_day == 1:
                 return f"{current:,.0f}{suffix}"
             
             change = current - previous
@@ -123,13 +126,13 @@ class ChickenMudGame:
             else:
                 return f"{current:,.0f}{suffix} (±0)"
         
-        print(f"\n{'='*20} 🏪 치킨집 현황 (턴 {self.game_state.day}) {'='*20}")
+        print(f"\n{'='*20} 🏪 치킨집 현황 (턴 {self.game_state.current_day}) {'='*20}")
         
         # GameState의 기본 필드들
         print(f"💰 자금: {format_change(self.game_state.money, self.previous_game_state.money, '원')}")
         print(f"⭐ 평판: {format_change(self.game_state.reputation, self.previous_game_state.reputation, '점')}")
         print(f"😊 행복도: {format_change(self.game_state.happiness, self.previous_game_state.happiness, '점')}")
-        print(f"😰 고통도: {format_change(self.game_state.pain, self.previous_game_state.pain, '점')}")
+        print(f"😰 고통도: {format_change(self.game_state.suffering, self.previous_game_state.suffering, '점')}")
         
         # MetricsSnapshot의 확장 지표들
         current_inventory = self.metrics_snapshot.get_metric_value("inventory")
@@ -448,7 +451,7 @@ class ChickenMudGame:
             if choice in ['y', 'yes', 'ㅇ']:
                 self.game_state = self.game_state.apply_effects({
                     "happiness": 20,
-                    "pain": -15,
+                    "suffering": -15,
                     "money": -10000  # 기회비용
                 })
                 
@@ -536,7 +539,7 @@ class ChickenMudGame:
                     
                     # 실패 페널티
                     self.game_state = self.game_state.apply_effects({
-                        "pain": 10,
+                        "suffering": 10,
                         "happiness": -5
                     })
                     
@@ -553,11 +556,10 @@ class ChickenMudGame:
             
     def process_turn(self):
         """턴 진행 - 실제 도메인 모델 사용"""
-        print(f"\n{'='*20} ⏰ 턴 {self.game_state.day} 진행 중... {'='*20}")
+        print(f"\n{'='*20} ⏰ 턴 {self.game_state.current_day} 진행 중... {'='*20}")
         
         # 전날 상태 저장
         self.previous_game_state = self.game_state
-        self.previous_metrics = self.metrics_snapshot
         
         time.sleep(0.5)
         print("📋 오늘의 상황을 점검 중...")
@@ -565,22 +567,27 @@ class ChickenMudGame:
         # 일일 비즈니스 시뮬레이션
         self.simulate_daily_business()
         
-        # 턴 수 증가 (실제 GameState.apply_effects 사용)
-        self.game_state = self.game_state.apply_effects({"day": 1})
-        
-        # 타임스탬프 업데이트
-        self.metrics_snapshot = MetricsSnapshot(
-            metrics=self.metrics_snapshot.metrics,
-            timestamp=self.game_state.day
+        # 턴 수 증가
+        self.game_state = GameState(
+            current_day=self.game_state.current_day + 1,
+            money=self.game_state.money,
+            reputation=self.game_state.reputation,
+            happiness=self.game_state.happiness,
+            suffering=self.game_state.suffering,
+            inventory=self.game_state.inventory,
+            staff_fatigue=self.game_state.staff_fatigue,
+            facility=self.game_state.facility,
+            demand=self.game_state.demand,
+            events_history=self.game_state.events_history
         )
         
-        print(f"✅ 턴 {self.game_state.day - 1} 완료!")
+        print(f"✅ 턴 {self.game_state.current_day - 1} 완료!")
         
     def simulate_daily_business(self):
         """일일 비즈니스 시뮬레이션"""
         # 간단한 비즈니스 로직
-        demand = self.metrics_snapshot.get_metric_value("demand")
-        inventory = self.metrics_snapshot.get_metric_value("inventory")
+        demand = self.game_state.demand
+        inventory = self.game_state.inventory
         
         # 실제 판매량 계산
         customers = min(demand + random.randint(-10, 10), inventory)
@@ -590,8 +597,11 @@ class ChickenMudGame:
         
         if customers > 0:
             # 매출 추가, 재고 차감
-            self.game_state = self.game_state.apply_effects({"money": revenue})
-            self.metrics_snapshot = self.metrics_snapshot.apply_effects({"inventory": -customers})
+            effects = {
+                MetricEnum.MONEY: revenue,
+                MetricEnum.INVENTORY: -customers
+            }
+            self.game_state = self.game_state.apply_effects(effects)
             
             print(f"📈 오늘 손님 {customers}명, 매출 {revenue:,}원")
         else:

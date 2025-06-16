@@ -18,7 +18,9 @@ from debug_tracing_system import (
 )
 
 # 기존 백엔드 임포트
-from src.core.domain.game_state import GameState, GameSettings
+from src.core.domain.game_state import GameState
+from src.core.domain.game_settings import GameSettings
+from src.core.domain.metrics import MetricEnum
 from src.core.domain.metrics import MetricsSnapshot, Metric
 from src.core.domain.action_slots import (
     create_daily_action_plan, DailyActionPlan, ActionSlotConfiguration, 

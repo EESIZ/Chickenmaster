@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from ..core.domain.game_state import GameState
-from ..core.domain.metrics import MetricsSnapshot, Metric
+from ..core.domain.metrics import MetricsSnapshot, Metric, MetricEnum
 from ..core.domain.action_slots import (
     DailyActionPlan, ActionSlotConfiguration, 
     ActionType as SlotActionType, create_daily_action_plan
