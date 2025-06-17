@@ -4,45 +4,62 @@
 
 from pathlib import Path
 from typing import Any, Generic, TypeVar
+from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 
 
+class CascadeType(str, Enum):
+    """연쇄 이벤트 유형"""
+    IMMEDIATE = "IMMEDIATE"  # 즉시 발생
+    DELAYED = "DELAYED"    # 지연 발생
+    CONDITIONAL = "CONDITIONAL"  # 조건부 발생
+    PROBABILISTIC = "PROBABILISTIC"  # 확률적 발생
+
+
 class EventEffect(BaseModel):
     """이벤트 효과 모델"""
-
     metric: str
     formula: str
+    message: str | None = None
+
+    model_config = ConfigDict(strict=True)
+
+
+class CascadeEvent(BaseModel):
+    """연쇄 이벤트 모델"""
+    event_id: str
+    cascade_type: CascadeType = CascadeType.IMMEDIATE
+    delay_turns: int = Field(default=0, ge=0)  # 지연 턴수 (DELAYED 타입일 때 사용)
+    probability: float = Field(default=1.0, ge=0.0, le=1.0)  # 발생 확률 (PROBABILISTIC 타입일 때 사용)
+    conditions: list[str] = Field(default_factory=list)  # 발생 조건 (CONDITIONAL 타입일 때 사용)
 
     model_config = ConfigDict(strict=True)
 
 
 class EventChoice(BaseModel):
     """이벤트 선택지 모델"""
-
     text_ko: str
     text_en: str
     effects: dict[str, float]
-    cascade_events: list[str] = Field(default_factory=list)
+    cascade_events: list[CascadeEvent] = Field(default_factory=list)  # CascadeEvent 리스트로 변경
 
     model_config = ConfigDict(strict=True)
 
 
 class EventTrigger(BaseModel):
     """이벤트 트리거 모델"""
-
     metric: str
     condition: str
-    value: float
+    value: Any
 
     model_config = ConfigDict(strict=True)
 
 
 class Event(BaseModel):
     """이벤트 모델"""
-
     id: str
     type: str
     category: str
@@ -57,6 +74,7 @@ class Event(BaseModel):
     cooldown: int = Field(ge=0)
     priority: int = Field(default=0)
     trigger: EventTrigger | None = None
+    cascade_events: list[CascadeEvent] = Field(default_factory=list)  # 이벤트 레벨의 연쇄 이벤트
     last_fired: int | None = None
 
     model_config = ConfigDict(strict=True)

@@ -26,7 +26,8 @@
         "stress": 15,
         "reputation": 5,
         "stamina": -10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "직원을 기다려 제대로 준비 후 오픈한다",
@@ -35,7 +36,8 @@
         "reputation": -5,
         "stress": -5,
         "staff_loyalty": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "본사에 미리 연락해 상황을 설명한다",
@@ -44,7 +46,8 @@
         "stress": 5,
         "reputation": 2,
         "franchise_relationship": 3
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "직원",
     "본사압박"
   ],
-  "probability": 0.15
+  "probability": 0.15,
+  "cascade_events": []
 }

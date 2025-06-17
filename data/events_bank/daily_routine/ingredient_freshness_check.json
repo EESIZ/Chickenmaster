@@ -21,7 +21,8 @@
         "money": 5000,
         "food_quality": -3,
         "reputation": -2
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "새 양파를 구매한다",
@@ -30,7 +31,8 @@
         "money": -8000,
         "food_quality": 5,
         "reputation": 3
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "시든 부분만 제거하고 사용한다",
@@ -39,7 +41,8 @@
         "money": 2000,
         "food_quality": 1,
         "preparation_time": 15
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -50,5 +53,6 @@
     "비용절약",
     "시간관리"
   ],
-  "probability": 0.12
+  "probability": 0.12,
+  "cascade_events": []
 }

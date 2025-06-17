@@ -26,7 +26,8 @@
         "customer_loyalty": 25,
         "preparation_time": 20,
         "special_service_reputation": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "정중히 거절하고 다른 메뉴를 추천한다",
@@ -35,7 +36,8 @@
         "professionalism": 10,
         "customer_loyalty": -5,
         "menu_consistency": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "다음에 미리 말씀해달라고 한다",
@@ -44,7 +46,8 @@
         "customer_loyalty": 5,
         "planning_improvement": 15,
         "future_preparation": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "특별서비스",
     "관계유지"
   ],
-  "probability": 0.1
+  "probability": 0.1,
+  "cascade_events": []
 }

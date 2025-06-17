@@ -21,7 +21,8 @@
         "money": -25000,
         "reputation": 10,
         "marketing_appeal": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "기존 것을 정리해서 다시 붙인다",
@@ -30,7 +31,8 @@
         "money": 0,
         "reputation": 2,
         "preparation_time": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "아예 전단지를 없앤다",
@@ -39,7 +41,8 @@
         "money": 0,
         "reputation": -5,
         "marketing_reach": -10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -50,5 +53,6 @@
     "이미지",
     "비용"
   ],
-  "probability": 0.06
+  "probability": 0.06,
+  "cascade_events": []
 }

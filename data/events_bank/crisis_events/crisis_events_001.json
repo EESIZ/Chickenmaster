@@ -22,7 +22,8 @@
         "money": -300,
         "reputation": 5,
         "stress": 20
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "영업을 일시 중단하고 손님들에게 할인 쿠폰을 제공한다",
@@ -31,7 +32,8 @@
         "money": -150,
         "reputation": -10,
         "stress": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "촛불을 켜고 '캔들라이트 특별 이벤트'로 전환한다",
@@ -40,7 +42,8 @@
         "money": -50,
         "reputation": 15,
         "stress": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "tags": [
@@ -53,5 +56,6 @@
     "metric": "MONEY",
     "condition": "greater_than",
     "value": 5000
-  }
+  },
+  "cascade_events": []
 }

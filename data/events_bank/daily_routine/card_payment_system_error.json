@@ -26,7 +26,8 @@
         "customer_satisfaction": -15,
         "sales_loss": 20000,
         "simplicity": 5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "외상으로 처리하고 나중에 받기로 한다",
@@ -35,7 +36,8 @@
         "customer_satisfaction": 20,
         "financial_risk": 15,
         "trust_building": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "스마트폰 결제 앱을 활용한다",
@@ -44,7 +46,8 @@
         "customer_satisfaction": 10,
         "tech_adaptation": 15,
         "convenience": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "기술문제",
     "고객편의"
   ],
-  "probability": 0.06
+  "probability": 0.06,
+  "cascade_events": []
 }

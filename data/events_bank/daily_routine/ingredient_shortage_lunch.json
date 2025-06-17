@@ -26,7 +26,8 @@
         "customer_satisfaction": -5,
         "adaptability": 15,
         "sales": -3000
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "급하게 소스를 새로 만든다",
@@ -35,7 +36,8 @@
         "preparation_time": 30,
         "stress": 20,
         "customer_satisfaction": 5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "솔직히 설명하고 기다려달라고 한다",
@@ -44,7 +46,8 @@
         "honesty_reputation": 10,
         "customer_satisfaction": -8,
         "wait_time": 20
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -60,5 +63,6 @@
     "metric": "INGREDIENT_LEVEL",
     "condition": "less_than",
     "value": 30
-  }
+  },
+  "cascade_events": []
 }

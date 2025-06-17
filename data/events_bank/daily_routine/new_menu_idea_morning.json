@@ -21,7 +21,8 @@
         "innovation": 15,
         "money": -8000,
         "experimentation_risk": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "주말에 시간 날 때 연구해본다",
@@ -30,7 +31,8 @@
         "innovation": 5,
         "stress": 5,
         "planning": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "기존 메뉴에 집중한다",
@@ -39,7 +41,8 @@
         "innovation": -2,
         "food_quality": 5,
         "operational_stability": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -50,5 +53,6 @@
     "메뉴개발",
     "리스크"
   ],
-  "probability": 0.08
+  "probability": 0.08,
+  "cascade_events": []
 }

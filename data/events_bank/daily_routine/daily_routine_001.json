@@ -22,7 +22,8 @@
         "money": 150,
         "reputation": 10,
         "stress": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "정중히 거절하고 메뉴 내에서 추천해 드린다",
@@ -31,7 +32,8 @@
         "money": 100,
         "reputation": -5,
         "stress": -5
-      }
+      },
+      "cascade_events": []
     }
   ],
   "tags": [
@@ -41,5 +43,6 @@
     "트레이드오프"
   ],
   "probability": 0.4,
-  "cooldown": 14
+  "cooldown": 14,
+  "cascade_events": []
 }

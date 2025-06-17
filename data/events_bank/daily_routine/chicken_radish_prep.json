@@ -21,7 +21,8 @@
         "money": -3000,
         "customer_satisfaction": 10,
         "food_waste_risk": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "평소만큼만 준비한다",
@@ -30,7 +31,8 @@
         "money": 0,
         "customer_satisfaction": 0,
         "operational_efficiency": 5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "적게 준비하고 떨어지면 추가로 만든다",
@@ -39,7 +41,8 @@
         "money": 1000,
         "customer_satisfaction": -5,
         "workload": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -50,5 +53,6 @@
     "고객만족",
     "비용"
   ],
-  "probability": 0.2
+  "probability": 0.2,
+  "cascade_events": []
 }

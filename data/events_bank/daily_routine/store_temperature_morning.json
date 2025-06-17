@@ -26,7 +26,8 @@
         "money": -15000,
         "customer_comfort": 15,
         "staff_comfort": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "그냥 참는다",
@@ -35,7 +36,8 @@
         "money": 0,
         "customer_comfort": -10,
         "staff_comfort": -10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "두꺼운 옷을 입고 버틴다",
@@ -44,7 +46,8 @@
         "money": 0,
         "personal_comfort": -5,
         "resilience": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "고객편의",
     "비용절약"
   ],
-  "probability": 0.15
+  "probability": 0.15,
+  "cascade_events": []
 }

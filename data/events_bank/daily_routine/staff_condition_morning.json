@@ -26,7 +26,8 @@
         "staff_loyalty": -10,
         "hygiene": -5,
         "productivity": -10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "집에 보내고 혼자 운영한다",
@@ -35,7 +36,8 @@
         "staff_loyalty": 15,
         "stress": 25,
         "productivity": -20
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "약국에서 감기약을 사다준다",
@@ -44,7 +46,8 @@
         "money": -8000,
         "staff_loyalty": 20,
         "hygiene": 5
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "위생",
     "인간관계"
   ],
-  "probability": 0.1
+  "probability": 0.1,
+  "cascade_events": []
 }

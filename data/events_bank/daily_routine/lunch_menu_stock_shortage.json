@@ -26,7 +26,8 @@
         "customer_satisfaction": -8,
         "sales_diversification": 15,
         "menu_balance": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "급하게 재료를 주문한다",
@@ -35,7 +36,8 @@
         "money": -15000,
         "supply_cost": 5000,
         "customer_satisfaction": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "한정 수량으로 판매한다고 공지한다",
@@ -44,7 +46,8 @@
         "scarcity_marketing": 15,
         "customer_urgency": 10,
         "transparency": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -60,5 +63,6 @@
     "metric": "INGREDIENT_LEVEL",
     "condition": "less_than",
     "value": 25
-  }
+  },
+  "cascade_events": []
 }

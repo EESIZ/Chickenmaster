@@ -26,7 +26,17 @@
         "cooking_speed": 15,
         "food_quality": -10,
         "safety_risk": 10
-      }
+      },
+      "cascade_events": [
+        {
+          "event_id": "quality_complaint",
+          "cascade_type": "PROBABILISTIC",
+          "probability": 0.3,
+          "conditions": [
+            "food_quality < 70"
+          ]
+        }
+      ]
     },
     {
       "text_ko": "미리 준비된 것들을 최대한 활용한다",
@@ -35,7 +45,14 @@
         "cooking_speed": 10,
         "preparation_efficiency": 15,
         "operational_efficiency": 20
-      }
+      },
+      "cascade_events": [
+        {
+          "event_id": "inventory_shortage",
+          "cascade_type": "DELAYED",
+          "delay_turns": 2
+        }
+      ]
     },
     {
       "text_ko": "정확한 시간을 안내하고 기다려달라고 한다",
@@ -44,7 +61,17 @@
         "honesty_reputation": 15,
         "customer_satisfaction": -5,
         "quality_commitment": 20
-      }
+      },
+      "cascade_events": [
+        {
+          "event_id": "customer_complaint",
+          "cascade_type": "CONDITIONAL",
+          "conditions": [
+            "waiting_time > 15",
+            "customer_satisfaction < 60"
+          ]
+        }
+      ]
     }
   ],
   "conditions": [
@@ -60,5 +87,11 @@
     "metric": "RUSH_HOUR",
     "condition": "equal",
     "value": true
-  }
+  },
+  "cascade_events": [
+    {
+      "event_id": "staff_stress_increase",
+      "cascade_type": "IMMEDIATE"
+    }
+  ]
 }

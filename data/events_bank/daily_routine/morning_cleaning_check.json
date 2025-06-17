@@ -26,7 +26,8 @@
         "hygiene": 15,
         "stress": 10,
         "preparation_time": 30
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "눈에 띄는 부분만 대충 닦는다",
@@ -35,7 +36,8 @@
         "hygiene": 5,
         "stress": -5,
         "preparation_time": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "직원에게 청소 교육을 다시 시킨다",
@@ -44,7 +46,8 @@
         "hygiene": 10,
         "staff_loyalty": -5,
         "training_investment": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -60,5 +63,6 @@
     "metric": "HYGIENE",
     "condition": "less_than",
     "value": 70
-  }
+  },
+  "cascade_events": []
 }

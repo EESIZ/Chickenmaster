@@ -26,7 +26,8 @@
         "customer_interest": 15,
         "profit_margin": -15,
         "price_positioning": -5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "적극적으로 홍보한다",
@@ -35,7 +36,8 @@
         "marketing_effort": 20,
         "customer_awareness": 15,
         "energy_investment": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "내일부터 다른 메뉴로 바꾼다",
@@ -44,7 +46,8 @@
         "adaptability": 15,
         "menu_flexibility": 10,
         "learning_application": 5
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "메뉴전략",
     "고객반응"
   ],
-  "probability": 0.08
+  "probability": 0.08,
+  "cascade_events": []
 }

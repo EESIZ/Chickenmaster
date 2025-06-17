@@ -26,7 +26,8 @@
         "equipment_risk": 15,
         "money": 0,
         "stress": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "즉시 A/S를 부른다",
@@ -35,7 +36,8 @@
         "money": -50000,
         "stress": 20,
         "equipment_safety": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "직접 간단히 점검해본다",
@@ -44,7 +46,8 @@
         "stress": 5,
         "preparation_time": 15,
         "equipment_knowledge": 5
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "안전",
     "비용"
   ],
-  "probability": 0.08
+  "probability": 0.08,
+  "cascade_events": []
 }

@@ -26,7 +26,8 @@
         "competitiveness": 15,
         "profit_margin": -20,
         "market_share": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "품질로 승부한다고 마음먹는다",
@@ -35,7 +36,8 @@
         "quality_focus": 20,
         "customer_education": 10,
         "differentiation": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "특별 서비스로 차별화한다",
@@ -44,7 +46,8 @@
         "service_quality": 15,
         "operational_cost": 5,
         "uniqueness": 20
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "가격전략",
     "차별화"
   ],
-  "probability": 0.09
+  "probability": 0.09,
+  "cascade_events": []
 }

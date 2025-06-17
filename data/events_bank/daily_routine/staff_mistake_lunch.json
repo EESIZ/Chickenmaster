@@ -26,7 +26,8 @@
         "customer_satisfaction": 5,
         "money": -8000,
         "service_recovery": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "직원을 대신해 사과하고 할인해준다",
@@ -35,7 +36,8 @@
         "customer_satisfaction": 15,
         "money": -5000,
         "staff_loyalty": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "직원에게 직접 사과하게 한다",
@@ -44,7 +46,8 @@
         "customer_satisfaction": 0,
         "staff_learning": 15,
         "responsibility_teaching": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "고객서비스",
     "직원교육"
   ],
-  "probability": 0.12
+  "probability": 0.12,
+  "cascade_events": []
 }

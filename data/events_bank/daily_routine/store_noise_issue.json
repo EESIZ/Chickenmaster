@@ -26,7 +26,8 @@
         "customer_comfort": 15,
         "atmosphere": -5,
         "noise_management": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "그냥 내버려둔다",
@@ -35,7 +36,8 @@
         "customer_comfort": -10,
         "natural_atmosphere": 10,
         "non_intervention": 5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "흡음재 설치를 고려한다",
@@ -44,7 +46,8 @@
         "money": -50000,
         "long_term_comfort": 20,
         "facility_investment": 15
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -60,5 +63,6 @@
     "metric": "CUSTOMER_COUNT",
     "condition": "greater_than",
     "value": 8
-  }
+  },
+  "cascade_events": []
 }

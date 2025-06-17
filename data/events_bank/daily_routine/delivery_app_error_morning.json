@@ -26,7 +26,8 @@
         "stress": 15,
         "preparation_time": 20,
         "problem_resolution": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "조금 더 기다려본다",
@@ -35,7 +36,8 @@
         "stress": 10,
         "potential_sales": -15,
         "patience": 5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "다른 배달앱을 추가로 켠다",
@@ -44,7 +46,8 @@
         "commission_cost": 5,
         "potential_sales": 20,
         "workload": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "배달앱",
     "매출"
   ],
-  "probability": 0.07
+  "probability": 0.07,
+  "cascade_events": []
 }

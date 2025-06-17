@@ -22,7 +22,8 @@
         "money": -500,
         "reputation": 25,
         "stress": 30
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "축제에 참가하되 간소화된 메뉴로 준비한다",
@@ -31,7 +32,8 @@
         "money": -300,
         "reputation": 15,
         "stress": 20
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "이번 축제는 참가하지 않고 다음 기회를 기다린다",
@@ -40,7 +42,8 @@
         "money": 0,
         "reputation": -5,
         "stress": -10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "tags": [
@@ -50,5 +53,6 @@
     "노력과보상"
   ],
   "probability": 0.3,
-  "cooldown": 30
+  "cooldown": 30,
+  "cascade_events": []
 }

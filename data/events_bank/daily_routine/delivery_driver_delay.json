@@ -26,7 +26,8 @@
         "customer_satisfaction": 20,
         "preparation_time": 40,
         "personal_service": 15
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "다른 배달기사를 긴급 호출한다",
@@ -35,7 +36,8 @@
         "money": -8000,
         "customer_satisfaction": 10,
         "problem_solving": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "고객에게 상황을 설명하고 새로 만들어 보낸다",
@@ -44,7 +46,8 @@
         "customer_satisfaction": 5,
         "money": -12000,
         "honesty_reputation": 15
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -55,5 +58,6 @@
     "고객소통",
     "위기대응"
   ],
-  "probability": 0.14
+  "probability": 0.14,
+  "cascade_events": []
 }

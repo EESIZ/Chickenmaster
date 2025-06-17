@@ -26,7 +26,8 @@
         "customer_comfort": 20,
         "money": -12000,
         "service_quality": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "선풍기만 돌린다",
@@ -35,7 +36,8 @@
         "customer_comfort": 8,
         "money": -3000,
         "compromise_solution": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "창문을 열어 자연 환기한다",
@@ -44,7 +46,8 @@
         "customer_comfort": 5,
         "money": 0,
         "natural_solution": 15
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -56,5 +59,6 @@
     "전기요금",
     "고객편의"
   ],
-  "probability": 0.12
+  "probability": 0.12,
+  "cascade_events": []
 }

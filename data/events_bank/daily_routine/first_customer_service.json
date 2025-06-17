@@ -26,7 +26,8 @@
         "customer_satisfaction": 15,
         "reputation": 5,
         "personal_energy": 10
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "정중하지만 차분하게 응대한다",
@@ -35,7 +36,8 @@
         "customer_satisfaction": 8,
         "professionalism": 10,
         "stress": -5
-      }
+      },
+      "cascade_events": []
     },
     {
       "text_ko": "준비가 부족함을 솔직히 말한다",
@@ -44,7 +46,8 @@
         "honesty_reputation": 15,
         "customer_satisfaction": -5,
         "trust_building": 10
-      }
+      },
+      "cascade_events": []
     }
   ],
   "conditions": [
@@ -56,5 +59,6 @@
     "첫인상",
     "에너지"
   ],
-  "probability": 0.25
+  "probability": 0.25,
+  "cascade_events": []
 }
