@@ -37,7 +37,24 @@ def handle_action(action_type):
     return execute_action_with_probability(action_type)
 ```
 
-### 2. 확률적 결과 시스템 도입
+### 2. 메인 게임 루프 수정
+```python
+# web_prototype/main.py 수정
+class WebGameManager:
+    def __init__(self):
+        self.daily_plan = create_daily_action_plan(day=1, config=ActionSlotConfiguration())
+        
+    def handle_action(self, action_type):
+        if not self.daily_plan.can_perform_action():
+            return "❌ 오늘은 더 이상 행동할 수 없습니다. 'turn'으로 다음 날로 진행하세요."
+        
+        # 확률적 결과 적용
+        outcome = self.calculate_probabilistic_outcome(action_type)
+        self.daily_plan = self.daily_plan.use_action_slot(action_type)
+        return outcome
+```
+
+### 3. 확률적 결과 시스템 도입
 ```python
 # 모든 액션에 확률적 결과 적용
 ACTION_OUTCOMES = {
@@ -49,7 +66,7 @@ ACTION_OUTCOMES = {
 }
 ```
 
-### 3. 외부 환경 변화 시스템
+### 4. 외부 환경 변화 시스템
 ```python
 # 매 턴마다 시장 상황 변동
 class MarketEnvironment:
@@ -84,8 +101,8 @@ class MarketEnvironment:
 
 ### 2. 메인 게임 루프 수정
 ```python
-# chicken_debug_mud.py 수정
-class ChickenDebugMUD:
+# web_prototype/main.py 수정
+class WebGameManager:
     def __init__(self):
         self.daily_plan = create_daily_action_plan(day=1, config=ActionSlotConfiguration())
         

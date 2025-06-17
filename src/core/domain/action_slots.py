@@ -7,7 +7,8 @@ Daily Action Slots 시스템 도메인 모델
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from ..ports.data_provider import DataProvider, DataCategory, DataRequest
 
 
 class ActionType(Enum):
@@ -58,7 +59,7 @@ class DailyActionPlan:
     
     day: int
     slots: tuple[ActionSlot, ...]
-    max_actions: int = 3  # 기본 3개 행동
+    max_actions: int
     
     def get_available_slots(self) -> List[ActionSlot]:
         """사용 가능한 슬롯 목록"""
@@ -123,13 +124,21 @@ class DailyActionPlan:
 class ActionSlotConfiguration:
     """행동 슬롯 설정 - 절대 불변"""
     
-    base_daily_actions: int = 3  # 기본 일일 행동 수
-    research_slot_upgrade_interval: int = 365  # 연구 슬롯 업그레이드 간격 (턴)
-    max_daily_actions: int = 5  # 최대 일일 행동 수
+    base_daily_actions: int
+    research_slot_upgrade_interval: int
+    max_daily_actions: int
+    
+    @classmethod
+    def from_provider(cls, provider: DataProvider) -> "ActionSlotConfiguration":
+        """데이터 제공자로부터 설정을 생성합니다."""
+        return cls(
+            base_daily_actions=provider.get_value(DataRequest(DataCategory.ACTION_SLOTS, "base_daily_actions", 3)),
+            research_slot_upgrade_interval=provider.get_value(DataRequest(DataCategory.ACTION_SLOTS, "research_slot_upgrade_interval", 365)),
+            max_daily_actions=provider.get_value(DataRequest(DataCategory.ACTION_SLOTS, "max_daily_actions", 5))
+        )
     
     def calculate_max_actions_for_day(self, day: int) -> int:
         """특정 날짜의 최대 행동 수 계산"""
-        # 연구 슬롯: 시작 1 ▶ 매 365턴 +1 ▶ 최대 3
         additional_slots = min(
             2,  # 최대 2개 추가 (1 + 2 = 3 최대)
             day // self.research_slot_upgrade_interval
@@ -157,34 +166,15 @@ def create_daily_action_plan(day: int, config: ActionSlotConfiguration) -> Daily
     )
 
 
-# 사전 정의된 행동별 트레이드오프
-ACTION_EFFECTS = {
-    ActionType.CLEANING: {
-        "immediate": {"hygiene": 10, "money": -5000, "fatigue": 5},
-        "tradeoff": "위생 개선하지만 돈과 체력 소모"
-    },
-    ActionType.PROMOTION: {
-        "immediate": {"reputation": 15, "demand": 10, "money": -20000},
-        "tradeoff": "평판과 손님 증가하지만 비용과 재고 압박"
-    },
-    ActionType.RESEARCH: {
-        "immediate": {"research_points": 1, "daily_revenue": 0},
-        "tradeoff": "연구 포인트 획득하지만 당일 매출 포기"
-    },
-    ActionType.INVENTORY: {
-        "immediate": {"inventory": 50, "money": -50000},
-        "tradeoff": "재고 확보하지만 현금 부족"
-    },
-    ActionType.STAFF_REST: {
-        "immediate": {"staff_fatigue": -20, "money": -30000},
-        "tradeoff": "직원 피로 해소하지만 비용 발생"
-    },
-    ActionType.FACILITY: {
-        "immediate": {"facility": 20, "money": -100000},
-        "tradeoff": "장기 투자하지만 단기 현금 부족"
-    },
-    ActionType.PERSONAL_REST: {
-        "immediate": {"happiness": 20, "pain": -15, "opportunity_cost": 10000},
-        "tradeoff": "컨디션 회복하지만 기회비용 발생"
-    }
-} 
+class ActionEffects:
+    """행동 효과 관리자"""
+    
+    def __init__(self, provider: DataProvider):
+        self.provider = provider
+        
+    def get_action_effects(self, action_type: ActionType) -> Dict[str, Any]:
+        """특정 행동의 효과를 가져옵니다."""
+        effects = self.provider.get_dict(DataCategory.ACTION_SLOTS, f"effects_{action_type.name.lower()}")
+        if not effects:
+            raise ValueError(f"효과를 찾을 수 없음: {action_type}")
+        return effects 

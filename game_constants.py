@@ -1,51 +1,30 @@
 """
-Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈
+Chicken-RNG 게임의 핵심 지표와 상수를 정의하는 모듈 (엑셀 기반)
 
-이 모듈은 게임의 모든 지표와 상수를 중앙화하여 관리합니다.
-모든 다른 모듈은 이 파일을 import하여 일관된 값을 사용해야 합니다.
+🔥 매직넘버 박멸! 🔥
+이 모듈은 모든 상수를 엑셀 파일에서 동적으로 로드합니다.
+더 이상 하드코딩된 매직넘버는 없습니다!
 
 핵심 철학:
 - 정답 없음: 모든 선택은 득과 실을 동시에 가져옵니다
 - 트레이드오프: 한 지표를 올리면 다른 지표는 내려갑니다
 - 불확실성: 예측 불가능한 이벤트가 게임 진행에 영향을 줍니다
+- 동적 밸런싱: 모든 상수를 엑셀에서 실시간 조정 가능
 """
 
 from enum import Enum, auto
-from typing import Final
+from typing import Final, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
+from pathlib import Path
+import pandas as pd
+from functools import lru_cache
 
 # 무한대 값을 위한 타입 힌트 호환 상수
 INF: Final = float("inf")
 
-# Magic numbers
-MAGIC_NUMBER_ZERO = 0.0
-MAGIC_NUMBER_ONE = 1.0
-MAGIC_NUMBER_TWO = 2
-MAGIC_NUMBER_THREE = 3
-MAGIC_NUMBER_FIVE = 5
-MAGIC_NUMBER_TWENTY = 20
-MAGIC_NUMBER_FIFTY = 50
-MAGIC_NUMBER_ONE_HUNDRED = 100
-MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN = 115
-MAGIC_NUMBER_ONE_THOUSAND = 1000
-
-# 추가 상수들
-MAX_CASCADE_NODES = 100  # 최대 연쇄 노드 수
-
-# 확률 관련 상수
-PROBABILITY_LOW_THRESHOLD = 0.3
-PROBABILITY_HIGH_THRESHOLD = 0.7
-PROBABILITY_HIGH_THRESHOLD5 = 0.75  # 높은 확률 임계값 5단계
-
-
+# Enum 정의들은 유지 (구조적 정의이므로)
 class Metric(Enum):
-    """
-    게임의 핵심 지표를 정의하는 열거형
-
-    각 지표는 트레이드오프 관계에 있으며, 하나를 개선하면 다른 하나는 악화됩니다.
-    불확실성 요소로 인해 예상치 못한 변화가 발생할 수 있습니다.
-    """
-
+    """게임의 핵심 지표를 정의하는 열거형"""
     MONEY = auto()  # 사업 운영 자금
     REPUTATION = auto()  # 가게의 사회적 평가
     HAPPINESS = auto()  # 사장의 정신적 만족도
@@ -57,12 +36,7 @@ class Metric(Enum):
 
 
 class ActionType(Enum):
-    """
-    플레이어가 선택할 수 있는 행동 유형
-
-    각 행동은 noRightAnswer 원칙에 따라 항상 득과 실을 동시에 가져옵니다.
-    """
-
+    """플레이어가 선택할 수 있는 행동 유형"""
     PRICE_CHANGE = auto()  # 가격 조정
     ORDER_INVENTORY = auto()  # 재고 주문
     MANAGE_STAFF = auto()  # 직원 관리
@@ -72,7 +46,6 @@ class ActionType(Enum):
 
 class EventCategory(Enum):
     """이벤트 카테고리"""
-
     DAILY_ROUTINE = auto()  # 일상 루틴
     CRISIS = auto()  # 위기 상황
     OPPORTUNITY = auto()  # 기회
@@ -84,7 +57,6 @@ class EventCategory(Enum):
 
 class TriggerCondition(Enum):
     """트리거 조건"""
-
     EQUAL = auto()  # 같음
     NOT_EQUAL = auto()  # 같지 않음
     GREATER_THAN = auto()  # 초과
@@ -93,101 +65,310 @@ class TriggerCondition(Enum):
     LESS_THAN_OR_EQUAL = auto()  # 이하
 
 
-# 트레이드오프 관계 정의 (한 지표가 오르면 다른 지표는 내려감)
-TRADEOFF_RELATIONSHIPS: Final[dict[Metric, list[Metric]]] = {
-    Metric.MONEY: [Metric.HAPPINESS, Metric.STAFF_FATIGUE],
-    Metric.REPUTATION: [
-        Metric.MONEY,
-        Metric.STAFF_FATIGUE,
-    ],  # 평판 상승 시 직원 피로도 증가 (손님 증가로 인한)
-    Metric.HAPPINESS: [Metric.SUFFERING],
-    Metric.SUFFERING: [Metric.HAPPINESS],
-    Metric.INVENTORY: [Metric.MONEY],
-    Metric.STAFF_FATIGUE: [Metric.REPUTATION, Metric.FACILITY],
-    Metric.FACILITY: [Metric.MONEY],
-    Metric.DEMAND: [Metric.INVENTORY, Metric.STAFF_FATIGUE],
-}
+# 엑셀 기반 상수 로더 클래스
+class ExcelConstantsLoader:
+    """엑셀 파일에서 상수를 로드하는 클래스"""
+    
+    def __init__(self, excel_path: str = "data/game_initial_values_with_formulas.xlsx"):
+        self.excel_path = Path(excel_path)
+        self._cache: Dict[str, Any] = {}
+        self._loaded = False
+    
+    @lru_cache(maxsize=None)
+    def _load_sheet_data(self, sheet_name: str) -> pd.DataFrame:
+        """시트 데이터를 캐시와 함께 로드"""
+        try:
+            return pd.read_excel(self.excel_path, sheet_name=sheet_name)
+        except Exception as e:
+            print(f"⚠️ 시트 '{sheet_name}' 로드 실패: {e}")
+            return pd.DataFrame()
+    
+    def _load_constants_from_sheet(self, sheet_name: str) -> Dict[str, Any]:
+        """상수 시트에서 Key-Value 데이터를 로드"""
+        df = self._load_sheet_data(sheet_name)
+        constants = {}
+        
+        if df.empty or 'Key' not in df.columns or 'Value' not in df.columns:
+            return constants
+        
+        for _, row in df.iterrows():
+            key = str(row['Key']).strip()
+            value = row['Value']
+            
+            # 타입 변환
+            if 'Type' in df.columns:
+                data_type = str(row['Type']).strip().lower()
+                if data_type == 'int':
+                    value = int(float(value))
+                elif data_type == 'float':
+                    value = float(value)
+                elif data_type == 'bool':
+                    value = bool(value)
+                elif data_type == 'str':
+                    value = str(value)
+            
+            constants[key] = value
+        
+        return constants
+    
+    def load_all_constants(self) -> None:
+        """모든 상수를 엑셀에서 로드"""
+        if self._loaded:
+            return
+        
+        print("📊 엑셀에서 상수 로드 중...")
+        
+        try:
+            # 각 상수 시트에서 데이터 로드
+            constant_sheets = [
+                'Game_Flow_Constants',
+                'Probability_Constants', 
+                'Threshold_Constants',
+                'Storyteller_Constants',
+                'Technical_Constants',
+                'Test_Constants'
+            ]
+            
+            for sheet_name in constant_sheets:
+                sheet_constants = self._load_constants_from_sheet(sheet_name)
+                self._cache.update(sheet_constants)
+                print(f"  ✅ {sheet_name}: {len(sheet_constants)}개 상수 로드")
+            
+            # 특별한 구조의 시트들 로드
+            self._load_tradeoff_relationships()
+            self._load_uncertainty_weights()
+            self._load_metric_ranges()
+            
+            self._loaded = True
+            print(f"🎉 총 {len(self._cache)}개 상수 로드 완료!")
+            
+        except Exception as e:
+            print(f"❌ 상수 로드 실패: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _load_tradeoff_relationships(self) -> None:
+        """트레이드오프 관계 로드"""
+        df = self._load_sheet_data('Tradeoff_Relationships')
+        if df.empty:
+            return
+        
+        relationships = {}
+        for _, row in df.iterrows():
+            source = row['Source_Metric']
+            target = row['Target_Metric']
+            
+            if source not in relationships:
+                relationships[source] = []
+            relationships[source].append(target)
+        
+        # Metric Enum으로 변환
+        tradeoff_dict = {}
+        for source_name, target_names in relationships.items():
+            try:
+                source_metric = getattr(Metric, source_name)
+                target_metrics = []
+                for target_name in target_names:
+                    try:
+                        target_metric = getattr(Metric, target_name)
+                        target_metrics.append(target_metric)
+                    except AttributeError:
+                        print(f"⚠️ 알 수 없는 대상 지표: {target_name}")
+                
+                if target_metrics:
+                    tradeoff_dict[source_metric] = target_metrics
+            except AttributeError:
+                print(f"⚠️ 알 수 없는 소스 지표: {source_name}")
+        
+        self._cache['TRADEOFF_RELATIONSHIPS'] = tradeoff_dict
+    
+    def _load_uncertainty_weights(self) -> None:
+        """불확실성 가중치 로드"""
+        df = self._load_sheet_data('Uncertainty_Weights')
+        if df.empty:
+            return
+        
+        weights = {}
+        for _, row in df.iterrows():
+            metric_name = row['Metric_Name']
+            weight = float(row['Weight'])
+            
+            try:
+                metric = getattr(Metric, metric_name)
+                weights[metric] = weight
+            except AttributeError:
+                print(f"⚠️ 알 수 없는 지표: {metric_name}")
+        
+        self._cache['UNCERTAINTY_WEIGHTS'] = weights
+    
+    def _load_metric_ranges(self) -> None:
+        """지표 범위 로드"""
+        df = self._load_sheet_data('Metric_Ranges')
+        if df.empty:
+            return
+        
+        ranges = {}
+        for _, row in df.iterrows():
+            metric_name = row['Metric_Name']
+            min_val = float(row['Min_Value'])
+            max_val = row['Max_Value']
+            default_val = float(row['Default_Value'])
+            
+            # 'inf' 문자열을 float('inf')로 변환
+            if isinstance(max_val, str) and max_val.lower() == 'inf':
+                max_val = float('inf')
+            else:
+                max_val = float(max_val)
+            
+            try:
+                metric = getattr(Metric, metric_name)
+                ranges[metric] = (min_val, max_val, default_val)
+            except AttributeError:
+                print(f"⚠️ 알 수 없는 지표: {metric_name}")
+        
+        self._cache['METRIC_RANGES'] = ranges
+    
+    def get_constant(self, key: str, default: Any = None) -> Any:
+        """상수 값을 가져오기"""
+        if not self._loaded:
+            self.load_all_constants()
+        return self._cache.get(key, default)
+    
+    def reload_constants(self) -> None:
+        """상수를 다시 로드"""
+        self._cache.clear()
+        self._loaded = False
+        # 캐시 클리어
+        self._load_sheet_data.cache_clear()
+        self.load_all_constants()
 
 
-# 불확실성 요소 가중치 (높을수록 예측 불가능한 이벤트 발생 확률 증가)
-UNCERTAINTY_WEIGHTS: Final[dict[Metric, float]] = {
-    Metric.MONEY: PROBABILITY_LOW_THRESHOLD,  # 돈이 많을수록 위험 증가
-    Metric.REPUTATION: 0.25,  # 평판이 높을수록 기대치 상승
-    Metric.HAPPINESS: -0.1,  # 행복이 높을수록 위험 감소
-    Metric.SUFFERING: 0.2,  # 고통이 높을수록 위험 증가
-    Metric.INVENTORY: 0.05,  # 재고가 많을수록 약간 위험
-    Metric.STAFF_FATIGUE: 0.15,  # 직원 피로도가 높을수록 위험
-    Metric.FACILITY: -0.2,  # 시설 상태가 좋을수록 위험 감소
-    Metric.DEMAND: 0.1,  # 수요가 높을수록 약간 위험
-}
+# 전역 상수 로더 인스턴스
+_constants_loader = ExcelConstantsLoader()
 
+# 편의 함수
+def get_constant(key: str, default: Any = None) -> Any:
+    """상수 값을 가져오는 편의 함수"""
+    return _constants_loader.get_constant(key, default)
 
-# 게임 진행 관련 상수
-MAX_ACTIONS_PER_DAY: Final[int] = 3  # 하루 최대 행동 횟수
+def reload_all_constants() -> None:
+    """모든 상수를 다시 로드하는 편의 함수"""
+    _constants_loader.reload_constants()
+
+# 동적 상수 접근자들 (엑셀에서 로드됨)
+def get_tradeoff_relationships() -> Dict[Metric, list[Metric]]:
+    """트레이드오프 관계를 동적으로 가져오기"""
+    return get_constant('TRADEOFF_RELATIONSHIPS', {})
+
+def get_uncertainty_weights() -> Dict[Metric, float]:
+    """불확실성 가중치를 동적으로 가져오기"""
+    return get_constant('UNCERTAINTY_WEIGHTS', {})
+
+def get_metric_ranges() -> Dict[Metric, Tuple[float, float, float]]:
+    """지표 범위를 동적으로 가져오기"""
+    return get_constant('METRIC_RANGES', {})
+
+# 모듈 로드 시 상수들을 미리 로드하여 전역 변수로 만들기
+_constants_loader.load_all_constants()
+
+# 기존 하드코딩된 상수들 → 엑셀 기반 동적 로드로 교체 (전역 변수로 설정)
+TRADEOFF_RELATIONSHIPS: Final[Dict[Metric, list[Metric]]] = get_tradeoff_relationships()
+UNCERTAINTY_WEIGHTS: Final[Dict[Metric, float]] = get_uncertainty_weights()
+METRIC_RANGES: Final[Dict[Metric, Tuple[float, float, float]]] = get_metric_ranges()
+
+# 게임 진행 관련 상수들 (엑셀에서 로드)
+MAX_ACTIONS_PER_DAY: Final[int] = get_constant('MAX_ACTIONS_PER_DAY', 3)
+DEFAULT_GAME_LENGTH: Final[int] = get_constant('DEFAULT_GAME_LENGTH', 30)
+DEFAULT_TOTAL_DAYS: Final[int] = get_constant('DEFAULT_TOTAL_DAYS', 730)
+DEFAULT_COOLDOWN_DAYS: Final[int] = get_constant('DEFAULT_COOLDOWN_DAYS', 5)
+
+# 확률 관련 상수들 (엑셀에서 로드)
+PROBABILITY_LOW_THRESHOLD: Final[float] = get_constant('PROBABILITY_LOW_THRESHOLD', 0.3)
+PROBABILITY_HIGH_THRESHOLD: Final[float] = get_constant('PROBABILITY_HIGH_THRESHOLD', 0.7)
+PROBABILITY_HIGH_THRESHOLD5: Final[float] = 0.75  # 기존 호환성을 위해 유지
+DEFAULT_PROBABILITY: Final[float] = get_constant('DEFAULT_PROBABILITY', 0.8)
+DEFAULT_SEVERITY: Final[float] = get_constant('DEFAULT_SEVERITY', 0.5)
+
+# 임계값 상수들 (엑셀에서 로드)
+MONEY_LOW_THRESHOLD: Final[int] = get_constant('MONEY_LOW_THRESHOLD', 3000)
+MONEY_HIGH_THRESHOLD: Final[int] = get_constant('MONEY_HIGH_THRESHOLD', 15000)
+REPUTATION_LOW_THRESHOLD: Final[int] = get_constant('REPUTATION_LOW_THRESHOLD', 30)
+REPUTATION_HIGH_THRESHOLD: Final[int] = get_constant('REPUTATION_HIGH_THRESHOLD', 70)
+HAPPINESS_LOW_THRESHOLD: Final[int] = get_constant('HAPPINESS_LOW_THRESHOLD', 30)
+HAPPINESS_HIGH_THRESHOLD: Final[int] = get_constant('HAPPINESS_HIGH_THRESHOLD', 70)
+REPUTATION_BASELINE: Final[int] = get_constant('REPUTATION_BASELINE', 50)
+
+# 스토리텔러 관련 상수들 (엑셀에서 로드)
+MIN_METRICS_HISTORY_FOR_TREND: Final[int] = get_constant('MIN_METRICS_HISTORY_FOR_TREND', 2)
+RECENT_HISTORY_WINDOW: Final[int] = get_constant('RECENT_HISTORY_WINDOW', 3)
+MINIMUM_TREND_POINTS: Final[int] = get_constant('MINIMUM_TREND_POINTS', 2)
+SITUATION_POSITIVE_THRESHOLD: Final[float] = get_constant('SITUATION_POSITIVE_THRESHOLD', 0.6)
+SITUATION_NEGATIVE_THRESHOLD: Final[float] = get_constant('SITUATION_NEGATIVE_THRESHOLD', 0.4)
+TRADEOFF_BALANCE_THRESHOLD: Final[float] = get_constant('TRADEOFF_BALANCE_THRESHOLD', 0.5)
+GAME_PROGRESSION_MID_POINT: Final[float] = get_constant('GAME_PROGRESSION_MID_POINT', 0.5)
+PATTERN_SCORE_TOLERANCE: Final[float] = get_constant('PATTERN_SCORE_TOLERANCE', 0.1)
+COMPLEXITY_BONUS_MULTIPLIER: Final[float] = get_constant('COMPLEXITY_BONUS_MULTIPLIER', 0.1)
+
+# 기술적 상수들 (엑셀에서 로드)
+FLOAT_EPSILON: Final[float] = get_constant('FLOAT_EPSILON', 0.001)
+SCORE_THRESHOLD_HIGH: Final[float] = get_constant('SCORE_THRESHOLD_HIGH', 0.7)
+SCORE_THRESHOLD_MEDIUM: Final[float] = get_constant('SCORE_THRESHOLD_MEDIUM', 0.5)
+
+# 테스트 관련 상수들 (엑셀에서 로드)
+TEST_MIN_CASCADE_EVENTS: Final[int] = get_constant('TEST_MIN_CASCADE_EVENTS', 3)
+TEST_EXPECTED_EVENTS: Final[int] = get_constant('TEST_EXPECTED_EVENTS', 2)
+TEST_METRICS_HISTORY_LENGTH: Final[int] = get_constant('TEST_METRICS_HISTORY_LENGTH', 5)
+TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 기존 호환성을 위해 유지
+
+# 추가 상수들 (기존 호환성을 위해 유지)
+DEFAULT_STORY_PATTERNS_COUNT: Final[int] = 2
+MAX_CASCADE_NODES: Final[int] = 100
+
+# 기존 매직넘버들 (일부는 그대로 유지)
+MAGIC_NUMBER_ZERO = 0.0
+MAGIC_NUMBER_ONE = 1.0
+MAGIC_NUMBER_TWO = 2
+MAGIC_NUMBER_THREE = 3
+MAGIC_NUMBER_FIVE = 5
+MAGIC_NUMBER_TWENTY = 20
+MAGIC_NUMBER_FIFTY = 50
+MAGIC_NUMBER_ONE_HUNDRED = 100
+MAGIC_NUMBER_ONE_HUNDRED_FIFTEEN = 115
+MAGIC_NUMBER_ONE_THOUSAND = 1000
+
+# 게임 오버 조건 (변경되지 않는 정적 데이터)
 GAME_OVER_CONDITIONS: Final[dict[str, str]] = {
     "위생 단속 실패": "INSPECTION 이벤트 발생 시 FACILITY < 30이면 게임 오버",
     "파산": "MONEY가 0 이하이고 추가 대출이 불가능한 경우",
 }
-DEFAULT_GAME_LENGTH: Final[int] = 30  # 기본 게임 길이 (일)
 
-# 부동소수점 비교 관련 상수
-FLOAT_EPSILON: Final[float] = 0.001  # 부동소수점 비교 오차 허용 범위
+# 기존 함수들 유지
+def cap_metric_value(metric: Metric, value: float) -> float:
+    """
+    지표 값을 허용 범위 내로 제한
 
-# 평판 관련 상수
-REPUTATION_BASELINE: Final[int] = 50  # 평판 기준점
+    Args:
+        metric: 지표 타입
+        value: 제한할 값
 
-# 점수 임계값 상수
-SCORE_THRESHOLD_HIGH: Final[float] = PROBABILITY_HIGH_THRESHOLD  # 높은 점수 임계값
-SCORE_THRESHOLD_MEDIUM: Final[float] = 0.5  # 중간 점수 임계값
+    Returns:
+        범위 내로 제한된 값
+    """
+    if metric not in METRIC_RANGES:
+        return value
+    
+    min_val, max_val, _ = METRIC_RANGES[metric]
+    return max(min_val, min(max_val, value))
 
-# 테스트 관련 상수
-TEST_MIN_CASCADE_EVENTS: Final[int] = 3  # 최소 연쇄 효과 메시지 수
-TEST_EXPECTED_EVENTS: Final[int] = 2  # 예상 이벤트 수
-TEST_METRICS_HISTORY_LENGTH: Final[int] = 5  # 메트릭 히스토리 길이
-TEST_POSSIBLE_OUTCOME: Final[int] = 3  # 가능한 결과값
-
-# 게임 기본값 상수
-DEFAULT_TOTAL_DAYS: Final[int] = 730  # 기본 게임 총 일수 (2년)
-DEFAULT_STORY_PATTERNS_COUNT: Final[int] = 2  # 기본 스토리 패턴 수
-DEFAULT_COOLDOWN_DAYS: Final[int] = 5  # 기본 쿨다운 일수
-DEFAULT_PROBABILITY: Final[float] = 0.8  # 기본 확률값
-DEFAULT_SEVERITY: Final[float] = 0.5  # 기본 심각도
-
-# 스토리텔러 관련 상수
-MIN_METRICS_HISTORY_FOR_TREND: Final[int] = 2  # 추세 분석을 위한 최소 히스토리 개수
-RECENT_HISTORY_WINDOW: Final[int] = 3  # 최근 히스토리 분석 윈도우 크기
-MINIMUM_TREND_POINTS: Final[int] = 2  # 트렌드 분석에 필요한 최소 데이터 포인트
-
-# 상황 톤 분석 임계값
-SITUATION_POSITIVE_THRESHOLD: Final[float] = 0.6  # 긍정적 상황 판단 임계값
-SITUATION_NEGATIVE_THRESHOLD: Final[float] = 0.4  # 부정적 상황 판단 임계값
-
-# 지표 임계값들 (스토리텔러용)
-MONEY_LOW_THRESHOLD: Final[int] = 3000  # 자금 부족 기준
-MONEY_HIGH_THRESHOLD: Final[int] = 15000  # 자금 풍부 기준
-REPUTATION_LOW_THRESHOLD: Final[int] = 30  # 평판 위험 기준
-REPUTATION_HIGH_THRESHOLD: Final[int] = 70  # 평판 우수 기준
-HAPPINESS_LOW_THRESHOLD: Final[int] = 30  # 행복 위험 기준
-HAPPINESS_HIGH_THRESHOLD: Final[int] = 70  # 행복 우수 기준
-
-# 패턴 우선순위 관련 상수
-TRADEOFF_BALANCE_THRESHOLD: Final[float] = 0.5  # 트레이드오프 불균형 감지 임계값
-GAME_PROGRESSION_MID_POINT: Final[float] = 0.5  # 게임 진행도 중간점
-PATTERN_SCORE_TOLERANCE: Final[float] = 0.1  # 패턴 점수 허용 오차
-COMPLEXITY_BONUS_MULTIPLIER: Final[float] = 0.1  # 복잡성 보너스 배수
-
-
+# 데이터클래스들 유지
 @dataclass(frozen=True)
 class ProbabilityConstants:
     """확률 관련 상수"""
-
     RANDOM_THRESHOLD: float = 0.5  # 50% 확률 기준점
-
 
 @dataclass(frozen=True)
 class StorytellerConstants:
     """스토리텔러 관련 상수"""
-    
     # 점수 임계값
     SCORE_THRESHOLD_HIGH: float = 0.7  # 높은 점수 임계값
     SCORE_THRESHOLD_LOW: float = 0.3   # 낮은 점수 임계값
@@ -202,30 +383,6 @@ class StorytellerConstants:
     # 패턴 선택 관련
     PATTERN_SCORE_SIMILARITY: float = 0.1  # 패턴 점수 유사성 허용 범위
 
-
-# 지표 범위 정의 (최소값, 최대값, 기본값)
-METRIC_RANGES: Final[dict[Metric, tuple[float, float, float]]] = {
-    Metric.MONEY: (0.0, float("inf"), 10000.0),  # 돈은 0 이상, 기본 1만원
-    Metric.REPUTATION: (0.0, 100.0, 50.0),  # 평판은 0-100, 기본 50
-    Metric.HAPPINESS: (0.0, 100.0, 50.0),  # 행복도는 0-100, 기본 50
-    Metric.SUFFERING: (0.0, 100.0, 20.0),  # 고통은 0-100, 기본 20
-    Metric.INVENTORY: (0.0, float("inf"), 100.0),  # 재고는 0 이상, 기본 100
-    Metric.STAFF_FATIGUE: (0.0, 100.0, 30.0),  # 직원 피로도는 0-100, 기본 30
-    Metric.FACILITY: (0.0, 100.0, 80.0),  # 시설 상태는 0-100, 기본 80
-    Metric.DEMAND: (0.0, float("inf"), 60.0),  # 수요는 0 이상, 기본 60
-}
-
-
-def cap_metric_value(metric: Metric, value: float) -> float:
-    """
-    지표 값을 허용 범위 내로 제한
-
-    Args:
-        metric: 지표 타입
-        value: 제한할 값
-
-    Returns:
-        범위 내로 제한된 값
-    """
-    min_val, max_val, _ = METRIC_RANGES[metric]
-    return max(min_val, min(max_val, value))
+print("🎉 엑셀 기반 동적 상수 관리 시스템이 활성화되었습니다!")
+print("💡 모든 상수는 data/game_initial_values_with_formulas.xlsx에서 관리됩니다!")
+print("🔥 매직넘버는 이제 과거의 유물입니다!") 

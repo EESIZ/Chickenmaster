@@ -6,9 +6,9 @@ Chickenmaster 프로젝트의 헥사고널 아키텍처 전체 구조를 시각�
 
 ```mermaid
 graph TB
-    subgraph "🖥️ UI Layer"
-        MUD[🎮 chicken_mud_game.py<br/>MUD 스타일 인터페이스]
-        DebugMUD[🐛 chicken_debug_mud.py<br/>디버그 인터페이스]
+    subgraph "��️ UI Layer"
+        WebUI[🌐 web_prototype/main.py<br/>웹 인터페이스]
+        WebAPI[🔌 FastAPI 웹 서버]
     end
     
     subgraph "🎭 Application Layer"
@@ -101,8 +101,8 @@ graph TB
     end
     
     %% UI → Application
-    MUD --> AppService
-    DebugMUD --> AppService
+    WebUI --> AppService
+    WebAPI --> AppService
     
     %% Application → Core
     AppService --> GameState

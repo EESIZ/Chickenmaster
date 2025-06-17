@@ -48,5 +48,5 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-# MUD 게임은 CI 테스트에서 제외 (개발 중)
-ignore = ["chicken_mud_game.py"] 
+# 테스트 설정
+ignore = []

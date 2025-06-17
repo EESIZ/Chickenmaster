@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 🍗 Chicken Master Web Server 🍗
-치킨마스터 MUD를 웹으로 변환한 FastAPI 서버
+치킨마스터 웹 서버
 
-기존 chicken_mud_game.py의 모든 기능을 웹 API로 제공합니다.
+게임의 모든 기능을 웹 API로 제공합니다.
 Render.com에 바로 배포 가능한 형태로 구현되었습니다.
 """
 

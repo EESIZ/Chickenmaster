@@ -4,6 +4,8 @@
 """
 
 from dataclasses import dataclass
+from typing import Dict, Any
+from ..ports.data_provider import DataProvider, DataCategory, DataRequest
 
 
 @dataclass(frozen=True)
@@ -65,17 +67,28 @@ class EventTrigger:
     operator: str
     value: int
 
-    def evaluate(self, current_value: int) -> bool:
-        """트리거 조건 평가"""
-        if self.operator == ">":
-            return current_value > self.value
-        elif self.operator == ">=":
-            return current_value >= self.value
-        elif self.operator == "<":
-            return current_value < self.value
-        elif self.operator == "<=":
-            return current_value <= self.value
-        elif self.operator == "==":
-            return current_value == self.value
+    @classmethod
+    def get_operator_function(cls, provider: DataProvider, operator: str) -> callable:
+        """연산자에 해당하는 함수를 가져옵니다."""
+        operators = provider.get_dict(DataCategory.EVENTS, "operators")
+        func_name = operators.get(operator)
+        if not func_name:
+            raise ValueError(f"Unknown operator: {operator}")
+            
+        if func_name == "gt":
+            return lambda x, y: x > y
+        elif func_name == "ge":
+            return lambda x, y: x >= y
+        elif func_name == "lt":
+            return lambda x, y: x < y
+        elif func_name == "le":
+            return lambda x, y: x <= y
+        elif func_name == "eq":
+            return lambda x, y: x == y
         else:
-            return False
+            raise ValueError(f"Unknown operator function: {func_name}")
+
+    def evaluate(self, provider: DataProvider, current_value: int) -> bool:
+        """트리거 조건 평가"""
+        operator_func = self.get_operator_function(provider, self.operator)
+        return operator_func(current_value, self.value)
