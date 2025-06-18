@@ -25,6 +25,21 @@ services:
     autoDeploy: true
     healthCheckPath: /health
 
+  # 프론트엔드 서비스
+  - type: web
+    name: chickenmaster-frontend
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://chickenmaster-api.onrender.com
+    autoDeploy: true
+
   # 정적 파일 서빙을 위한 서비스 (필요한 경우)
   - type: web
     name: chickenmaster-static
