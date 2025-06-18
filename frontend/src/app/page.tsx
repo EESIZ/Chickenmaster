@@ -1,103 +1,90 @@
-import Image from "next/image";
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen bg-gray-900 text-white">
+      <div className="container mx-auto px-4 py-8">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold text-center">치킨마스터</h1>
+        </header>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 경영 현황 섹터 */}
+          <div className="bg-gray-800 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">경영 현황</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-400">자금</p>
+                <p className="text-2xl font-bold">100.5백만원</p>
+              </div>
+              <div>
+                <p className="text-gray-400">평판</p>
+                <p className="text-2xl font-bold">85/100</p>
+              </div>
+              <div>
+                <p className="text-gray-400">재고</p>
+                <p className="text-2xl font-bold">75%</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          {/* 상태 섹터 */}
+          <div className="bg-gray-800 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">상태</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-400">행복도</p>
+                <div className="w-full bg-gray-700 rounded-full h-2.5">
+                  <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '70%' }}></div>
+                </div>
+              </div>
+              <div>
+                <p className="text-gray-400">피로도</p>
+                <div className="w-full bg-gray-700 rounded-full h-2.5">
+                  <div className="bg-red-600 h-2.5 rounded-full" style={{ width: '45%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 시간 섹터 */}
+          <div className="bg-gray-800 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">시간</h2>
+            <div className="text-center">
+              <p className="text-3xl font-bold">14:30</p>
+              <p className="text-gray-400 mt-2">영업 시간: 12:00 - 22:00</p>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+
+        {/* 액션 버튼 */}
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            주문 받기
+          </button>
+          <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            재료 준비
+          </button>
+          <button className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            재고 관리
+          </button>
+          <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            휴식
+          </button>
+        </div>
+
+        {/* 이벤트 로그 */}
+        <div className="mt-8 bg-gray-800 p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">이벤트 로그</h2>
+          <div className="space-y-2 text-sm">
+            <p>14:30 - 신규 주문이 들어왔습니다: 후라이드 치킨 2마리</p>
+            <p>14:25 - 양념 치킨 조리가 완료되었습니다</p>
+            <p>14:20 - 재료 준비를 시작했습니다</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 }
