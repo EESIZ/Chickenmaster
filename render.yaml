@@ -1,9 +1,28 @@
 services:
+  # 프론트엔드 서비스 (메인)
+  - type: web
+    name: chickenmaster
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.chickenmaster.onrender.com
+      - key: PORT
+        value: "10000"
+    autoDeploy: true
+
+  # 백엔드 API 서비스
   - type: web
     name: chickenmaster-api
     runtime: python
-    plan: free  # 무료 티어 사용
-    region: singapore  # 아시아 리전 사용
+    plan: free
+    region: singapore
     buildCommand: pip install -r requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -24,24 +43,6 @@ services:
         value: ap-northeast-2
     autoDeploy: true
     healthCheckPath: /health
-
-  # 프론트엔드 서비스
-  - type: web
-    name: chickenmaster-frontend
-    runtime: node
-    plan: free
-    region: singapore
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NEXT_PUBLIC_API_URL
-        value: https://chickenmaster-api.onrender.com
-      - key: PORT
-        value: "10000"
-    autoDeploy: true
 
   # 정적 파일 서비스
   - type: web
