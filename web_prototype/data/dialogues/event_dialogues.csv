@@ -1,0 +1,25 @@
+event_id,trigger_condition,speaker,position,emotion,text,category
+price_increase,action_price_up,boss,center,worried,"가격을 올렸다. 손님들이 어떻게 반응할까?",action_result
+price_decrease,action_price_down,boss,center,hopeful,"가격을 내렸다. 더 많은 손님이 올 거야!",action_result
+inventory_purchase,action_buy_inventory,boss,center,relieved,"재료 구입 완료! 이제 더 많은 치킨을 만들 수 있어.",action_result
+staff_management,action_manage_staff,boss,center,caring,"직원들 관리에 신경썼다. 모두 힘내자!",action_result
+promotion_success,action_promote,boss,center,excited,"홍보 활동을 했다! 더 많은 사람들이 알게 될 거야!",action_result
+facility_improvement,action_upgrade_facility,boss,center,proud,"시설을 개선했다. 더 깔끔한 환경이 되었어!",action_result
+personal_rest,action_rest,boss,center,refreshed,"휴식을 취했다. 몸과 마음이 한결 나아졌어.",action_result
+research_success,research_success,boss,center,thrilled,"연구개발 성공! 새로운 메뉴가 탄생했다!",special_event
+research_failure,research_failure,boss,center,disappointed,"연구개발 실패... 돈만 날렸네. 다음엔 성공하겠지!",special_event
+first_sale,customer_count_1,boss,center,excited,"첫 번째 손님! 정말 기쁘다!",milestone
+busy_rush,customer_count_30plus,boss,center,overwhelmed,"와! 손님이 너무 많아서 정신없다!",milestone
+no_customers,customer_count_0,boss,center,worried,"오늘은 손님이 한 명도 안 왔네... 걱정된다.",milestone
+profit_milestone,profit_100000plus,boss,center,celebrating,"하루 수익이 10만원을 넘었다! 대박!",milestone
+loss_warning,profit_negative,boss,center,anxious,"적자가 나고 있다... 뭔가 대책이 필요해!",warning
+reputation_breakthrough,reputation_50plus,boss,center,proud,"평판이 50을 넘었다! 이제 제대로 된 가게가 되었어!",milestone
+reputation_famous,reputation_80plus,boss,center,amazed,"평판이 80을 넘었다! 이 동네에서 유명한 치킨집이 되었어!",milestone
+money_crisis,money_500000minus,boss,center,panicked,"자금이 50만원 아래로 떨어졌다! 정말 위험해!",crisis
+money_abundant,money_20000000plus,boss,center,confident,"자금이 2천만원을 넘었다! 이제 여유가 생겼어!",milestone
+happiness_low,happiness_20minus,boss,center,depressed,"너무 힘들다... 이대로 계속할 수 있을까?",crisis
+happiness_high,happiness_80plus,boss,center,joyful,"정말 행복하다! 치킨집 사장이 되길 잘했어!",milestone
+pain_extreme,pain_80plus,boss,center,suffering,"고통이 너무 심하다... 정말 힘들어...",crisis
+fatigue_high,staff_fatigue_80plus,boss,center,concerned,"직원들이 너무 피곤해 보인다. 휴식이 필요해.",crisis
+facility_poor,facility_30minus,boss,center,ashamed,"시설 상태가 너무 나쁘다... 손님들이 어떻게 생각할까?",crisis
+demand_surge,demand_100plus,boss,center,excited,"수요가 폭증했다! 준비를 더 해야겠어!",opportunity 

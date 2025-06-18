@@ -1,0 +1,4 @@
+character_id,name,avatar_path,voice_description,is_first_person,default_image,happy_image,sad_image,angry_image,nervous_image
+boss,나,/static/images/icon_chicken_large.png,나의 생각,true,,,,,
+customer,손님,/static/images/customer_character_small.png,고객,false,/static/images/customer_character.png,/static/images/customer_character.png,/static/images/customer_character.png,,
+assistant,도우미,/static/images/boss_character_small.png,게임 도우미,false,/static/images/boss_character.png,/static/images/boss_character_happy.png,/static/images/boss_character_sad.png,/static/images/boss_character_angry.png, 

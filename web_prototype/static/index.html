@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍗 치킨마스터 - 웹 경영 시뮬레이션</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="치킨집 사장이 되어 경영 시뮬레이션을 즐겨보세요!">
+</head>
+<body>
+    <!-- 메인 게임 컨테이너 -->
+    <div class="game-container">
+        
+        <!-- 헤더 영역 -->
+        <header class="header">
+            <h1>🍗 치킨마스터</h1>
+            <div class="header-info">
+                <div class="day-counter">
+                    <span id="dayDisplay">1</span>일차
+                </div>
+                <div class="money-display">
+                    💰 <span id="moneyDisplay">10,000</span>원
+                </div>
+            </div>
+        </header>
+
+        <!-- 사이드바 (상태 지표) -->
+        <aside class="sidebar">
+            <h2>📊 매장 현황</h2>
+            <div class="compact-metrics">
+                
+                <!-- 기본 지표 -->
+                <div class="compact-metric money">
+                    <div class="icon">💰</div>
+                    <div class="value" id="money">10,000원</div>
+                    <div class="label">자금</div>
+                    <div class="change" id="moneyChange"></div>
+                    <div class="tooltip">현재 보유 자금입니다. 0이 되면 게임 오버!</div>
+                </div>
+
+                <div class="compact-metric reputation">
+                    <div class="icon">⭐</div>
+                    <div class="value" id="reputation">50점</div>
+                    <div class="label">평판</div>
+                    <div class="change" id="reputationChange"></div>
+                    <div class="tooltip">매장 평판도입니다. 높을수록 손님이 많이 와요!</div>
+                </div>
+
+                <div class="compact-metric happiness">
+                    <div class="icon">😊</div>
+                    <div class="value" id="happiness">50점</div>
+                    <div class="label">행복</div>
+                    <div class="change" id="happinessChange"></div>
+                    <div class="tooltip">사장님의 행복도입니다. 0이 되면 번아웃!</div>
+                </div>
+
+                <div class="compact-metric pain">
+                    <div class="icon">😰</div>
+                    <div class="value" id="pain">20점</div>
+                    <div class="label">고통</div>
+                    <div class="change" id="painChange"></div>
+                    <div class="tooltip">사장님의 스트레스입니다. 너무 높으면 위험!</div>
+                </div>
+
+                <!-- 운영 지표 -->
+                <div class="compact-metric inventory">
+                    <div class="icon">🥩</div>
+                    <div class="value" id="inventory">100개</div>
+                    <div class="label">재고</div>
+                    <div class="change" id="inventoryChange"></div>
+                    <div class="tooltip">치킨 재료 보유량입니다. 부족하면 장사 못해요!</div>
+                </div>
+
+                <div class="compact-metric staff-fatigue">
+                    <div class="icon">😴</div>
+                    <div class="value" id="staffFatigue">30점</div>
+                    <div class="label">직원피로</div>
+                    <div class="change" id="staffFatigueChange"></div>
+                    <div class="tooltip">직원들의 피로도입니다. 관리해주세요!</div>
+                </div>
+
+                <div class="compact-metric facility">
+                    <div class="icon">🏪</div>
+                    <div class="value" id="facility">80점</div>
+                    <div class="label">시설</div>
+                    <div class="change" id="facilityChange"></div>
+                    <div class="tooltip">매장 시설 수준입니다. 업그레이드하면 좋아요!</div>
+                </div>
+
+                <div class="compact-metric demand">
+                    <div class="icon">📈</div>
+                    <div class="value" id="demand">60점</div>
+                    <div class="label">수요</div>
+                    <div class="change" id="demandChange"></div>
+                    <div class="tooltip">고객 수요입니다. 높을수록 손님이 많아져요!</div>
+                </div>
+
+            </div>
+
+            <!-- 경영 정보 -->
+            <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="font-size: 12px; color: #ff6b35; margin-bottom: 8px;">오늘의 장사</h3>
+                <div style="font-size: 10px; color: #666; display: flex; flex-direction: column; gap: 3px;">
+                    <div>치킨 가격: <span id="chickenPrice" style="font-weight: bold;">10,000원</span></div>
+                    <div>오늘 손님: <span id="dailyCustomers" style="font-weight: bold;">0명</span></div>
+                    <div>오늘 매출: <span id="dailyRevenue" style="font-weight: bold;">0원</span></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 메인 영역 (비주얼 노벨 스타일) -->
+        <main class="main-area">
+            <div class="visual-novel-container">
+                <!-- 배경 레이어 -->
+                <div class="background-layer" id="backgroundLayer">
+                    <img id="backgroundImage" src="/static/images/chicken_shop_bg.png" alt="치킨집 배경">
+                </div>
+                
+                <!-- 캐릭터 레이어들 -->
+                <div class="character-layer" id="characterLayer">
+                    <div class="character-slot left" id="characterLeft">
+                        <img id="characterLeftImg" src="" alt="캐릭터" style="display: none;">
+                    </div>
+                    <div class="character-slot center" id="characterCenter">
+                        <img id="characterCenterImg" src="" alt="캐릭터" style="display: none;">
+                    </div>
+                    <div class="character-slot right" id="characterRight">
+                        <img id="characterRightImg" src="" alt="캐릭터" style="display: none;">
+                    </div>
+                </div>
+                
+                <!-- UI 오버레이 -->
+                <div class="ui-overlay">
+                    <div class="location-info">
+                        <span id="locationName">🍗 황금치킨집</span>
+                        <span id="timeInfo">1일차 오전</span>
+                    </div>
+                </div>
+                
+                <!-- 대화창 시스템 -->
+                <div class="dialogue-system" id="dialogueSystem">
+                    <div class="dialogue-box" id="dialogueBox">
+                        <div class="speaker-info">
+                            <div class="speaker-avatar" id="speakerAvatar">
+                                <img src="/static/images/icon_chicken_large.png" alt="화자">
+                            </div>
+                            <div class="speaker-name" id="speakerName">나</div>
+                        </div>
+                        <div class="dialogue-content">
+                            <div class="dialogue-text" id="dialogueText">
+                                안녕하세요! 치킨마스터에 오신 것을 환영합니다! 함께 최고의 치킨집을 만들어보아요!
+                            </div>
+                            <div class="dialogue-controls">
+                                <button class="dialogue-btn" id="continueBtn" onclick="continueDialogue()">
+                                    계속 ▶
+                                </button>
+                                <button class="dialogue-btn skip" id="skipBtn" onclick="skipDialogue()">
+                                    건너뛰기 ⏭
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 액션 패널 -->
+        <aside class="actions-panel">
+            <h2>⚡ 경영 액션</h2>
+            <div class="action-grid">
+
+                <!-- 가격 조정 -->
+                <div class="action-card" id="priceAction">
+                    <h3>💰 가격 조정</h3>
+                    <p>치킨 가격을 변경합니다</p>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn" onclick="executeAction('price_change', {change: 1000})" title="가격 인상 (Ctrl+1)">
+                            ⬆️ +1천원
+                        </button>
+                        <button class="btn" onclick="executeAction('price_change', {change: -1000})" title="가격 인하 (Ctrl+1)">
+                            ⬇️ -1천원
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 재료 주문 -->
+                <div class="action-card" id="inventoryAction">
+                    <h3>🥩 재료 주문</h3>
+                    <p>치킨 재료 50개분 (5만원)</p>
+                    <button class="btn" onclick="executeAction('order_inventory')" title="재료 주문 (Ctrl+2)">
+                        📦 주문하기
+                    </button>
+                </div>
+
+                <!-- 직원 관리 -->
+                <div class="action-card" id="staffAction">
+                    <h3>👥 직원 관리</h3>
+                    <p>직원 휴식 제공 (3만원)</p>
+                    <button class="btn" onclick="executeAction('staff_management')" title="직원 관리 (Ctrl+3)">
+                        😴 휴식 주기
+                    </button>
+                </div>
+
+                <!-- 홍보 활동 -->
+                <div class="action-card" id="promotionAction">
+                    <h3>📢 홍보 활동</h3>
+                    <p>광고로 평판 Up (2만원)</p>
+                    <button class="btn" onclick="executeAction('promotion')" title="홍보 활동 (Ctrl+4)">
+                        📺 광고하기
+                    </button>
+                </div>
+
+                <!-- 시설 개선 -->
+                <div class="action-card" id="facilityAction">
+                    <h3>🔧 시설 개선</h3>
+                    <p>매장 시설 업그레이드 (10만원)</p>
+                    <button class="btn" onclick="executeAction('facility_upgrade')" title="시설 개선 (Ctrl+5)">
+                        🏪 업그레이드
+                    </button>
+                </div>
+
+                <!-- 개인 휴식 -->
+                <div class="action-card" id="restAction">
+                    <h3>☕ 개인 휴식</h3>
+                    <p>사장님 컨디션 회복 (1만원)</p>
+                    <button class="btn" onclick="executeAction('personal_rest')" title="개인 휴식 (Ctrl+6)">
+                        😌 휴식하기
+                    </button>
+                </div>
+
+                <!-- 연구개발 -->
+                <div class="action-card" id="researchAction">
+                    <h3>🔬 연구개발</h3>
+                    <p>신메뉴 개발 시도 (8만원)</p>
+                    <button class="btn" onclick="executeAction('research_development')" title="연구개발 (Ctrl+7)">
+                        🍗 신메뉴 개발
+                    </button>
+                </div>
+
+                <!-- 턴 진행 -->
+                <div class="action-card next-turn" style="grid-column: 1 / -1; background: linear-gradient(135deg, #ff9ff3, #f368e0); border: 2px solid #f368e0;">
+                    <h3 style="color: white;">⏰ 하루 마감</h3>
+                    <p style="color: rgba(255,255,255,0.9);">다음 날로 넘어갑니다</p>
+                    <button class="kawaii-btn" onclick="executeAction('next_turn')" title="턴 진행 (Space 또는 Ctrl+8)">
+                        🌅 내일로 GO!
+                    </button>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- 메시지 영역 -->
+        <section class="messages-area">
+            <div class="message-panel">
+                <h3>💬 게임 로그</h3>
+                <div id="messageArea" style="font-size: 10px; line-height: 1.4; color: #666;">
+                    <div class="message-item">
+                        <span class="message-icon">🍗</span>
+                        <span class="message-text">치킨마스터에 오신 것을 환영합니다!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-panel">
+                <h3>📋 이벤트 히스토리</h3>
+                <div id="eventsList" style="font-size: 10px; line-height: 1.4; color: #666;">
+                    <div class="event-item">
+                        <span class="event-icon">🎮</span>
+                        <span class="event-text">새로운 게임을 시작했습니다!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-panel">
+                <h3>🎮 게임 컨트롤</h3>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button class="btn" onclick="refreshGameState()" title="상태 새로고침 (Ctrl+R)" style="font-size: 9px; padding: 4px 8px;">
+                        🔄 새로고침
+                    </button>
+                    <button class="btn" onclick="resetGame()" title="게임 리셋" style="font-size: 9px; padding: 4px 8px; background: #e74c3c;">
+                        🔄 리셋
+                    </button>
+                </div>
+                <div style="margin-top: 5px; font-size: 9px; color: #999;">
+                    💡 Ctrl+1~8: 액션 실행<br>
+                    💡 Space: 턴 진행
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 게임 오버 모달 -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2>🍗 게임 오버!</h2>
+            <p id="gameOverReason">게임이 종료되었습니다.</p>
+            <button class="btn" onclick="resetGame()">🔄 다시 시작</button>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/dialogue_system_csv.js" charset="utf-8"></script>
+    <script src="/static/script.js" charset="utf-8"></script>
+
+    <!-- 게임 시작 메시지 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🍗 치킨마스터 웹 게임 로드 완료!');
+            console.log('🎮 키보드 단축키 활성화됨');
+            console.log('💡 F12 개발자 도구에서 ChickenMasterDebug 사용 가능');
+        });
+    </script>
+
+</body>
+</html> 
