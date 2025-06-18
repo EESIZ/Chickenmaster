@@ -12,6 +12,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to ChickenMaster API",
+        "version": "0.1.0",
+        "docs_url": "/docs",
+        "health_check": "/health"
+    }
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "chickenmaster-api"}
