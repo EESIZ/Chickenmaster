@@ -6,7 +6,7 @@ services:
     plan: free
     region: singapore
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --production=false && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
@@ -16,7 +16,7 @@ services:
       - key: PORT
         value: "10000"
       - key: NODE_VERSION
-        value: "18.17.0"
+        value: "20.11.1"
     autoDeploy: true
 
   # 백엔드 API 서비스
