@@ -13,6 +13,8 @@ fuzzywuzzy[speedup]>=0.18.0
 pandas>=2.1.0
 openpyxl>=3.1.0
 jinja2>=3.1.0
+fastapi>=0.110.0
+uvicorn>=0.27.0
 
 # 타입 지원
 # types-all 패키지는 types-pkg-resources 의존성 문제로 제거
